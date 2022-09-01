@@ -1,0 +1,6 @@
+myqueue.c:12:6:MyQueue_Init	24	static
+myqueue.c:22:6:MyQueue_InsertElement	24	static
+myqueue.c:41:10:MyQueue_GetAverageValue	16	static
+myqueue.c:49:10:MyQueue_GetLastValue	16	static
+myqueue.c:60:6:MyQueue_InsertElementTesting_1	24	static
+myqueue.c:70:6:MyQueue_InsertElementTesting_2	24	static

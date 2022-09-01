@@ -1,0 +1,4 @@
+datetime.c:11:6:DateTime_Update	16	static
+datetime.c:22:6:DateTime_AddSecond	16	static
+datetime.c:62:6:DateTime_setDateString	32	static
+datetime.c:111:6:DateTime_setTimeString	32	static
