@@ -38,7 +38,7 @@
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 	uCAN_MSG rxMessage;
-	extern ManageSD fm;
+	extern ManageSD fatman;
 //	FIL EventFile;
 //	uint8_t message[45];
 //	extern ManageSD fm;
@@ -300,7 +300,7 @@ int main(void)
 //	fm_init(ID);
 //	fm_write(ID);
 //	f_mount(NULL, (TCHAR const*)SDPath, 0);
-//  fm_test_all();
+  fatman_test_all();
   HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);	/* Illumina un led */
   while (1) {
 	  HAL_IWDG_Refresh(&hiwdg);
@@ -1307,12 +1307,6 @@ void AssignDefaultValue()
 
 	/* DateTime */
 	DateTime_Update(&today, 2022, 07, 11, 10, 25, 00); /* 2022/07/11 10:25:00*/
-
-	DateTime_setDateString(&today, NULL);
-	DateTime_setDateString(&today, "/");
-
-	DateTime_setTimeString(&today, NULL);
-	DateTime_setTimeString(&today, ":");
 }
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){

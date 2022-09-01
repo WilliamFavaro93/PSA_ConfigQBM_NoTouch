@@ -1,4 +1,11 @@
-datetime.c:11:6:DateTime_Update	16	static
-datetime.c:22:6:DateTime_AddSecond	16	static
-datetime.c:62:6:DateTime_setDateString	32	static
-datetime.c:111:6:DateTime_setTimeString	32	static
+datetime.c:43:6:DateTime_Init	24	static
+datetime.c:63:6:DateTime_UpdateString	8	static
+datetime.c:76:6:DateTime_AddSecond	4	static
+datetime.c:123:9:DateTime_ItsaNewDay	24	static
+datetime.c:144:6:DateTime_setDateString	32	static
+datetime.c:198:6:DateTime_setTimeString	32	static
+datetime.c:250:9:DateTime_test_AddSecond	24	static
+datetime.c:266:9:DateTime_test_NewDay	24	static
+datetime.c:281:9:DateTime_test_NewYear	24	static
+datetime.c:295:9:DateTime_test_UpdateString	4	static
+datetime.c:307:9:DateTime_test_all	16	static

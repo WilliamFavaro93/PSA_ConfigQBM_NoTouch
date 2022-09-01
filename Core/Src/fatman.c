@@ -1,82 +1,116 @@
-/*
- * 		@file fatman.c
- *		@brief This module is created to simplify the usage of SD with STM32F4
- *      @author William.Favaro
- *      @date 13/07/2022
- *
- *      "fatman" stands for FAT File System Manager
- */
+/**
+  ******************************************************************************
+  * @file   fatman.c
+  * @author William Favaro
+  * @date	13/07/2022
+  * @brief  fatman functions
+  * 		This module is created to simplify the usage of SD with STM32F4
+  *
+  ******************************************************************************
+  * @note
+  *
+  *			fatman -> FAT File System Manager
+  *
+  *
+  ******************************************************************************
+  */
 
 
 #include "fatman.h"
 
 #define FATMAN_AUTEST 1
 
-ManageSD fm;
+ManageSD fatman;
 
 /*** PRIVATE METHOD REFERENCEs ***/
 
 /*** PUBLIC METHODs ***/
 /*
- * This method is used to initialize. It creates the directory if it doesn't exists. It creates the file if it doesn't exists.
+ * @brief This method is used to initialize. It creates the directory if it doesn't exists. It creates the file if it doesn't exists.
  * @author William Favaro
  * @date 05/08/2022
  * @param ID The number that identifies the directory
  */
-void fm_init(uint8_t ID)
+void fatman_init(uint8_t ID)
 {
 	/* If the file does not exist, create the directory */
-	f_mkdir((TCHAR const*)fm.Directory[ID].DirectoryName);
+	f_mkdir((TCHAR const*)fatman.Directory[ID].DirectoryName);
 
 	/* It creates the file */
-	f_open(&fm.OpenFIL, (TCHAR const*)fm.Directory[ID].FilePath, FA_CREATE_ALWAYS|FA_WRITE);
+	f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[ID].FilePath, FA_CREATE_ALWAYS|FA_WRITE);
 
 	/* Save the file and close */
-	memcpy(&fm.Directory[ID].SaveFIL, &fm.OpenFIL, sizeof(FIL));
+	memcpy(&fatman.Directory[ID].SaveFIL, &fatman.OpenFIL, sizeof(FIL));
 
+	f_close(&fatman.OpenFIL);
 	/* Update Directory State */
-	fm.Directory[ID].FileIsCreated = 1;
-	fm.Directory[ID].AlreadyWrittenOnce = 0;
+	fatman.Directory[ID].FileIsCreated = 1;
+	fatman.Directory[ID].AlreadyWrittenOnce = 0;
 }
 
 /*
- * This method is used to write the text in the buffer on the file
+ * @brief This method is used to write the text in the buffer on the file
  * @author William Favaro
  * @date 05/08/2022
  * @param ID The number that identifies the directory and the file
  */
-void fm_write(uint8_t ID)
+void fatman_write(uint8_t ID)
 {
 	/* Write the text saved in fm.rwFileBuffer in the file targeted by fm.Directory[ID].FilePath */
 	uint32_t byteswritten;
-	memcpy(&fm.OpenFIL, &fm.Directory[ID].SaveFIL, sizeof(FIL));
-	fm.OpenFile_ID = ID;
-	f_write(&fm.OpenFIL, (void *)&fm.Buffer, fm.Buffer_size, (void *)&byteswritten);
-	f_sync(&fm.OpenFIL);
+	memcpy(&fatman.OpenFIL, &fatman.Directory[ID].SaveFIL, sizeof(FIL));
+	fatman.OpenFile_ID = ID;
+	f_write(&fatman.OpenFIL, (void *)&fatman.Buffer, fatman.Buffer_size, (void *)&byteswritten);
+	f_sync(&fatman.OpenFIL);
 
 	/* Save the FIL */
-	memcpy(&fm.Directory[ID].SaveFIL, &fm.OpenFIL, sizeof(FIL));
-	fm.Directory[ID].AlreadyWrittenOnce = 1;
+	memcpy(&fatman.Directory[ID].SaveFIL, &fatman.OpenFIL, sizeof(FIL));
+	fatman.Directory[ID].AlreadyWrittenOnce = 1;
 
 	/* Clear fm.rwFileBuffer */
-	fm.Buffer_size = 0;
-	memset(&fm.Buffer, 0, 255);
+	fatman.Buffer_size = 0;
+	memset(&fatman.Buffer, 0, BUFFER_SIZE);
 
 	/* Close fm.OpenFIL */
-	f_close(&fm.OpenFIL);
-	fm.OpenFile_ID = 0;
+	f_close(&fatman.OpenFIL);
+	fatman.OpenFile_ID = 0;
 }
 
-/* NOTE: Deve andare a leggere dal buffer qual'è il percorso */
-void fm_read()
+/*
+ * @brief This method is used to read the text inside a file
+ * @author William Favaro
+ * @date 05/08/2022
+ * @param ID The number that identifies the directory and the file
+ */
+void fatman_read()
 {
-	fm.OpenFile_ID = N_DIRECTORY + 1;
-	f_open(&fm.OpenFIL, (TCHAR const*)fm.Buffer, FA_READ);
-	f_read(&fm.OpenFIL, (void *)&fm.Buffer, BUFFER_SIZE, (void *)&fm.Buffer_size);
-	f_close(&fm.OpenFIL);
-	fm.OpenFile_ID = 0;
+//	uint8_t status;
+	uint32_t bytesread = 0;
+
+	/* It opens the file, if it exists, in read-only mode */
+	f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[0].FilePath, FA_READ);
+
+
+	fatman.OpenFile_ID = N_DIRECTORY + 1;
+
+	/* Update Directory State */
+	fatman.Directory[0].FileIsCreated = 1;
+	fatman.Directory[0].AlreadyWrittenOnce = 0;
+
+	f_read(&fatman.OpenFIL, &fatman.Buffer, BUFFER_SIZE, (void *)&bytesread);
+	fatman.Buffer_size = bytesread;
+
+	fatman.Directory[0].AlreadyWrittenOnce = 1;
+
+	/* Close fm.OpenFIL */
+	f_close(&fatman.OpenFIL);
+	fatman.OpenFile_ID = 0;
 }
 
+void fatman_copy(uint8_t ID)
+{
+
+}
 /*** PRIVATE METHODs ***/
 
 
@@ -89,15 +123,15 @@ void fm_read()
  * @author William Favaro
  * @date 05/08/2022
  */
-void fm_test_NormalUsage1()
+void fm_test_NormalUse1()
 {
 	/* Fatman */
-	memcpy(&fm.Directory[1].DirectoryName, "FIGA", sizeof("FIGA"));
-	memcpy(&fm.Directory[1].FilePath, "FIGA/FIGA.TXT", sizeof("FIGA/FIGA.TXT"));
-	fm_init(1);
-	memcpy(&fm.Buffer, "Odio tutti\n", sizeof("Odio tutti\n"));
-	fm.Buffer_size = strlen("Odio tutti\n");
-	fm_write(1);
+	memcpy(&fatman.Directory[1].DirectoryName, "TEST0", sizeof("FIGA"));
+	memcpy(&fatman.Directory[1].FilePath, "TEST0/TEST0.TXT", sizeof("TEST0/TEST0.TXT"));
+	fatman_init(1);
+	memcpy(&fatman.Buffer, "Odio tutti\n", sizeof("Odio tutti\n"));
+	fatman.Buffer_size = strlen("Odio tutti\n");
+	fatman_write(1);
 }
 
 /*
@@ -105,27 +139,27 @@ void fm_test_NormalUsage1()
  * @author William Favaro
  * @date 05/08/2022
  */
-void fm_test_NormalUsage2()
+void fm_test_NormalUse2()
 {
 	uint8_t ID = 2;
 	uint8_t NameDir[] = "TEST2";
 	uint8_t NameFile[] = "20220805";
 	uint8_t wtext[] = "Funziona Bene!!\n";
 	/* fm.Directory[1].DirectoryName = "FILE" */
-	memcpy(&fm.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
+	memcpy(&fatman.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
 	/* fm.Directory[1].FilePath = "FILE/20220805_FILE" */
-	memset((void *)fm.Directory[ID].FilePath, 0, 30);
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, "/");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameFile);
-	strcat((char *)fm.Directory[ID].FilePath, "_");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, ".TXT");
+	memset((void *)fatman.Directory[ID].FilePath, 0, 30);
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, "/");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameFile);
+	strcat((char *)fatman.Directory[ID].FilePath, "_");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, ".TXT");
 	/* Fatman */
-	fm_init(ID);
-	memcpy(&fm.Buffer, wtext, strlen((char const*)wtext));
-	fm.Buffer_size = strlen((char const*)wtext);
-	fm_write(ID);
+	fatman_init(ID);
+	memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
+	fatman.Buffer_size = strlen((char const*)wtext);
+	fatman_write(ID);
 }
 
 /*
@@ -140,20 +174,20 @@ void fm_test_WHITheFilePathChanges()
 	uint8_t NameFile[] = "20220804";
 	uint8_t wtext[] = "Funziona Bene se all'interno della cartella c'è anche il file 20220805_TEST1\n";
 	/* fm.Directory[1].DirectoryName = "FILE" */
-	memcpy(&fm.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
+	memcpy(&fatman.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
 	/* fm.Directory[1].FilePath = "FILE/20220805_FILE" */
-	memset((void *)fm.Directory[ID].FilePath, 0, 30);
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, "/");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameFile);
-	strcat((char *)fm.Directory[ID].FilePath, "_");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, ".TXT");
+	memset((void *)fatman.Directory[ID].FilePath, 0, 30);
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, "/");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameFile);
+	strcat((char *)fatman.Directory[ID].FilePath, "_");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, ".TXT");
 	/* Fatman */
-	fm_init(ID);
-	memcpy(&fm.Buffer, wtext, strlen((char const*)wtext));
-	fm.Buffer_size = strlen((char const*)wtext);
-	fm_write(ID);
+	fatman_init(ID);
+	memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
+	fatman.Buffer_size = strlen((char const*)wtext);
+	fatman_write(ID);
 }
 
 /*
@@ -170,23 +204,23 @@ void fm_test_WHIitsWritedSeveralConsecutiveTimes()
 	uint8_t nTimes = 10;
 
 	/* fm.Directory[1].DirectoryName = "FILE" */
-	memcpy(&fm.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
+	memcpy(&fatman.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
 	/* fm.Directory[1].FilePath = "FILE/20220805_FILE" */
-	memset((void *)fm.Directory[ID].FilePath, 0, 30);
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, "/");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameFile);
-	strcat((char *)fm.Directory[ID].FilePath, "_");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, ".TXT");
+	memset((void *)fatman.Directory[ID].FilePath, 0, 30);
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, "/");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameFile);
+	strcat((char *)fatman.Directory[ID].FilePath, "_");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, ".TXT");
 
 	/* Fatman */
-	fm_init(ID);
+	fatman_init(ID);
 	for(uint8_t i = 0; i < nTimes; i++)
 	{
-		memcpy(&fm.Buffer, wtext, strlen((char const*)wtext));
-		fm.Buffer_size = strlen((char const*)wtext);
-		fm_write(ID);
+		memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
+		fatman.Buffer_size = strlen((char const*)wtext);
+		fatman_write(ID);
 	}
 }
 
@@ -206,68 +240,43 @@ void fm_test_CheckIf4096IsTheLimit()
 //	uint8_t wtext_size = 32;
 
 	/* fm.Directory[1].DirectoryName = "FILE" */
-	memcpy(&fm.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
+	memcpy(&fatman.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
 	/* fm.Directory[1].FilePath = "FILE/20220829_FILE" */
-	memset((void *)fm.Directory[ID].FilePath, 0, 30);
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, "/");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameFile);
-	strcat((char *)fm.Directory[ID].FilePath, "_");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, ".TXT");
+	memset((void *)fatman.Directory[ID].FilePath, 0, 30);
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, "/");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameFile);
+	strcat((char *)fatman.Directory[ID].FilePath, "_");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, ".TXT");
 
 	/* create the file to test */
 	uint16_t bw = 0;
-	fm_init(ID);
-	memcpy(&fm.Buffer, wtext, strlen((char const*)wtext));
-	fm.Buffer_size = strlen((char const*)wtext);
+	fatman_init(ID);
+	memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
+	fatman.Buffer_size = strlen((char const*)wtext);
 	for(uint8_t i = 0; i < 129; i++)
 	{
-		memcpy(&fm.Buffer, wtext, strlen((char const*)wtext));
-		fm.Buffer_size = strlen((char const*)wtext);
-		fm_write(ID);
+		memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
+		fatman.Buffer_size = strlen((char const*)wtext);
+		fatman_write(ID);
 		bw += strlen((char const*)wtext);
 	}
-	fm.State = bw;
+	fatman.State = bw;
 
 	/* It creates the file */
 	uint16_t br = 0;
-	f_open(&fm.OpenFIL, (TCHAR const*)fm.Directory[ID].FilePath, FA_READ);
-	f_read(&fm.OpenFIL, (void *)&fm.Buffer, 4127, (void *)&br);
-	f_close(&fm.OpenFIL);
-	fm.State = br;
+	f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[ID].FilePath, FA_READ);
+	f_read(&fatman.OpenFIL, (void *)&fatman.Buffer, 4127, (void *)&br);
+	f_close(&fatman.OpenFIL);
+	fatman.State = br;
 
 
 
-	f_open(&fm.OpenFIL, "TEST3/20220805_TEST3_1.TXT", FA_CREATE_ALWAYS|FA_WRITE);
-	f_write(&fm.OpenFIL, (void *)&fm.Buffer, 4127, (void *)&br);
-	f_close(&fm.OpenFIL);
-	fm.State = br;
-}
-
-void fm_test_read()
-{
-	uint8_t ID = 5;
-	uint8_t NameDir[] = "TEST5";
-	uint8_t NameFile[] = "20220829";
-
-	/* fm.Directory[1].DirectoryName = "FILE" */
-	memcpy(&fm.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
-	/* fm.Directory[1].FilePath = "FILE/20220829_FILE" */
-	memset((void *)fm.Directory[ID].FilePath, 0, 30);
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, "/");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameFile);
-	strcat((char *)fm.Directory[ID].FilePath, "_");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, ".TXT");
-
-	fm.Buffer_size = strlen("FIGA/FIGA.TXT ");
-	memcpy(fm.Buffer, "FIGA/FIGA.TXT ", fm.Buffer_size);
-	fm_read();
-
-	fm_init(ID);
-	fm_write(ID);
+	f_open(&fatman.OpenFIL, "TEST3/20220805_TEST3_1.TXT", FA_CREATE_ALWAYS|FA_WRITE);
+	f_write(&fatman.OpenFIL, (void *)&fatman.Buffer, 4127, (void *)&br);
+	f_close(&fatman.OpenFIL);
+	fatman.State = br;
 }
 
 /*
@@ -283,42 +292,67 @@ void fm_test_WHItheBufferIsTooBig()
 	uint8_t wtext[] = "tanti auguri e buon compleanno!\n";
 
 	/* fm.Directory[1].DirectoryName = "FILE" */
-	memcpy(&fm.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
+	memcpy(&fatman.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
 	/* fm.Directory[1].FilePath = "FILE/20220829_FILE" */
-	memset((void *)fm.Directory[ID].FilePath, 0, 30);
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, "/");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameFile);
-	strcat((char *)fm.Directory[ID].FilePath, "_");
-	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-	strcat((char *)fm.Directory[ID].FilePath, "_01");
-	strcat((char *)fm.Directory[ID].FilePath, ".TXT");
+	memset((void *)fatman.Directory[ID].FilePath, 0, 30);
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, "/");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameFile);
+	strcat((char *)fatman.Directory[ID].FilePath, "_");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, "_01");
+	strcat((char *)fatman.Directory[ID].FilePath, ".TXT");
 
 	/* create the file to test */
 	uint16_t bw = 0;
-	fm_init(ID);
+	fatman_init(ID);
 
 	for(uint16_t i = 0; i < 300; i++)
 	{
 		/* Fill the buffer*/
-		memcpy(&fm.Buffer, wtext, strlen((char const*)wtext));
-		fm.Buffer_size = strlen((char const*)wtext);
+		memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
+		fatman.Buffer_size = strlen((char const*)wtext);
 
 		/* Change name of the file if it's becoming to big  */
-		if((fm.Directory[ID].SaveFIL.fptr + fm.Buffer_size) > BUFFER_SIZE)
+		if((fatman.Directory[ID].SaveFIL.fptr + fatman.Buffer_size) > BUFFER_SIZE)
 		{
-			fm.Directory[ID].FilePath[22] += 1;
-			fm_init(ID);
+			fatman.Directory[ID].FilePath[22] += 1;
+			fatman_init(ID);
 		}
 
 		/*  */
-		fm_write(ID);
+		fatman_write(ID);
 
 		/* Just for help in debugging */
 		bw += strlen((char const*)wtext);
 	}
 
-	fm.State = bw;
+	fatman.State = bw;
+}
+
+void fm_test_read()
+{
+	uint8_t ID = 1;
+	uint8_t NameDir[] = "TEST1";
+	uint8_t NameFile[] = "20220901";
+
+	/* fm.Directory[1].DirectoryName = "FILE" */
+	memcpy(&fatman.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
+	/* fm.Directory[1].FilePath = "FILE/20220829_FILE" */
+	memset((void *)fatman.Directory[ID].FilePath, 0, 30);
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, "/");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameFile);
+	strcat((char *)fatman.Directory[ID].FilePath, "_");
+	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
+	strcat((char *)fatman.Directory[ID].FilePath, ".TXT");
+
+	fatman_init(ID);
+
+	memcpy(fatman.Directory[0].FilePath, "TEST6/20220830_TEST6_01.TXT", sizeof("TEST6/20220830_TEST6_01.TXT"));
+	fatman_read();
+
+	fatman_write(ID);
 }
 
 #endif /* UNIT_TEST */
@@ -328,18 +362,19 @@ void fm_test_WHItheBufferIsTooBig()
  * @author William Favaro
  * @date 05/08/2022
  */
-void fm_test_all()
+void fatman_test_all()
 {
 #if FATMAN_AUTEST
 	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
 
-	fm_test_NormalUsage1();
-	fm_test_NormalUsage2();
+	fm_test_NormalUse1();
+	fm_test_NormalUse2();
 
 	fm_test_WHITheFilePathChanges();
 	fm_test_WHIitsWritedSeveralConsecutiveTimes();
-	fm_test_read();
+
 	fm_test_WHItheBufferIsTooBig();
+	fm_test_read();
 
 	f_mount(NULL, (TCHAR const*)SDPath, 0);
 #endif /* FATMAN_UTEST */

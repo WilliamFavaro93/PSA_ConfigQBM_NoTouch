@@ -15,42 +15,58 @@
   ******************************************************************************
   */
 
+/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef INC_FATMAN_H_
 #define INC_FATMAN_H_
 
+/* Includes ------------------------------------------------------------------*/
 #include "fatfs.h"
 #include "string.h"
 #include "stdint.h"
 
-#define DIRECTORY_NAME_LENGTH 	10
-#define FILEPATH_LENGTH 		(2*(DIRECTORY_NAME_LENGTH) + 14)
+/* Exported macro ------------------------------------------------------------*/
+#define DIRECTORYNAME_LENGTH 	10
+#define FILEPATH_LENGTH 		(2*(DIRECTORYNAME_LENGTH) + 14)
 #define N_DIRECTORY 			8
-#define BUFFER_SIZE 			4128
+#define BUFFER_SIZE 			4096
 
+#define BYTE_READ_EACH_STEP		32
+
+/* Exported variables --------------------------------------------------------*/
+/**
+  * @brief  ManageDirectory structure definition
+  */
 typedef struct
 {
 	uint8_t State;
-	char DirectoryName[DIRECTORY_NAME_LENGTH];			/* Nome della cartella */
-	char FilePath[FILEPATH_LENGTH];				/* Nome del percorso del file usato */
-	FIL SaveFIL;					/*  */
-	uint8_t FileIsCreated;			/*  */
-	uint8_t AlreadyWrittenOnce;		/*  */
+	char DirectoryName[DIRECTORYNAME_LENGTH];	/**< Directory's Name					*/
+	char FilePath[FILEPATH_LENGTH];				/**< Path of the file					*/
+	FIL SaveFIL;									/**< FIL structure of the file 			*/
+	uint8_t FileIsCreated;							/**< 0: File is not already created
+	 	 	 	 	 	 	 	 	 				1: File is created (DEBUG) 		*/
+	uint8_t AlreadyWrittenOnce;						/**< 0: File is not already written once
+	 	 	 	 	 	 	 	 	 	 	 	 	 1:	File is written once (DEBUG) 	*/
 } ManageDirectory;
 
+/**
+  * @brief  ManageSD structure definition
+  */
 typedef struct
 {
-	uint16_t State;					/* Contiene lo stato passaggio per passaggio */
-	uint8_t OpenFile_ID; 			/* Identifica la struttura usata */
-	FIL OpenFIL; 					/* Salva a struttura aperta. */
-	ManageDirectory Directory[N_DIRECTORY];	/* */
-	char Buffer[BUFFER_SIZE];				/* */
-	uint8_t Buffer_size;			/* */
+	uint8_t State;								/**< State of the driver 			*/
+	uint8_t OpenFile_ID; 						/**< ID of the open file			*/
+	FIL OpenFIL; 								/**< FIL structure of the open file */
+	ManageDirectory Directory[N_DIRECTORY];		/**< array of ManageDirectory		*/
+	char Buffer[BUFFER_SIZE];					/**< buffer							*/
+	uint16_t Buffer_size;						/**< size of the buffer 			*/
 } ManageSD;
 
-void fm_init(uint8_t Directory_ID);
-void fm_write(uint8_t Directory_ID);
-void fm_read();
-void fm_test_all();
+/* Exported functions --------------------------------------------------------*/
+void fatman_init(uint8_t Directory_ID);
+void fatman_write(uint8_t Directory_ID);
+void fatman_read();
+void fatman_copy(uint8_t Directory_ID);
+void fatman_test_all();
 
 
 #endif /* INC_FATMAN_H_ */

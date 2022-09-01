@@ -1,43 +1,59 @@
-/*
- * DateTime.h
- *
- *  Created on: 30 giu 2022
- *      Author: William.Favaro
- */
+/**
+  ******************************************************************************
+  * @file   datetime.h
+  * @author William Favaro
+  * @date	13/07/2022
+  * @brief  datetime structure definition
+  *
+  * 		This file defines the structure datetime that manage date and time
+  *
+  ******************************************************************************
+  * @note
+  *
+  *
+  *
+  ******************************************************************************
+  */
 
+/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef INC_DATETIME_H_
 #define INC_DATETIME_H_
 
+/* Includes ------------------------------------------------------------------*/
 #include "stdint.h"
-
+#include "string.h"
+/* Exported types ------------------------------------------------------------*/
+/**
+  * @brief  datetime structure definition
+  */
 typedef struct
 {
 	/* Date */
-	uint16_t year;
-	uint8_t month;
-	uint8_t day;
+	uint16_t year;						/**< year number 	*/
+	uint8_t month;						/**< month number	*/
+	uint8_t day;						/**< day number		*/
 
 	/* Time */
-	uint8_t hours;
-	uint8_t minutes;
-	uint8_t seconds;
+	uint8_t hours;						/**< hour number	*/
+	uint8_t minutes;					/**< minute number	*/
+	uint8_t seconds;					/**< second number	*/
 
-	char DateString[9];
-	char DateString_wSeparator[12];
-
-	char TimeString[7];
-	char TimeString_wSeparator[9];
+	char DateString[9];					/**< array of char that identifies the date.
+										Example: "20220829" 							*/
+	char DateString_withSeparator[12];		/**< array of char that identifies the date.
+										Example: "2022/08/29" where '/' is the separator*/
+	char TimeString[7];					/**< array of char that identifies the time.
+										Example: "102300"  								*/
+	char TimeString_withSeparator[9];		/**< array of char that identifies the date.
+										Example: "10:23:00" where ':' is the separator	*/
 } DateTime;
 
+/* Exported constants --------------------------------------------------------*/
+/* Exported macro ------------------------------------------------------------*/
+/* Exported functions --------------------------------------------------------*/
 void DateTime_Update(DateTime* DateTime, uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uint8_t minutes, uint8_t seconds);
-void DateTime_AddSecond(DateTime* DateTime);
-void DateTime_setDateString(DateTime* DateTime, char* separator);
-void DateTime_setTimeString(DateTime* DateTime, char* separator);
-
-/*
- * 	DateTime_Update(&today, 2022, 07, 11, 10, 25, 00);
-	DateTime_setDateString(&today, NULL); // today.DateString = "20220711"
-	DateTime_setDateString(&today, "/"); // today.DateString_wSeparator = "2022/07/11"
- */
+void DateTime_AddSecond();
+void DateTime_setDateString(char* separator);
+void DateTime_setTimeString(char* separator);
 
 #endif /* INC_DATETIME_H_ */
