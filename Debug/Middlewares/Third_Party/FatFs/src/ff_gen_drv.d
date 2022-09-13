@@ -51,10 +51,9 @@ Middlewares/Third_Party/FatFs/src/ff_gen_drv.o: \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dsi.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_qspi.h \
- ../Core/Inc/psa.h ../Core/Inc/state.h ../Core/Inc/Settings.h \
- ../Core/Inc/configuration.h ../Core/Inc/version.h ../Core/Inc/Debug.h \
- ../Core/Inc/myqueue.h ../Core/Inc/timecounter.h \
- ../FATFS/Target/bsp_driver_sd.h ../FATFS/Target/fatfs_platform.h
+ ../Core/Inc/psa.h ../Core/Inc/state.h ../Core/Inc/myqueue.h \
+ ../Core/Inc/timecounter.h ../FATFS/Target/bsp_driver_sd.h \
+ ../FATFS/Target/fatfs_platform.h
 
 ../Middlewares/Third_Party/FatFs/src/ff_gen_drv.h:
 
@@ -165,14 +164,6 @@ Middlewares/Third_Party/FatFs/src/ff_gen_drv.o: \
 ../Core/Inc/psa.h:
 
 ../Core/Inc/state.h:
-
-../Core/Inc/Settings.h:
-
-../Core/Inc/configuration.h:
-
-../Core/Inc/version.h:
-
-../Core/Inc/Debug.h:
 
 ../Core/Inc/myqueue.h:
 

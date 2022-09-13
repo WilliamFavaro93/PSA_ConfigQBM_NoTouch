@@ -1,9 +1,18 @@
-/*
- * State.c
- *
- *  Created on: 12 mag 2022
- *      Author: William.Favaro
- */
+/**
+  ******************************************************************************
+  * @file   state.h
+  * @author William Favaro
+  * @date	12/05/2022
+  * @brief  datetime functions
+  *
+  *
+  ******************************************************************************
+  * @note
+  *
+  *
+  *
+  ******************************************************************************
+  */
 
 #include <state.h>
 
@@ -13,6 +22,18 @@
 //uint8_t charState[2]; /* Send the state by UART communication during DEBUG */
 extern PSAStruct PSA;
 
+#if DEBUG
+void State_DebugInit()
+{
+	PSA.Time.Adsorption_1 = 27;
+	PSA.Time.Adsorption_2 = 27;
+	PSA.Time.Compensation_0 = 1;
+	PSA.Time.Compensation_1 = 1;
+	PSA.Time.Compensation_2 = 1;
+	PSA.Time.PreStandby_1 = 5;
+	PSA.Time.PreStandby_2 = 5;
+}
+#endif /* DEBUG */
 
 void State_OutValve()
 {
@@ -32,7 +53,7 @@ void State_Adsorption1()
 
 	PSA.ValveState[0] = 0xC6;
 	State_OutValve();
-	PSA.NextState.Timer = 27; /* 275 ds */
+	PSA.Time.NextStateTimer = PSA.Time.Adsorption_1; /* 275 ds */
 
 }
 
@@ -40,7 +61,7 @@ void State_Compensation0()
 {
 	PSA.ValveState[0] = 0x00;
 	State_OutValve();
-	PSA.NextState.Timer = 1; /* 5 ds */
+	PSA.Time.NextStateTimer = PSA.Time.Compensation_0; /* 5 ds */
 
 }
 
@@ -48,7 +69,7 @@ void State_Compensation1()
 {
 	PSA.ValveState[0] = 0xA0;
 	State_OutValve();
-	PSA.NextState.Timer = 1; /* 5 ds */
+	PSA.Time.NextStateTimer = PSA.Time.Compensation_1; /* 5 ds */
 
 }
 
@@ -56,35 +77,34 @@ void State_Compensation2()
 {
 	PSA.ValveState[0] = 0x24;
 	State_OutValve();
-	PSA.NextState.Timer = 1; /* 5 ds */
+	PSA.Time.NextStateTimer = PSA.Time.Compensation_2; /* 5 ds */
 }
 void State_Adsorption2()
 {
 	PSA.ValveState[0] = 0xB8;
 	State_OutValve();
-	PSA.NextState.Timer = 27; /* 275 ds */
+	PSA.Time.NextStateTimer = PSA.Time.Adsorption_2; /* 275 ds */
 }
 
 /* -> Standby1 -> Standby2 -> Standby3 -> */
 void State_PreStandby1()
 {
 	PSA.ValveState[0] = 0x08;
-	PSA.NextState.Timer = 5; /* 50 ds */
+	PSA.Time.NextStateTimer = PSA.Time.PreStandby_1; /* 50 ds */
 
 }
 void State_PreStandby2()
 {
 	PSA.ValveState[0] = 0x48;
-	PSA.NextState.Timer = 5; /* 50 ds */
+	PSA.Time.NextStateTimer = PSA.Time.PreStandby_2; /* 50 ds */
 }
 void State_Standby()
 {
 	PSA.ValveState[0] = 0x00;
-	PSA.NextState.Timer = 0; /* ds */
+	PSA.Time.NextStateTimer = 0; /* ds */
 }
 
 #define STATE_COMPENSATION2
-//#define STATE_COMPENSATION0
 
 #ifdef STATE_COMPENSATION2
 #ifdef STATE_COMPENSATION0

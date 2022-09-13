@@ -1,21 +1,30 @@
-/*
- * Queue.h
- *
- *  Created on: 13 apr 2022
- *      Author: William.Favaro
- */
+/**
+  ******************************************************************************
+  * @file   myqueue.h
+  * @author William Favaro
+  * @date	13/04/2022
+  * @brief  queue definition functions
+  * 		This module is created to simplify the usage of SD with STM32F4
+  *
+  ******************************************************************************
+  * @note
+  *
+  *			fatman -> FAT File System Manager
+  *
+  *
+  ******************************************************************************
+  */
 
+/* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef MYQUEUE_H_
 #define MYQUEUE_H_
 
+/* Includes ------------------------------------------------------------------*/
 #include <stdint.h>
-#include "Settings.h"
 
+/* Defines -------------------------------------------------------------------*/
 #define MYQUEUE_DEBUG 1 /* 0: Ignore the code between #ifDEBUG and #endif */
 #define MYQUEUE_N_MAX_SAMPLE 255
-/* QUEUE_ELEMENT_TYPE & QUEUE_SIZE_TYPE -> Less changing, less bugs */
-//#define MYQUEUE_ELEMENT_TYPE uint16_t
-//#define MYQUEUE_SIZE_TYPE uint8_t
 
 typedef struct{
 	uint16_t Queue[MYQUEUE_N_MAX_SAMPLE];

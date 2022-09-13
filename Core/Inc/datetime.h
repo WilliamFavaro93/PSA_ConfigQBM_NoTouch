@@ -22,6 +22,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stdint.h"
 #include "string.h"
+
 /* Exported types ------------------------------------------------------------*/
 /**
   * @brief  datetime structure definition

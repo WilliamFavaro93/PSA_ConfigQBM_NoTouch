@@ -37,15 +37,6 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-	uCAN_MSG rxMessage;
-	extern ManageSD fatman;
-//	FIL EventFile;
-//	uint8_t message[45];
-//	extern ManageSD fm;
-//
-//	uint8_t FileName1[] = "FILE/FILE1.TXT";
-//	uint8_t FileName2[] = "FILE/FILE2.TXT";
-//	uint8_t wtext1[] = "This file is \n";
 
 /* USER CODE END PTD */
 
@@ -153,6 +144,34 @@ const osThreadAttr_t CAN1RxTxTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for AlarmTask */
+osThreadId_t AlarmTaskHandle;
+const osThreadAttr_t AlarmTask_attributes = {
+  .name = "AlarmTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for FaultTask */
+osThreadId_t FaultTaskHandle;
+const osThreadAttr_t FaultTask_attributes = {
+  .name = "FaultTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for ValveTask */
+osThreadId_t ValveTaskHandle;
+const osThreadAttr_t ValveTask_attributes = {
+  .name = "ValveTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for RequestTask */
+osThreadId_t RequestTaskHandle;
+const osThreadAttr_t RequestTask_attributes = {
+  .name = "RequestTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for BinarySemCAN */
 osSemaphoreId_t BinarySemCANHandle;
 const osSemaphoreAttr_t BinarySemCAN_attributes = {
@@ -164,14 +183,17 @@ const osSemaphoreAttr_t BinarySemCAN_attributes = {
 QueueStruct AirFlux;
 QueueStruct Oxygen;
 QueueStruct Nitrogen;
+
 /*** TIMECOUNTER ***/
 TimeCounter PulldownWorking;
 TimeCounter MaintenanceWorking;
 TimeCounter TotalWorking;
 /*** PSA ***/
 extern PSAStruct PSA;
+extern DateTime today;
+uCAN_MSG rxMessage;
+extern ManageSD fatman;
 
-DateTime today;
 const TickType_t seconds = pdMS_TO_TICKS(1000);
 const TickType_t deciseconds = pdMS_TO_TICKS(100);
 const TickType_t centiseconds = pdMS_TO_TICKS(10);
@@ -210,6 +232,10 @@ void StartCAN2TxTask(void *argument);
 void StartErrorManager(void *argument);
 void StartSDTask(void *argument);
 void StartCAN1RxTxTask(void *argument);
+void StartAlarmTask(void *argument);
+void StartFaultTask(void *argument);
+void StartValveTask(void *argument);
+void StartRequestTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 int __io_putchar(int character);
@@ -274,45 +300,14 @@ int main(void)
   /* USER CODE BEGIN 2 */
   PSA.B1_IncomingAirPressure.Value = 710;
   PSA.Mode.Ready = 1;
-//  AssignDefaultValue();
+  AssignDefaultValue();
+//  fatman_test_all();
+//  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+//  while (1) {
+//	  HAL_IWDG_Refresh(&hiwdg);
+//  }
 
-  /* TEST */
-//	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
-//	uint8_t ID = 1;
-//	uint8_t NameDir[] = "TEST1";
-//	uint8_t NameFile[] = "20220829";
-//
-//	/* fm.Directory[1].DirectoryName = "FILE" */
-//	memcpy(&fm.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
-//	/* fm.Directory[1].FilePath = "FILE/20220829_FILE" */
-//	memset((void *)fm.Directory[ID].FilePath, 0, 30);
-//	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-//	strcat((char *)fm.Directory[ID].FilePath, "/");
-//	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameFile);
-//	strcat((char *)fm.Directory[ID].FilePath, "_");
-//	strcat((char *)fm.Directory[ID].FilePath, (char const*)NameDir);
-//	strcat((char *)fm.Directory[ID].FilePath, ".TXT");
-//
-//	fm.Buffer_size = strlen("config.json ");
-//	memcpy(fm.Buffer, "config.json ", fm.Buffer_size);
-//	fm_read();
-//
-//	fm_init(ID);
-//	fm_write(ID);
-//	f_mount(NULL, (TCHAR const*)SDPath, 0);
-  fatman_test_all();
-  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);	/* Illumina un led */
-  while (1) {
-	  HAL_IWDG_Refresh(&hiwdg);
-  }
-
-  /* TEST */
-
-//  HAL_CAN_Start(&hcan1);			// inizializza CAN (non lo uso ma serve per hcan2 altrimenti non ha accesso alla memoria!)
-  HAL_CAN_Start(&hcan2);			// inizializza CAN
-
-  // attiva interrupt per CAN2
-//  HAL_CAN_ActivateNotification(&hcan1, CAN_IT_RX_FIFO0_MSG_PENDING);	// fa partire interrupt delle notifiche CAN ricez
+  HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING);
   /* USER CODE END 2 */
 
@@ -366,6 +361,18 @@ int main(void)
 
   /* creation of CAN1RxTxTask */
   CAN1RxTxTaskHandle = osThreadNew(StartCAN1RxTxTask, NULL, &CAN1RxTxTask_attributes);
+
+  /* creation of AlarmTask */
+  AlarmTaskHandle = osThreadNew(StartAlarmTask, NULL, &AlarmTask_attributes);
+
+  /* creation of FaultTask */
+  FaultTaskHandle = osThreadNew(StartFaultTask, NULL, &FaultTask_attributes);
+
+  /* creation of ValveTask */
+  ValveTaskHandle = osThreadNew(StartValveTask, NULL, &ValveTask_attributes);
+
+  /* creation of RequestTask */
+  RequestTaskHandle = osThreadNew(StartRequestTask, NULL, &RequestTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1280,6 +1287,8 @@ uint16_t Convert_Command_Value(uint8_t * Command, uint8_t Command_Size, uint8_t 
 
 void AssignDefaultValue()
 {
+	State_DebugInit(); /* Inizializza i valori dei timer per il debug */
+
 	PSA.B1_IncomingAirPressure.LowerThreshold = 580; 	//SB1L
 	PSA.B1_IncomingAirPressure.UpperThreshold = 600; 	//SB1H
 
@@ -1299,14 +1308,14 @@ void AssignDefaultValue()
 	PSA.KE2_OxygenSensor_2.LowerThreshold = 2; 			//SO2-2
 	PSA.Out2.Enable = 1;
 
-	/* I timer forse conviene inizializzarli nel TimeTask */
-	PSA.ReceiveValveMessage.Refresh = 1000;
-	PSA.ReceiveValveMessage.Timer = PSA.ReceiveValveMessage.Refresh;
-	PSA.CAN_2.TransmitAliveMessage.Refresh = 10;
-	PSA.CAN_2.TransmitAliveMessage.Timer = PSA.CAN_2.TransmitAliveMessage.Refresh;
+//	/* I timer forse conviene inizializzarli nel TimeTask */
+//	PSA.ReceiveValveMessage.Refresh = 1000;
+//	PSA.ReceiveValveMessage.Timer = PSA.ReceiveValveMessage.Refresh;
+//	PSA.CAN_2.TransmitAliveMessage.Refresh = 10;
+//	PSA.CAN_2.TransmitAliveMessage.Timer = PSA.CAN_2.TransmitAliveMessage.Refresh;
 
 	/* DateTime */
-	DateTime_Update(&today, 2022, 07, 11, 10, 25, 00); /* 2022/07/11 10:25:00*/
+	DateTime_Init(2022, 7, 11, 10, 25, 0);
 }
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
@@ -1319,7 +1328,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 		{
 			/* Valve are working -> Refresh Valve Timer */
 			HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-			PSA.ReceiveValveMessage.Timer = PSA.ReceiveValveMessage.Refresh;
+			PSA.Time.ValveAlive_ReceiveMessageTimer = PSA.Time.ValveAlive_SendMessageRefresh;
 			PSA.CAN_2.ReceiveAliveMessage = RxData[0];
 		}
 	}
@@ -1401,7 +1410,7 @@ void StartStateTask(void *argument)
   for(;;)
   {
 
-	  if(!PSA.NextState.Timer)
+	  if(!PSA.Time.NextStateTimer)
 	  {
 		  PSA.State = NextState;
 		  NextState = State_NextState(PSA.State);
@@ -1624,7 +1633,15 @@ void StartModeTask(void *argument)
 void StartTimeTask(void *argument)
 {
   /* USER CODE BEGIN StartTimeTask */
-	PSA.CAN_2.TransmitAliveMessage.Timer = 0;
+	/* Init Refresher */
+	State_DebugInit();
+	PSA.Time.ValveAlive_ReceiveMessageRefresh = 100;
+	PSA.Time.ValveAlive_SendMessageRefresh = 10;
+	/* Init Timer */
+	PSA.Time.ValveAlive_ReceiveMessageTimer = PSA.Time.ValveAlive_ReceiveMessageRefresh;
+	PSA.Time.ValveAlive_SendMessageTimer = PSA.Time.ValveAlive_SendMessageRefresh;
+
+
   /* Infinite loop */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
   for(;;)
@@ -1637,12 +1654,12 @@ void StartTimeTask(void *argument)
 	  TimeCounter_AddDecisecond(&TotalWorking);
 	  /*** TIMER ***/
 	  /* When a timer reach 0, something happens and it refresh */
-	  if(PSA.NextState.Timer)
-		  PSA.NextState.Timer--;
-	  if(PSA.ReceiveValveMessage.Timer)
-		  PSA.ReceiveValveMessage.Timer--;
-	  if(PSA.CAN_2.TransmitAliveMessage.Timer)
-		  PSA.CAN_2.TransmitAliveMessage.Timer--;
+	  if(PSA.Time.NextStateTimer)
+		  PSA.Time.NextStateTimer--;
+	  if(PSA.Time.ValveAlive_ReceiveMessageTimer)
+		  PSA.Time.ValveAlive_ReceiveMessageTimer--;
+	  if(PSA.Time.ValveAlive_SendMessageTimer)
+		  PSA.Time.ValveAlive_SendMessageTimer--;
 	  /*** WATCHDOG ***/
 	  /* If there's no problem, it refresh before reaching 0 */
 	  HAL_IWDG_Refresh(&hiwdg);
@@ -1704,10 +1721,10 @@ void StartCAN2TxTask(void *argument)
 			  PSA.CAN_2.State = HAL_CAN_AddTxMessage(&hcan2, &TxValveMxHeader, PSA.ValveState, &TxMailbox);
 			  PSA.CAN_2.TransmitValveMessage = 0x00;
 		  }
-		  if(!PSA.CAN_2.TransmitAliveMessage.Timer)
+		  if(!PSA.Time.ValveAlive_SendMessageTimer)
 		  {
 			  PSA.CAN_2.State = HAL_CAN_AddTxMessage(&hcan2, &TxAliveMxHeader, AliveMessage, &TxMailbox);
-			  PSA.CAN_2.TransmitAliveMessage.Timer = PSA.CAN_2.TransmitAliveMessage.Refresh;
+			  PSA.Time.ValveAlive_SendMessageTimer = PSA.Time.ValveAlive_SendMessageRefresh;
 		  }
 	  }
 	  else if(PSA.CAN_2.State == HAL_ERROR)
@@ -1957,6 +1974,108 @@ void StartCAN1RxTxTask(void *argument)
 		  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
 	  }
   /* USER CODE END StartCAN1RxTxTask */
+}
+
+/* USER CODE BEGIN Header_StartAlarmTask */
+/**
+* @brief Function implementing the AlarmTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartAlarmTask */
+void StartAlarmTask(void *argument)
+{
+  /* USER CODE BEGIN StartAlarmTask */
+  /* Infinite loop */
+  TickType_t StateTaskDelayTimer = xTaskGetTickCount();
+  for(;;)
+  {
+
+	  if((PSA.B1_IncomingAirPressure.Value < PSA.B1_IncomingAirPressure.LowerThreshold) && (!PSA.Time.LowAirPressureTimer))
+	  {/* (B1 < SB1L) */
+		  PSA.Alarm.AL02_LowAirPressure = PSA_ALARM_ON;
+	  }
+	  else if((1))
+	  {/* (B1 > SB1H)  */
+		  PSA.Alarm.AL02_LowAirPressure = PSA_ALARM_OFF;
+		  PSA.Time.LowAirPressureTimer = PSA.Time.LowAirPressureRefresh;
+	  }
+
+	  if((PSA.B3_ProcessTankPressure.Value < PSA.B3_ProcessTankPressure.LowerThreshold))
+	  {/* (B3 < SB3L) */
+		  PSA.Alarm.AL05_LowProcessTankPressure = PSA_ALARM_ON;
+	  }
+	  else if((PSA.B3_ProcessTankPressure.Value > PSA.B3_ProcessTankPressure.UpperThreshold))
+	  {/* (B3 > SB3H) */
+		  PSA.Alarm.AL05_LowProcessTankPressure = PSA_ALARM_OFF;
+	  }
+
+	  if((PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.UpperThreshold))
+	  {/* (B4 > SB4H) */
+		  PSA.Alarm.AL16_HighOut2Pressure = PSA_ALARM_ON;
+	  }
+	  else if((PSA.B4_OutputPressure_2.Value < PSA.B4_OutputPressure_2.LowerThreshold))
+	  {/* (B4 < SB4L)  */
+		  PSA.Alarm.AL16_HighOut2Pressure = PSA_ALARM_OFF;
+	  }
+
+	  vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
+  }
+  /* USER CODE END StartAlarmTask */
+}
+
+/* USER CODE BEGIN Header_StartFaultTask */
+/**
+* @brief Function implementing the FaultTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartFaultTask */
+void StartFaultTask(void *argument)
+{
+  /* USER CODE BEGIN StartFaultTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartFaultTask */
+}
+
+/* USER CODE BEGIN Header_StartValveTask */
+/**
+* @brief Function implementing the ValveTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartValveTask */
+void StartValveTask(void *argument)
+{
+  /* USER CODE BEGIN StartValveTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartValveTask */
+}
+
+/* USER CODE BEGIN Header_StartRequestTask */
+/**
+* @brief Function implementing the RequestTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartRequestTask */
+void StartRequestTask(void *argument)
+{
+  /* USER CODE BEGIN StartRequestTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartRequestTask */
 }
 
 /**

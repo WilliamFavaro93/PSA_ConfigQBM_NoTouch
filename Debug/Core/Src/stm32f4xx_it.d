@@ -46,10 +46,8 @@ Core/Src/stm32f4xx_it.o: ../Core/Src/stm32f4xx_it.c ../Core/Inc/main.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_uart.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_dsi.h \
  ../Drivers/STM32F4xx_HAL_Driver/Inc/stm32f4xx_hal_qspi.h \
- ../Core/Inc/psa.h ../Core/Inc/state.h ../Core/Inc/Settings.h \
- ../Core/Inc/configuration.h ../Core/Inc/version.h ../Core/Inc/Debug.h \
- ../Core/Inc/myqueue.h ../Core/Inc/timecounter.h \
- ../Core/Inc/stm32f4xx_it.h
+ ../Core/Inc/psa.h ../Core/Inc/state.h ../Core/Inc/myqueue.h \
+ ../Core/Inc/timecounter.h ../Core/Inc/stm32f4xx_it.h
 
 ../Core/Inc/main.h:
 
@@ -150,14 +148,6 @@ Core/Src/stm32f4xx_it.o: ../Core/Src/stm32f4xx_it.c ../Core/Inc/main.h \
 ../Core/Inc/psa.h:
 
 ../Core/Inc/state.h:
-
-../Core/Inc/Settings.h:
-
-../Core/Inc/configuration.h:
-
-../Core/Inc/version.h:
-
-../Core/Inc/Debug.h:
 
 ../Core/Inc/myqueue.h:
 

@@ -34,7 +34,6 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include <psa.h>
 #include <state.h>
-#include "Settings.h"
 #include <myqueue.h>
 #include <timecounter.h>
 /* USER CODE END Includes */

@@ -1,0 +1,2 @@
+json_extractor.c:26:13:json_extract_string	24	static
+json_extractor.c:52:6:json_extractor_all	4	static

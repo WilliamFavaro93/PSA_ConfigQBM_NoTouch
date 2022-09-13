@@ -15,16 +15,18 @@
   ******************************************************************************
   */
 
-
+/* Includes ------------------------------------------------------------------*/
 #include "fatman.h"
 
+/* Defines -------------------------------------------------------------------*/
 #define FATMAN_AUTEST 1
 
+/* Variables -----------------------------------------------------------------*/
 ManageSD fatman;
 
-/*** PRIVATE METHOD REFERENCEs ***/
-
-/*** PUBLIC METHODs ***/
+/* Private Function definition -----------------------------------------------*/
+/* Public Function -----------------------------------------------------------*/
+/* Private Function ----------------------------------------------------------*/
 /*
  * @brief This method is used to initialize. It creates the directory if it doesn't exists. It creates the file if it doesn't exists.
  * @author William Favaro
@@ -380,4 +382,4 @@ void fatman_test_all()
 #endif /* FATMAN_UTEST */
 }
 
-/* END FILE */
+/* End of the file -----------------------------------------------------------*/
