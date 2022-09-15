@@ -66,7 +66,7 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Middlewares/Third_Party/FatFs/src/diskio.h \
  ../Middlewares/Third_Party/FatFs/src/ff.h ../FATFS/Target/sd_diskio.h \
  ../Core/Inc/canspi.h ../Core/Inc/mcp2515.h ../Core/Inc/datetime.h \
- ../Core/Inc/fatman.h
+ ../Core/Inc/fatman.h ../Core/Inc/alarm.h
 
 ../Core/Inc/main.h:
 
@@ -221,3 +221,5 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/datetime.h:
 
 ../Core/Inc/fatman.h:
+
+../Core/Inc/alarm.h:

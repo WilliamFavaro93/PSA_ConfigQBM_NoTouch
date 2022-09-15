@@ -15,20 +15,26 @@
   ******************************************************************************
   */
 
+/* Includes ------------------------------------------------------------------*/
 #include <datetime.h>
 
-#define DATETIME_AUTEST 1
+/* Defines -------------------------------------------------------------------*/
+#if DEBUG
+	#define DATETIME_AUTEST 1
+#else /* DEBUG */
+	#define DATETIME_AUTEST 0
+#endif /* DEBUG */
 
-/* global-static variable */
+/* Variables -----------------------------------------------------------------*/
 DateTime today;
 DateTime today_LastUpdate;
 
-/*** PRIVATE METHODs ***/
+/* Private Function definition -----------------------------------------------*/
 void DateTime_setDateString(char* separator);
 void DateTime_setTimeString(char* separator);
 
 
-/*** PUBLIC METHODs ***/
+/* Public Function -----------------------------------------------------------*/
 /*
  * @brief This method is used to initialize or update the char[] of the DateTime
  * @author William Favaro
@@ -243,7 +249,7 @@ void DateTime_setTimeString(char* separator)
 	}
 }
 
-/*** UNIT TEST ***/
+/* Private Function ----------------------------------------------------------*/
 #define DATETIME_AUTEST 1
 #if DATETIME_AUTEST
 
@@ -319,4 +325,4 @@ uint8_t DateTime_test_all()
 	return 0;
 }
 
-/*********************************** EOF **************************************/
+/* End of the file -----------------------------------------------------------*/

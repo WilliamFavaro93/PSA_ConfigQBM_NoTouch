@@ -1,55 +1,62 @@
-/*
- * MyQueue.c
- *
- *  Created on: 14 apr 2022
- *      Author: William.Favaro
- */
+/**
+  ******************************************************************************
+  * @file   myqueue.c
+  * @author William Favaro
+  * @date	13/04/2022
+  * @brief  queue definition functions
+  * 		This module is created to simplify the usage of SD with STM32F4
+  *
+  ******************************************************************************
+  * @note
+  *
+  *
+  *
+  ******************************************************************************
+  */
 
 #include <myqueue.h>
 
-/* TODO Change Prototype with QueueStruct */
-
-void MyQueue_Init(QueueStruct *Prototype)
+void MyQueue_Init(QueueStruct *Queue)
 {
-	for(int i=0; i<MYQUEUE_N_MAX_SAMPLE; i++){
-		Prototype->Queue[i]=1;
+	for(int i=0; i<MYQUEUE_N_MAX_ELEMENT; i++){
+		Queue->Element[i]=1;
 	}
-	Prototype->NextElementPositionPointer=0;
-	Prototype->AverageValue=0;
-	Prototype->Size=0;
+	Queue->NextElementPositionPointer=0;
+	Queue->AverageValue=0;
+	Queue->Size=0;
 }
 
-void MyQueue_InsertElement(QueueStruct *Prototype, int16_t ElementToInsert)
+void MyQueue_InsertElement(QueueStruct *Queue, int16_t ElementToInsert)
 {
 	/* Setup: This piece of code is useless without Update AverageValue works together */
 	int16_t ElementToEliminate = 0;
-	if(Prototype->Size==MYQUEUE_N_MAX_SAMPLE)
-		ElementToEliminate = Prototype->Queue[Prototype->NextElementPositionPointer];
+	if(Queue->Size==MYQUEUE_N_MAX_ELEMENT)
+		ElementToEliminate = Queue->Element[Queue->NextElementPositionPointer];
 	/* Insert the element */
-	Prototype->Queue[Prototype->NextElementPositionPointer]=ElementToInsert;
+	Queue->Element[Queue->NextElementPositionPointer]=ElementToInsert;
 	/* Update Queue */
-	Prototype->NextElementPositionPointer++;
-	if(Prototype->NextElementPositionPointer==MYQUEUE_N_MAX_SAMPLE)
-		Prototype->NextElementPositionPointer=0;
-	if(Prototype->Size!=MYQUEUE_N_MAX_SAMPLE)
-		Prototype->Size++;
+	Queue->NextElementPositionPointer++;
+	if(Queue->NextElementPositionPointer==MYQUEUE_N_MAX_ELEMENT)
+		Queue->NextElementPositionPointer=0;
+	if(Queue->Size!=MYQUEUE_N_MAX_ELEMENT)
+		Queue->Size++;
 	/* Update AverageValue */
-	Prototype->Sum = Prototype->Sum + ElementToInsert - ElementToEliminate;
-	Prototype->AverageValue = Prototype->Sum / Prototype->Size;
+	Queue->Sum = Queue->Sum + ElementToInsert - ElementToEliminate;
+	Queue->AverageValue = Queue->Sum / Queue->Size;
 }
 
-uint16_t MyQueue_GetAverageValue(QueueStruct *Prototype)
+uint16_t MyQueue_GetAverageValue(QueueStruct *Queue)
 {
-	return Prototype->AverageValue;
+	return Queue->AverageValue;
 }
 
 /*
  *
  */
-uint16_t MyQueue_GetLastValue(QueueStruct *Prototype)
+uint16_t MyQueue_GetLastValue(QueueStruct *Queue)
 {
-	if(Prototype->Size)
-		return Prototype->Queue[Prototype->NextElementPositionPointer-1];
+	if(Queue->Size)
+		return Queue->Element[Queue->NextElementPositionPointer-1];
 	return 0;
 }
 
@@ -57,20 +64,20 @@ uint16_t MyQueue_GetLastValue(QueueStruct *Prototype)
 /*
  * This method is just for testing with debug this code
  */
-void MyQueue_InsertElementTesting_1(QueueStruct *Prototype)
+void MyQueue_InsertElementTesting_1(QueueStruct *Queue)
 {
 	for(uint8_t i=0; i<125; i++){
-		MyQueue_InsertElement(Prototype, i+2);
+		MyQueue_InsertElement(Queue, i+2);
 	}
 }
 
 /*
  * This method is just for testing with debug this code
  */
-void MyQueue_InsertElementTesting_2(QueueStruct *Prototype)
+void MyQueue_InsertElementTesting_2(QueueStruct *Queue)
 {
 	for(uint8_t i=0; i<125; i++){
-		MyQueue_InsertElement(Prototype, 3000);
+		MyQueue_InsertElement(Queue, 3000);
 	}
 }
 #endif /* DEBUG */

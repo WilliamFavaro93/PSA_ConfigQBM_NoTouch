@@ -23,7 +23,8 @@
 #include "stdint.h"
 #include "string.h"
 
-/* Exported types ------------------------------------------------------------*/
+/* Defines -------------------------------------------------------------------*/
+/* Typedef struct definition -------------------------------------------------*/
 /**
   * @brief  datetime structure definition
   */
@@ -49,9 +50,7 @@ typedef struct
 										Example: "10:23:00" where ':' is the separator	*/
 } DateTime;
 
-/* Exported constants --------------------------------------------------------*/
-/* Exported macro ------------------------------------------------------------*/
-/* Exported functions --------------------------------------------------------*/
+/* Public Function definition ------------------------------------------------*/
 void DateTime_Update(DateTime* DateTime, uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uint8_t minutes, uint8_t seconds);
 void DateTime_AddSecond();
 void DateTime_setDateString(char* separator);

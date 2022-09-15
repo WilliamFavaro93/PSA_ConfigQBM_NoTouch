@@ -9,7 +9,6 @@
   ******************************************************************************
   * @note
   *
-  *			fatman -> FAT File System Manager
   *
   *
   ******************************************************************************
@@ -24,19 +23,19 @@
 
 /* Defines -------------------------------------------------------------------*/
 #define MYQUEUE_DEBUG 1 /* 0: Ignore the code between #ifDEBUG and #endif */
-#define MYQUEUE_N_MAX_SAMPLE 255
+#define MYQUEUE_N_MAX_ELEMENT 255
 
 typedef struct{
-	uint16_t Queue[MYQUEUE_N_MAX_SAMPLE];
+	uint16_t Element[MYQUEUE_N_MAX_ELEMENT];
 	uint16_t AverageValue;
 	uint8_t NextElementPositionPointer;
 	uint8_t Size;
 	uint32_t Sum;
 }QueueStruct;
 
-void MyQueue_Init(QueueStruct *Prototype);
-void MyQueue_InsertElement(QueueStruct *Prototype, int16_t ElementToInsert);
-uint16_t MyQueue_GetAverageValue(QueueStruct *Prototype);
-uint16_t MyQueue_GetLastValue(QueueStruct *Prototype);
+void MyQueue_Init(QueueStruct *Queue);
+void MyQueue_InsertElement(QueueStruct *Queue, int16_t ElementToInsert);
+uint16_t MyQueue_GetAverageValue(QueueStruct *Queue);
+uint16_t MyQueue_GetLastValue(QueueStruct *Queue);
 
 #endif /* MYQUEUE_H_ */

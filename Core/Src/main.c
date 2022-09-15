@@ -33,6 +33,7 @@
 #include "psa.h"
 #include "state.h"
 #include "timecounter.h"
+#include "alarm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -290,7 +291,7 @@ int main(void)
   MX_CAN2_Init();
   MX_SPI2_Init();
   MX_ADC1_Init();
-  MX_IWDG_Init();
+//  MX_IWDG_Init();
   MX_TIM2_Init();
   MX_I2C2_Init();
   MX_USART6_UART_Init();
@@ -298,14 +299,16 @@ int main(void)
   MX_FATFS_Init();
   MX_DMA_Init();
   /* USER CODE BEGIN 2 */
+  Alarm_test_all();
+  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+  while(1)
+  {
+
+  }
+
   PSA.B1_IncomingAirPressure.Value = 710;
   PSA.Mode.Ready = 1;
   AssignDefaultValue();
-//  fatman_test_all();
-//  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-//  while (1) {
-//	  HAL_IWDG_Refresh(&hiwdg);
-//  }
 
   HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING);
