@@ -98,6 +98,7 @@ void Alarm_Enable(Alarm * Alarm)
 	Alarm->Timer = Alarm->RefreshTimer_ON;
 }
 /* Private Function ----------------------------------------------------------*/
+/* Public Automated Testing Function -----------------------------------------*/
 #if ALARM_AUTEST
 void Alarm_test_Triggered()
 {
@@ -194,10 +195,12 @@ void Alarm_test_ConditionKeepsChanging()
 
 void Alarm_test_all()
 {
+#if ALARM_AUTEST
 	Alarm_test_Triggered();
 	Alarm_test_FromTriggeredToNoTriggered();
 	Alarm_test_DisabledAlarm_AlarmMustNotTrigger();
 	Alarm_test_ConditionKeepsChanging();
+#endif /* ALARM_AUTEST */
 }
 /* End of the file -----------------------------------------------------------*/
 

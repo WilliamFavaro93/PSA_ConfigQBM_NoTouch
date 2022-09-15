@@ -38,6 +38,7 @@ void Alarm_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_O
 void Alarm_CheckCondition(Alarm * Alarm, uint8_t condition);
 void Alarm_Disable(Alarm * Alarm);
 void Alarm_Enable(Alarm * Alarm);
+/* Public Automated Testing Function -----------------------------------------*/
 void Alarm_test_all();
 
 #endif /* INC_ALARM_H_ */

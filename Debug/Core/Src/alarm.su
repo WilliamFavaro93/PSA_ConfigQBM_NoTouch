@@ -2,8 +2,8 @@ alarm.c:38:6:Alarm_Init	16	static
 alarm.c:53:6:Alarm_CheckCondition	16	static
 alarm.c:81:6:Alarm_Disable	16	static
 alarm.c:94:6:Alarm_Enable	16	static
-alarm.c:102:6:Alarm_test_Triggered	16	static
-alarm.c:125:6:Alarm_test_FromTriggeredToNoTriggered	16	static
-alarm.c:146:6:Alarm_test_DisabledAlarm_AlarmMustNotTrigger	16	static
-alarm.c:177:6:Alarm_test_ConditionKeepsChanging	16	static
-alarm.c:194:6:Alarm_test_all	8	static
+alarm.c:103:6:Alarm_test_Triggered	16	static
+alarm.c:126:6:Alarm_test_FromTriggeredToNoTriggered	16	static
+alarm.c:147:6:Alarm_test_DisabledAlarm_AlarmMustNotTrigger	16	static
+alarm.c:178:6:Alarm_test_ConditionKeepsChanging	16	static
+alarm.c:196:6:Alarm_test_all	8	static

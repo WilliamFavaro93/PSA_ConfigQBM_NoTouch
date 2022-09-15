@@ -30,7 +30,7 @@ main.c:1636:6:StartTimeTask	24	static
 main.c:1681:6:StartCAN2TxTask	120	static
 main.c:1751:6:StartErrorManager	32	static
 main.c:1786:6:StartSDTask	24	static
-main.c:1837:6:StartCAN1RxTxTask	40	static
+main.c:1837:6:StartCAN1RxTxTask	112	static
 main.c:1989:6:StartAlarmTask	24	static
 main.c:2037:6:StartFaultTask	16	static
 main.c:2055:6:StartValveTask	16	static

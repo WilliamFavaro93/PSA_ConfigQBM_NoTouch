@@ -14,19 +14,33 @@
   ******************************************************************************
   */
 
+/* Includes ------------------------------------------------------------------*/
 #include <myqueue.h>
 
-void MyQueue_Init(QueueStruct *Queue)
+/* Defines -------------------------------------------------------------------*/
+#if DEBUG
+	#define MYQUEUE_AUTEST 1
+#else /* DEBUG */
+	#define MYQUEUE_AUTEST 0
+#endif /* DEBUG */
+/* Variables -----------------------------------------------------------------*/
+#if MYQUEUE_AUTEST
+	MyQueue test;
+#endif /* MYQUEUE_AUTEST */
+
+/* Private Function definition -----------------------------------------------*/
+/* Public Function -----------------------------------------------------------*/
+void MyQueue_Init(MyQueue *Queue)
 {
-	for(int i=0; i<MYQUEUE_N_MAX_ELEMENT; i++){
-		Queue->Element[i]=1;
+	for(int i=0; i < MYQUEUE_N_MAX_ELEMENT; i++){
+		Queue->Element[i] = 0;
 	}
-	Queue->NextElementPositionPointer=0;
-	Queue->AverageValue=0;
-	Queue->Size=0;
+	Queue->NextElementPositionPointer = 0;
+	Queue->AverageValue = 0;
+	Queue->Size = 0;
 }
 
-void MyQueue_InsertElement(QueueStruct *Queue, int16_t ElementToInsert)
+void MyQueue_InsertElement(MyQueue *Queue, int16_t ElementToInsert)
 {
 	/* Setup: This piece of code is useless without Update AverageValue works together */
 	int16_t ElementToEliminate = 0;
@@ -45,39 +59,69 @@ void MyQueue_InsertElement(QueueStruct *Queue, int16_t ElementToInsert)
 	Queue->AverageValue = Queue->Sum / Queue->Size;
 }
 
-uint16_t MyQueue_GetAverageValue(QueueStruct *Queue)
+uint16_t MyQueue_GetAverageValue(MyQueue Queue)
 {
-	return Queue->AverageValue;
+	return Queue.AverageValue;
 }
 
 /*
  *
  */
-uint16_t MyQueue_GetLastValue(QueueStruct *Queue)
+uint16_t MyQueue_GetLastValue(MyQueue Queue)
 {
-	if(Queue->Size)
-		return Queue->Element[Queue->NextElementPositionPointer-1];
+	if(Queue.Size)
+	{
+		if(Queue.NextElementPositionPointer)
+			return Queue.Element[Queue.NextElementPositionPointer-1];
+		else
+			return Queue.Element[Queue.Size];
+	}
 	return 0;
 }
 
-#ifdef DEBUG
+MyQueue_RemoveLastInsertElement(MyQueue *Queue)
+{
+	/* TODO */
+}
+/* Private Function ----------------------------------------------------------*/
+/* Public Automated Testing Function -----------------------------------------*/
+#if MYQUEUE_AUTEST
 /*
  * This method is just for testing with debug this code
  */
-void MyQueue_InsertElementTesting_1(QueueStruct *Queue)
+void MyQueue_test_InsertBigNumberOfSameValueElements()
 {
-	for(uint8_t i=0; i<125; i++){
-		MyQueue_InsertElement(Queue, i+2);
+	uint16_t AverageElement = 30;
+
+	MyQueue_Init(&test);
+	for(uint8_t i=0; i<120; i++){
+		MyQueue_InsertElement(&test, AverageElement);
 	}
+
+	while(!(MyQueue_GetAverageValue(test) == AverageElement)){}
+	while(!(MyQueue_GetLastValue(test) == AverageElement)){}
 }
 
 /*
  * This method is just for testing with debug this code
  */
-void MyQueue_InsertElementTesting_2(QueueStruct *Queue)
+void MyQueue_test_()
 {
-	for(uint8_t i=0; i<125; i++){
-		MyQueue_InsertElement(Queue, 3000);
+	uint16_t StartingElement = 1600;
+
+	for(uint8_t i=0; i < MYQUEUE_N_MAX_ELEMENT; i++){
+		MyQueue_InsertElement(&test, StartingElement + i);
 	}
+
+	while(!(MyQueue_GetAverageValue(test) > (1600))){}
+	while(!(MyQueue_GetAverageValue(test) < (1600 + MYQUEUE_N_MAX_ELEMENT))){}
 }
-#endif /* DEBUG */
+#endif /* MYQUEUE_AUTEST */
+
+void MyQueue_test_all()
+{
+#if MYQUEUE_AUTEST
+	MyQueue_test_InsertBigNumberOfSameValueElements();
+#endif /* MYQUEUE_AUTEST */
+}
+/* End of the file -----------------------------------------------------------*/

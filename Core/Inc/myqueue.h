@@ -23,19 +23,23 @@
 
 /* Defines -------------------------------------------------------------------*/
 #define MYQUEUE_DEBUG 1 /* 0: Ignore the code between #ifDEBUG and #endif */
-#define MYQUEUE_N_MAX_ELEMENT 255
+#define MYQUEUE_N_MAX_ELEMENT 30
 
+/* Typedef struct definition -------------------------------------------------*/
 typedef struct{
 	uint16_t Element[MYQUEUE_N_MAX_ELEMENT];
 	uint16_t AverageValue;
 	uint8_t NextElementPositionPointer;
 	uint8_t Size;
 	uint32_t Sum;
-}QueueStruct;
+}MyQueue;
 
-void MyQueue_Init(QueueStruct *Queue);
-void MyQueue_InsertElement(QueueStruct *Queue, int16_t ElementToInsert);
-uint16_t MyQueue_GetAverageValue(QueueStruct *Queue);
-uint16_t MyQueue_GetLastValue(QueueStruct *Queue);
-
+/* Public Function definition ------------------------------------------------*/
+void MyQueue_Init(MyQueue *Queue);
+void MyQueue_InsertElement(MyQueue *Queue, int16_t ElementToInsert);
+void MyQueue_RemoveLastInsertElement(MyQueue *Queue);
+uint16_t MyQueue_GetAverageValue(MyQueue Queue);
+uint16_t MyQueue_GetLastValue(MyQueue Queue);
+/* Public Automated Testing Function -----------------------------------------*/
+void MyQueue_test_all();
 #endif /* MYQUEUE_H_ */

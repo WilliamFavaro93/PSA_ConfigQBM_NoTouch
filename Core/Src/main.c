@@ -181,9 +181,9 @@ const osSemaphoreAttr_t BinarySemCAN_attributes = {
 /* USER CODE BEGIN PV */
 /*** QUEUE ***/
 /* Ho evitato di mettere le code all'interno di una struttura perchè è difficile accedere agli elementi di un array */
-QueueStruct AirFlux;
-QueueStruct Oxygen;
-QueueStruct Nitrogen;
+MyQueue AirFlux;
+MyQueue Oxygen;
+MyQueue Nitrogen;
 
 /*** TIMECOUNTER ***/
 TimeCounter PulldownWorking;
@@ -299,7 +299,7 @@ int main(void)
   MX_FATFS_Init();
   MX_DMA_Init();
   /* USER CODE BEGIN 2 */
-  Alarm_test_all();
+  MyQueue_test_all();
   HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
   while(1)
   {
@@ -1892,7 +1892,7 @@ void StartCAN1RxTxTask(void *argument)
 	//				  break;
 				  case 0x40000A:
 					  rxMessage.frame.data0 = 0x4B;
-					  uint16_t Oxygen_LastValue = MyQueue_GetLastValue(&Oxygen);
+					  uint16_t Oxygen_LastValue = MyQueue_GetLastValue(Oxygen);
 					  rxMessage.frame.data4 = Oxygen_LastValue >> 8;
 					  rxMessage.frame.data5 = Oxygen_LastValue;
 					  break;
@@ -1924,13 +1924,13 @@ void StartCAN1RxTxTask(void *argument)
 					  break;
 				  case 0x400001:
 					  rxMessage.frame.data0 = 0x4B;
-					  uint16_t AirFlux_LastValue = MyQueue_GetLastValue(&AirFlux);
+					  uint16_t AirFlux_LastValue = MyQueue_GetLastValue(AirFlux);
 					  rxMessage.frame.data4 = AirFlux_LastValue >> 8;
 					  rxMessage.frame.data5 = AirFlux_LastValue;
 					  break;
 				  case 0x40001D:
 					  rxMessage.frame.data0 = 0x4B;
-					  uint16_t AirFlux_AverageValue = MyQueue_GetAverageValue(&AirFlux);
+					  uint16_t AirFlux_AverageValue = MyQueue_GetAverageValue(AirFlux);
 					  rxMessage.frame.data4 = AirFlux_AverageValue >> 8;
 					  rxMessage.frame.data5 = AirFlux_AverageValue;
 					  break;
