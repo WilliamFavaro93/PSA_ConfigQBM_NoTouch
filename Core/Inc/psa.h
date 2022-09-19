@@ -21,6 +21,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stdint.h"
+#include "alarm.h"
 
 /* Time structure ------------------------------------------------------------*/
 typedef struct
@@ -90,53 +91,52 @@ typedef struct{
  * 		Alarm 			-> It resets while the machine is working and when a condition happens
  */
 /* Alarm and Fault structure -------------------------------------------------*/
-#define PSA_ALARM_ON 	0x01
-#define PSA_ALARM_OFF	0x00
+
 typedef struct
 {
 	uint64_t State;
 
-	uint8_t AL01_CANbusError;			/**< define if AL01 is triggered:
+	Alarm AL01_CANbusError;			/**< define if AL01 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL01 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL01 is triggered				*/
-	uint8_t AL02_LowAirPressure;		/**< define if AL02 is triggered:
+	Alarm AL02_LowAirPressure;		/**< define if AL02 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL02 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL02 is triggered				*/
-	uint8_t AL05_LowProcessTankPressure;/**< define if AL05 is triggered:
+	Alarm AL05_LowProcessTankPressure;/**< define if AL05 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL05 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL05 is triggered				*/
-	uint8_t AL11_External;				/**< define if AL11 is triggered:
+	Alarm AL11_External;				/**< define if AL11 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL11 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL11 is triggered				*/
-	uint8_t AL16_HighOut2Pressure;		/**< define if AL16 is triggered:
+	Alarm AL16_HighOut2Pressure;		/**< define if AL16 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL16 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL16 is triggered				*/
-	uint8_t AL17_HighDewpoint;			/**< define if AL17 is triggered:
+	Alarm AL17_HighDewpoint;			/**< define if AL17 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL17 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL17 is triggered				*/
-	uint8_t AL18_HighDewpoint;			/**< define if AL18 is triggered:
+	Alarm AL18_HighDewpoint;			/**< define if AL18 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL18 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL18 is triggered				*/
-	uint8_t AL19_HighOut1Pressure;		/**< not anymore used				*/
-	uint8_t AL20_PCComunicationFault;	/**< define if AL20 is triggered:
+	Alarm AL19_HighOut1Pressure;		/**< not anymore used				*/
+	Alarm AL20_PCComunicationFault;	/**< define if AL20 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL20 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL20 is triggered				*/
-	uint8_t AL31_B1ProbeFault;			/**< define if AL31 is triggered:
+	Alarm AL31_B1ProbeFault;			/**< define if AL31 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL31 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL31 is triggered				*/
-	uint8_t AL32_B2ProbeFault;			/**< define if AL32 is triggered:
+	Alarm AL32_B2ProbeFault;			/**< define if AL32 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL32 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL32 is triggered				*/
-	uint8_t AL33_B3ProbeFault;			/**< define if AL33 is triggered:
+	Alarm AL33_B3ProbeFault;			/**< define if AL33 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL33 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL33 is triggered				*/
-	uint8_t AL34_B4ProbeFault;			/**< define if AL34 is triggered:
+	Alarm AL34_B4ProbeFault;			/**< define if AL34 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL34 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL34 is triggered				*/
-	uint8_t AL40_PsaDischanging;		/**< define if AL40 is triggered:
+	Alarm AL40_PsaDischanging;		/**< define if AL40 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL40 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL40 is triggered				*/
-	uint8_t MissingSDCard;				/**< define if MissingSDCard is triggered:
+	Alarm MissingSDCard;				/**< define if MissingSDCard is triggered:
 	 	 	 	 	 	 	 	 	 	 0: MissingSDCard is not triggered
 	 	 	 	 	 	 	 	 	 	 1: MissingSDCard is triggered		*/
 } SetOfAlarms;

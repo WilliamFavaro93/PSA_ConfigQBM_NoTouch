@@ -105,7 +105,7 @@ void MyQueue_test_InsertBigNumberOfSameValueElements()
 /*
  * This method is just for testing with debug this code
  */
-void MyQueue_test_()
+void MyQueue_test_InsertIncresingValueElements()
 {
 	uint16_t StartingElement = 1600;
 
@@ -122,6 +122,7 @@ void MyQueue_test_all()
 {
 #if MYQUEUE_AUTEST
 	MyQueue_test_InsertBigNumberOfSameValueElements();
+	MyQueue_test_InsertIncresingValueElements();
 #endif /* MYQUEUE_AUTEST */
 }
 /* End of the file -----------------------------------------------------------*/
