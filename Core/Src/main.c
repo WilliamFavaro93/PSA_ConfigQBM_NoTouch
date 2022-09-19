@@ -1328,11 +1328,15 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	PSA.CAN_2.State = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &RxHeader, RxData);
 	if(!PSA.CAN_2.State)
 	{
-		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 1))
+		/* La condizione per verificare la condizione è:
+		 * StdId = 0x701
+		 * DLC =1
+		 * Il primo dato diverso da 0x7F e 0xFF
+		 */
+		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 1) && (RxData[0] != 0x7F) && (RxData[0] != 0xFF))
 		{
 			/* Valve are working -> Refresh Valve Timer */
-			PSA.Time.ValveAlive_ReceiveMessageTimer = PSA.Time.ValveAlive_SendMessageRefresh;
-			PSA.CAN_2.ReceiveAliveMessage = RxData[0];
+			Alarm_Enable(&PSA.Alarm.AL01_CANbusError);
 		}
 	}
 }
@@ -1682,7 +1686,7 @@ void StartCAN2TxTask(void *argument)
 
 	  if(PSA.CAN_2.State == HAL_OK)
 	  {
-		  if(PSA.CAN_2.TransmitValveMessage)
+		  if((PSA.CAN_2.TransmitValveMessage)||(1))
 		  {
 			  PSA.CAN_2.State = HAL_CAN_AddTxMessage(&hcan2, &TxValveMxHeader, PSA.ValveState, &TxMailbox);
 			  PSA.CAN_2.TransmitValveMessage = 0x00;
@@ -1696,9 +1700,8 @@ void StartCAN2TxTask(void *argument)
 	  }
 	  else if(PSA.CAN_2.State == HAL_ERROR)
 	  {
-		  PSA.CAN_2.Error = hcan2.ErrorCode;
-		  PSA.Alarm.AL01_CANbusError.isTriggered = 0x01;
-		  PSA.Alarm.State |= 0x0000000000000001U;
+		  MX_CAN1_Init();
+		  MX_CAN2_Init();
 	  }
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
@@ -1960,27 +1963,29 @@ void StartAlarmTask(void *argument)
   TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
+	  if(!PSA.Alarm.AL01_CANbusError.Timer)
+		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure, (0));
 
 	  if(PSA.Alarm.AL02_LowAirPressure.isTriggered)
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
 			  	  	  	  	  (PSA.B1_IncomingAirPressure.Value < PSA.B1_IncomingAirPressure.LowerThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
-		 			  	  	  (PSA.B1_IncomingAirPressure.Value > PSA.B1_IncomingAirPressure.UpperThreshold));
+		 			  	  	  (PSA.B1_IncomingAirPressure.Value < PSA.B1_IncomingAirPressure.UpperThreshold));
 
 	  if(PSA.Alarm.AL05_LowProcessTankPressure.isTriggered)
 		  Alarm_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
 			  	  	  	  	  (PSA.B3_ProcessTankPressure.Value < PSA.B3_ProcessTankPressure.LowerThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
-		  			  	  	  (PSA.B3_ProcessTankPressure.Value > PSA.B3_ProcessTankPressure.UpperThreshold));
+		  			  	  	  (PSA.B3_ProcessTankPressure.Value < PSA.B3_ProcessTankPressure.UpperThreshold));
 
 	  if(PSA.Alarm.AL16_HighOut2Pressure.isTriggered)
 		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
 			  	  	  	  	  (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.UpperThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
-		  			  	  	  (PSA.B4_OutputPressure_2.Value < PSA.B4_OutputPressure_2.LowerThreshold));
+		  			  	  	  (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.LowerThreshold));
 
 
 
