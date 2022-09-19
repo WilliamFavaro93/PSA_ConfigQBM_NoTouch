@@ -53,6 +53,7 @@ typedef struct
   */
 typedef struct
 {
+	uint8_t SDisPresent;
 	uint8_t State;								/**< State of the driver 			*/
 	uint8_t OpenFile_ID; 						/**< ID of the open file			*/
 	FIL OpenFIL; 								/**< FIL structure of the open file */

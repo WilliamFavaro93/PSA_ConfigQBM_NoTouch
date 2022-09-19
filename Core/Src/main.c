@@ -291,7 +291,7 @@ int main(void)
   MX_CAN2_Init();
   MX_SPI2_Init();
   MX_ADC1_Init();
-//  MX_IWDG_Init();
+  MX_IWDG_Init();
   MX_TIM2_Init();
   MX_I2C2_Init();
   MX_USART6_UART_Init();
@@ -1357,6 +1357,14 @@ void StartDefaultTask(void *argument)
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
+//	  	 fatman.SDisPresent = BSP_PlatformIsDetected();
+//	  	 fatman.SDisPresent = BSP_SD_IsDetected();
+//	  fatman.SDisPresent = BSP_SD_GetCardState();
+//	  	  f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+//	  	 fatman.SDisPresent = BSP_PlatformIsDetected();
+//	  	fatman.SDisPresent = HAL_SD_InitCard(&hsd);
+	  	fatman.SDisPresent = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_2);
+//	  	 f_mount(NULL, (TCHAR const*)SDPath, 0);
 		 vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END 5 */
@@ -1755,41 +1763,24 @@ void StartSDTask(void *argument)
   /* USER CODE BEGIN StartSDTask */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
 
-//		uint8_t FileName1[]="FILE/GG1.TXT";
-//		uint8_t FileName2[]="FILE/GG2.TXT";
-//		uint8_t wtext1[]="GG1";
-//		uint8_t wtext2[]="\r\ndioboia Diobestia\r\n";
-//		uint32_t byteswritten;
-		/* Create a directory */
-//		f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
-//		f_mkdir("FILE");
-//		f_mount(NULL, (TCHAR const*)SDPath, 0);
+	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
   /* Infinite loop */
   for(;;)
   {
-	  /* Write the file every 5 seconds and toggle the LED if it does*/
+	  vTaskPrioritySet(SDTaskHandle, osPriorityNormal);
 //	  f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
-//	  f_open(&SDFile, (TCHAR const*)FileName1, FA_WRITE);
-//	  f_write(&SDFile, wtext1, sizeof(wtext1), (void *)&byteswritten);
-//	  f_close(&SDFile);
+	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+		memcpy(&fatman.Directory[1].DirectoryName, "TEST0", sizeof("FIGA"));
+		memcpy(&fatman.Directory[1].FilePath, "TEST0/TEST0.TXT", sizeof("TEST0/TEST0.TXT"));
+		fatman_init(1);
+		memcpy(&fatman.Buffer, "Odio tutti\n", sizeof("Odio tutti\n"));
+		fatman.Buffer_size = strlen("Odio tutti\n");
+		fatman_write(1);
+	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
 //	  f_mount(NULL, (TCHAR const*)SDPath, 0);
-	  /* If the Red LED toggle we are writing */
-//	  if(byteswritten){
-//		  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-//	  }
+	  vTaskPrioritySet(SDTaskHandle, osPriorityLow);
 
-	  /* Write the file every 5 seconds and toggle the LED if it does*/
-//	  f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
-//	  f_open(&SDFile, (TCHAR const*)FileName2, FA_WRITE);
-//	  f_write(&SDFile, wtext1, sizeof(wtext1), (void *)&byteswritten);
-//	  f_close(&SDFile);
-//	  f_mount(NULL, (TCHAR const*)SDPath, 0);
-	  /* If the Red LED toggle we are writing */
-//	  if(byteswritten){
-//		  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-//	  }
-
-	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
+	  vTaskDelayUntil(&TaskDelayTimer, 10 * deciseconds);
   }
   /* USER CODE END StartSDTask */
 }
@@ -1956,9 +1947,11 @@ void StartCAN1RxTxTask(void *argument)
 void StartAlarmTask(void *argument)
 {
   /* USER CODE BEGIN StartAlarmTask */
+	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 1);
 	Alarm_Init(&PSA.Alarm.AL02_LowAirPressure, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
+	Alarm_Init(&PSA.Alarm.MissingSDCard, 5, 1);
   /* Infinite loop */
   TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
@@ -1987,6 +1980,7 @@ void StartAlarmTask(void *argument)
 		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
 		  			  	  	  (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.LowerThreshold));
 
+	  Alarm_CheckCondition(&PSA.Alarm.MissingSDCard, hsd.ErrorCode == 4);
 
 
 	  vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
