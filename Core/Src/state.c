@@ -24,7 +24,7 @@ extern PSAStruct PSA;
 
 void State_DebugInit()
 {
-#if DEBUG
+#if (DEBUG)
 	PSA.Time.Adsorption_1 = 27;
 	PSA.Time.Adsorption_2 = 27;
 	PSA.Time.Compensation_0 = 1;

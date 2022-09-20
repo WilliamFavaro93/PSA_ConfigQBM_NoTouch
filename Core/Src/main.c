@@ -86,7 +86,7 @@ osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for StateTask */
 osThreadId_t StateTaskHandle;
@@ -1157,7 +1157,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOJ_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_5|GPIO_PIN_4, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(LED_blue_GPIO_Port, LED_blue_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_6, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_4, GPIO_PIN_RESET);
@@ -1168,12 +1174,26 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOH, GPIO_PIN_7|SPI_CS_Pin, GPIO_PIN_RESET);
 
+  /*Configure GPIO pins : PD5 PD4 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5|GPIO_PIN_4;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
   /*Configure GPIO pin : LED_blue_Pin */
   GPIO_InitStruct.Pin = LED_blue_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_blue_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PG6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PG2 */
   GPIO_InitStruct.Pin = GPIO_PIN_2;
@@ -1326,14 +1346,14 @@ void StartDefaultTask(void *argument)
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
-//	  	 fatman.SDisPresent = BSP_PlatformIsDetected();
-//	  	 fatman.SDisPresent = BSP_SD_IsDetected();
-//	  fatman.SDisPresent = BSP_SD_GetCardState();
-//	  	  f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
-//	  	 fatman.SDisPresent = BSP_PlatformIsDetected();
-//	  	fatman.SDisPresent = HAL_SD_InitCard(&hsd);
-//	  	fatman.SDisPresent = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_2);
-//	  	 f_mount(NULL, (TCHAR const*)SDPath, 0);
+//	  	  if(1)
+//	  		  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_4);
+//#if DEBUG
+//	  	  else
+//#endif
+//	  	  if(1)
+//	  		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_5);
+
 		 vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END 5 */
@@ -1404,7 +1424,9 @@ void StartOutTask(void *argument)
 			  PSA.Out2.Working = 0;
 			  PSA.Command.EnableOut1_DisableOut2 = 0;
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  if(PSA.Command.EnableOut2_DisableOut1)
 		  {
 			  PSA.Out2.Enable = 1;
@@ -1413,19 +1435,25 @@ void StartOutTask(void *argument)
 			  PSA.Out1.Working = 0;
 			  PSA.Command.EnableOut2_DisableOut1 = 0;
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  if(PSA.Command.EnableOut1_EnableOut2)
 		  {
 			  PSA.Out2.Enable = 1;
 			  PSA.Out1.Enable = 1;
 			  PSA.Command.EnableOut1_EnableOut2 = 0;
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  if(PSA.Command.SetPriorityOut1)
 		  {
 			  PSA.OUTPriority = 1;
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  if(PSA.Command.SetPriorityOut2)
 		  {
 			  PSA.OUTPriority = 2;
@@ -1455,28 +1483,38 @@ void StartOutTask(void *argument)
 				  PSA.Out2.Ready = 1;
 			  }
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  if ((PSA.Mode.Run) && ((PSA.Out1.Enable) && (!PSA.Out2.Enable)) && ((!PSA.Out1.Ready) && (!PSA.Out2.Ready)))
 		  {
 			  PSA.Out1.Ready = 1;
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  if ((PSA.Mode.Run) && ((!PSA.Out1.Enable) && (PSA.Out2.Enable)) && ((!PSA.Out1.Ready) && (!PSA.Out2.Ready)))
 		  {
 			  PSA.Out2.Ready = 1;
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  /*** OUT-WORKING CONDICTION ***/
 		  if((PSA.Mode.Run) && (PSA.Out1.Ready) && (PSA.KE1_OxygenSensor_1.Value < PSA.KE1_OxygenSensor_1.LowerThreshold))
 		  {
 			  PSA.Out1.Working = 1;
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  if((PSA.Mode.Run) && (PSA.Out2.Ready) && (PSA.KE2_OxygenSensor_2.Value < PSA.KE2_OxygenSensor_2.LowerThreshold))
 		  {/* If KE < SO2-1 -> OUT1 open*/
 			  PSA.Out2.Working = 1;
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  /*** OUT-SWAPPING CONDICTION ***/
 		  if((PSA.Mode.Run) && (PSA.Out1.Working) && (PSA.B2_OutputPressure_1.Value > PSA.B2_OutputPressure_1.UpperThreshold) && (PSA.KE2_OxygenSensor_2.LowerThreshold && PSA.Out2.Enable && !PSA.Alarm.AL16_HighOut2Pressure.isTriggered))
 		  {/* (Run + OUT_1 working) + B2 > SB2H + SO2-2!=OFF -> OUT1=OFF + OUT2 = Ready + AL*/
@@ -1484,20 +1522,25 @@ void StartOutTask(void *argument)
 			  PSA.Out1.Working = 0;
 			  PSA.Out2.Ready = 1;
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  if((PSA.Mode.Run) && (PSA.Out2.Working) && (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.UpperThreshold) && (PSA.KE1_OxygenSensor_1.LowerThreshold && PSA.Out1.Enable))
 		  {/* (Run + OUT_2 working) + B4 > SB4H + SO2-1=OFF -> OUT1=Ready + OUT2=OFF + AL */
 			  PSA.Out1.Ready = 1;
 			  PSA.Out2.Ready = 0;
 			  PSA.Out2.Working = 0;
 		  }
-//	  }
-
+#if !DEBUG
+	  else
+#endif
 		  if(/*PSA.OUT_1*/(PSA.Mode.Standby) && (PSA.Out1.Ready))
 		  {
 			  PSA.Out1.Working = 0;
 		  }
-
+#if !DEBUG
+	  else
+#endif
 		  if((PSA.Mode.Standby) && (PSA.Out2.Ready))
 		  {
 			  PSA.Out2.Working = 0;
@@ -1529,36 +1572,45 @@ void StartModeTask(void *argument)
 		  PSA.Mode.Run = 0x01;
 //		  PSA.Mode.Ready = 0x01;
 	  }
-
-
+#if !DEBUG
+	  else
+#endif
 	  /* Run + BlockingAlarm -> Standby */
 	  if(((PSA.Mode.Run) && (PSA.Out1.Ready||PSA.Out2.Ready)) && (PSA.Alarm.AL11_External.isTriggered||PSA.Alarm.AL16_HighOut2Pressure.isTriggered||PSA.Alarm.AL17_HighDewpoint.isTriggered))
 	  {
 		  PSA.Mode.Run = 0x00;
 		  PSA.Mode.Standby = 0x01;
 	  }
-
+#if !DEBUG
+	  else
+#endif
 	  /* Run + OUT1 -> Standby */
 	  if((PSA.Mode.Run && PSA.Out1.Working) && ((PSA.B2_OutputPressure_1.Value > PSA.B2_OutputPressure_1.UpperThreshold) && (!PSA.KE2_OxygenSensor_2.LowerThreshold || !PSA.Out2.Enable || PSA.Alarm.AL16_HighOut2Pressure.isTriggered)))
 	  {/* Run + OUT1 + B2 > SB2H -> Standby */
 		  PSA.Mode.Run = 0x00;
 		  PSA.Mode.Standby = 0x01;
 	  }
-
+#if !DEBUG
+	  else
+#endif
 	  /* Run + OUT2 -> Standby */
 	  if(((PSA.Mode.Run && PSA.Out2.Working)) && ((PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.UpperThreshold) && (!PSA.KE1_OxygenSensor_1.LowerThreshold || !PSA.Out1.Enable)))
 	  {/* Run + OUT2 + B4 > SB4H -> Standby */
 		  PSA.Mode.Run = 0x00;
 		  PSA.Mode.Standby = 0x01;
 	  }
-
+#if !DEBUG
+	  else
+#endif
 	  /* Standby + OUT1 -> Run */
 	  if((!PSA.State && PSA.Out1.Ready) && (PSA.B2_OutputPressure_1.Value < PSA.B2_OutputPressure_1.LowerThreshold))
 	  {/* Standby & B2 < SB2L & No Alarm -> Run*/
 		  PSA.Mode.Run = 0x01;
 		  PSA.Mode.Standby = 0x00;
 	  }
-
+#if !DEBUG
+	  else
+#endif
 	  /* Standby + OUT2 -> Run */
 	  if((!PSA.State && PSA.Out2.Ready) && (PSA.B4_OutputPressure_2.Value < PSA.B4_OutputPressure_2.LowerThreshold))
 	  {/* Standby & B2 > SB2L & No Alarm -> Run*/
@@ -1910,7 +1962,7 @@ void StartCAN1RxTxTask(void *argument)
 				  PSA.CANSPI.State = CANSPI_Transmit(&rxMessage);
 			  }
 		  }
-		  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
+		  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
 	  }
   /* USER CODE END StartCAN1RxTxTask */
 }
@@ -1929,7 +1981,7 @@ void StartAlarmTask(void *argument)
 	Alarm_Init(&PSA.Alarm.AL02_LowAirPressure, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
-	Alarm_Init(&PSA.Alarm.MissingSDCard, 5, 1);
+	Alarm_Init(&PSA.Alarm.MissingSDCard, 1, 1);
   /* Infinite loop */
   TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
