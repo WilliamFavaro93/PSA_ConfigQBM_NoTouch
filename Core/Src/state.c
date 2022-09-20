@@ -22,9 +22,10 @@
 //uint8_t charState[2]; /* Send the state by UART communication during DEBUG */
 extern PSAStruct PSA;
 
-#if DEBUG
+
 void State_DebugInit()
 {
+#if DEBUG
 	PSA.Time.Adsorption_1 = 27;
 	PSA.Time.Adsorption_2 = 27;
 	PSA.Time.Compensation_0 = 1;
@@ -32,8 +33,8 @@ void State_DebugInit()
 	PSA.Time.Compensation_2 = 1;
 	PSA.Time.PreStandby_1 = 5;
 	PSA.Time.PreStandby_2 = 5;
-}
 #endif /* DEBUG */
+}
 
 void State_OutValve()
 {
@@ -104,11 +105,10 @@ void State_Standby()
 	PSA.Time.NextStateTimer = 0; /* ds */
 }
 
-#define STATE_COMPENSATION2
 
-#ifdef STATE_COMPENSATION2
-#ifdef STATE_COMPENSATION0
-//if((define STATE_COMPENSATION2) && (define STATE_COMPENSATION0))
+
+
+
 int State_NextState(int n)
 {
 	switch(n)
@@ -152,83 +152,3 @@ int State_NextState(int n)
 	}
 	return 0;
 }
-#endif
-#endif
-
-#ifdef STATE_COMPENSATION2
-#ifndef STATE_COMPENSATION0
-//if((define STATE_COMPENSATION2) && !(define STATE_COMPENSATION0))
-int State_NextState(int n)
-{
-	switch(n)
-	{
-	/* STANDBY */
-	case -2:
-		State_PreStandby1();
-		return -1;
-	case -1:
-		State_PreStandby2();
-		return 0;
-	case 0:
-		State_Standby();
-		return 0;
-
-	/* ADSORPTION_CYCLE */
-	case 1:
-		State_Adsorption1();
-		return 2;
-	case 2:
-		State_Compensation1();
-		return 3;
-	case 3:
-		State_Compensation2();
-		return 4;
-	case 4:
-		State_Adsorption2();
-		return 5;
-	case 5:
-		State_Compensation1();
-		return 6;
-	case 6:
-		State_Compensation2();
-		return 1;
-	}
-	return 0;
-}
-#endif
-#endif
-
-#ifndef STATE_COMPENSATION2
-//if(!(define STATE_COMPENSATION2))
-int State_NextState(int n)
-{
-	switch(n)
-	{
-	/* STANDBY */
-	case -2:
-		State_PreStandby1();
-		return -1;
-	case -1:
-		State_PreStandby2();
-		return 0;
-	case 0:
-		State_Standby();
-		return 0;
-
-	/* ADSORPTION_CYCLE */
-	case 1:
-		State_Adsorption1();
-		return 2;
-	case 2:
-		State_Compensation2();
-		return 3;
-	case 3:
-		State_Adsorption2();
-		return 4;
-	case 4:
-		State_Compensation2();
-		return 1;
-	}
-	return 0;
-}
-#endif

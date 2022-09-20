@@ -34,6 +34,7 @@
 #include "state.h"
 #include "timecounter.h"
 #include "alarm.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -291,7 +292,7 @@ int main(void)
   MX_CAN2_Init();
   MX_SPI2_Init();
   MX_ADC1_Init();
-  MX_IWDG_Init();
+//  MX_IWDG_Init();
   MX_TIM2_Init();
   MX_I2C2_Init();
   MX_USART6_UART_Init();
@@ -303,8 +304,6 @@ int main(void)
 //  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
 //  while(1){}
 
-  PSA.B1_IncomingAirPressure.Value = 710;
-  PSA.Mode.Ready = 1;
   AssignDefaultValue();
 
   HAL_CAN_Start(&hcan2);
@@ -1264,7 +1263,8 @@ static void MX_GPIO_Init(void)
 
 int __io_putchar(int character)
 {
-	HAL_UART_Transmit(&huart6, (uint8_t*)&character, 1, 0xFFFFFFFF);
+//	HAL_UART_Transmit(&huart6, (uint8_t*)&character, 1, 0xFFFFFFFF);
+	ITM_SendChar(character);
 	return character;
 }
 
@@ -1289,8 +1289,10 @@ void AssignDefaultValue()
 {
 	State_DebugInit(); /* Inizializza i valori dei timer per il debug */
 
+	PSA.Mode.Ready = 0x01;								/* Altrimenti non parte */
+
 	PSA.B1_IncomingAirPressure.LowerThreshold = 500; 	//SB1L
-	PSA.B1_IncomingAirPressure.Value = 600;
+	PSA.B1_IncomingAirPressure.Value = 710;				/* Altrimenti non parte */
 	PSA.B1_IncomingAirPressure.UpperThreshold = 700; 	//SB1H
 
 	PSA.B3_ProcessTankPressure.LowerThreshold = 500; 	//SB3L
@@ -1363,7 +1365,7 @@ void StartDefaultTask(void *argument)
 //	  	  f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
 //	  	 fatman.SDisPresent = BSP_PlatformIsDetected();
 //	  	fatman.SDisPresent = HAL_SD_InitCard(&hsd);
-	  	fatman.SDisPresent = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_2);
+//	  	fatman.SDisPresent = HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_2);
 //	  	 f_mount(NULL, (TCHAR const*)SDPath, 0);
 		 vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
@@ -1558,7 +1560,15 @@ void StartModeTask(void *argument)
 	  if((PSA.Mode.Ready && !PSA.Mode.Run && !PSA.Mode.Standby) && ((PSA.B1_IncomingAirPressure.Value > PSA.B1_IncomingAirPressure.UpperThreshold) && ((PSA.KE1_OxygenSensor_1.LowerThreshold && PSA.Out1.Enable)||(PSA.KE2_OxygenSensor_2.LowerThreshold && PSA.Out2.Enable))))
 	  {/* (Ready + NotRun + NotStb) && (B1 > SB1H) && ((SO2-1 != OFF)||(SO2-2 != OFF)): starting condition */
 		  PSA.Mode.Run = 0x01;
-		  PSA.Mode.Ready = 0x01;
+//		  PSA.Mode.Ready = 0x01;
+	  }
+
+
+	  /* Run + BlockingAlarm -> Standby */
+	  if(((PSA.Mode.Run) && (PSA.Out1.Ready||PSA.Out2.Ready)) && (PSA.Alarm.AL11_External.isTriggered||PSA.Alarm.AL16_HighOut2Pressure.isTriggered||PSA.Alarm.AL17_HighDewpoint.isTriggered))
+	  {
+		  PSA.Mode.Run = 0x00;
+		  PSA.Mode.Standby = 0x01;
 	  }
 
 	  /* Run + OUT1 -> Standby */
@@ -1767,18 +1777,18 @@ void StartSDTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  vTaskPrioritySet(SDTaskHandle, osPriorityNormal);
-//	  f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
-	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-		memcpy(&fatman.Directory[1].DirectoryName, "TEST0", sizeof("FIGA"));
-		memcpy(&fatman.Directory[1].FilePath, "TEST0/TEST0.TXT", sizeof("TEST0/TEST0.TXT"));
-		fatman_init(1);
-		memcpy(&fatman.Buffer, "Odio tutti\n", sizeof("Odio tutti\n"));
-		fatman.Buffer_size = strlen("Odio tutti\n");
-		fatman_write(1);
-	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-//	  f_mount(NULL, (TCHAR const*)SDPath, 0);
-	  vTaskPrioritySet(SDTaskHandle, osPriorityLow);
+//	  vTaskPrioritySet(SDTaskHandle, osPriorityNormal);
+////	  f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+//	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+//		memcpy(&fatman.Directory[1].DirectoryName, "TEST0", sizeof("FIGA"));
+//		memcpy(&fatman.Directory[1].FilePath, "TEST0/TEST0.TXT", sizeof("TEST0/TEST0.TXT"));
+//		fatman_init(1);
+//		memcpy(&fatman.Buffer, "Odio tutti\n", sizeof("Odio tutti\n"));
+//		fatman.Buffer_size = strlen("Odio tutti\n");
+//		fatman_write(1);
+//	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+////	  f_mount(NULL, (TCHAR const*)SDPath, 0);
+//	  vTaskPrioritySet(SDTaskHandle, osPriorityLow);
 
 	  vTaskDelayUntil(&TaskDelayTimer, 10 * deciseconds);
   }
@@ -1961,26 +1971,26 @@ void StartAlarmTask(void *argument)
 
 	  if(PSA.Alarm.AL02_LowAirPressure.isTriggered)
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
-			  	  	  	  	  (PSA.B1_IncomingAirPressure.Value < PSA.B1_IncomingAirPressure.LowerThreshold));
+			  	  	  	  	  (PSA.B1_IncomingAirPressure.Value > PSA.B1_IncomingAirPressure.LowerThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
-		 			  	  	  (PSA.B1_IncomingAirPressure.Value < PSA.B1_IncomingAirPressure.UpperThreshold));
+		 			  	  	  (PSA.B1_IncomingAirPressure.Value > PSA.B1_IncomingAirPressure.UpperThreshold));
 
 	  if(PSA.Alarm.AL05_LowProcessTankPressure.isTriggered)
 		  Alarm_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
-			  	  	  	  	  (PSA.B3_ProcessTankPressure.Value < PSA.B3_ProcessTankPressure.LowerThreshold));
+			  	  	  	  	  (PSA.B3_ProcessTankPressure.Value > PSA.B3_ProcessTankPressure.LowerThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
-		  			  	  	  (PSA.B3_ProcessTankPressure.Value < PSA.B3_ProcessTankPressure.UpperThreshold));
+		  			  	  	  (PSA.B3_ProcessTankPressure.Value > PSA.B3_ProcessTankPressure.UpperThreshold));
 
 	  if(PSA.Alarm.AL16_HighOut2Pressure.isTriggered)
 		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
-			  	  	  	  	  (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.UpperThreshold));
+			  	  	  	  	  (PSA.B4_OutputPressure_2.Value < PSA.B4_OutputPressure_2.UpperThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
-		  			  	  	  (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.LowerThreshold));
+		  			  	  	  (PSA.B4_OutputPressure_2.Value < PSA.B4_OutputPressure_2.LowerThreshold));
 
-	  Alarm_CheckCondition(&PSA.Alarm.MissingSDCard, hsd.ErrorCode == 4);
+	  Alarm_CheckCondition(&PSA.Alarm.MissingSDCard, (hsd.ErrorCode != 4));
 
 
 	  vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);

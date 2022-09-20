@@ -19,8 +19,11 @@
 #include "fatman.h"
 
 /* Defines -------------------------------------------------------------------*/
-#define FATMAN_AUTEST 1
-
+#if DEBUG
+	#define FATMAN_AUTEST 1
+#else
+	#define FATMAN_AUTEST 0
+#endif /* DEBUG */
 /* Variables -----------------------------------------------------------------*/
 ManageSD fatman;
 
