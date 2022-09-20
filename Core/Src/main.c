@@ -65,8 +65,6 @@ DSI_HandleTypeDef hdsi;
 I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
 
-IWDG_HandleTypeDef hiwdg;
-
 LTDC_HandleTypeDef hltdc;
 
 QSPI_HandleTypeDef hqspi;
@@ -95,35 +93,35 @@ osThreadId_t StateTaskHandle;
 const osThreadAttr_t StateTask_attributes = {
   .name = "StateTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityLow6,
 };
 /* Definitions for OutTask */
 osThreadId_t OutTaskHandle;
 const osThreadAttr_t OutTask_attributes = {
   .name = "OutTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityLow6,
 };
 /* Definitions for ModeTask */
 osThreadId_t ModeTaskHandle;
 const osThreadAttr_t ModeTask_attributes = {
   .name = "ModeTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityLow6,
 };
 /* Definitions for TimeTask */
 osThreadId_t TimeTaskHandle;
 const osThreadAttr_t TimeTask_attributes = {
   .name = "TimeTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow1,
+  .priority = (osPriority_t) osPriorityLow7,
 };
 /* Definitions for CAN2TxTask */
 osThreadId_t CAN2TxTaskHandle;
 const osThreadAttr_t CAN2TxTask_attributes = {
   .name = "CAN2TxTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityLow5,
 };
 /* Definitions for ErrorManager */
 osThreadId_t ErrorManagerHandle;
@@ -137,21 +135,21 @@ osThreadId_t SDTaskHandle;
 const osThreadAttr_t SDTask_attributes = {
   .name = "SDTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityLow4,
 };
 /* Definitions for CAN1RxTxTask */
 osThreadId_t CAN1RxTxTaskHandle;
 const osThreadAttr_t CAN1RxTxTask_attributes = {
   .name = "CAN1RxTxTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityLow3,
 };
 /* Definitions for AlarmTask */
 osThreadId_t AlarmTaskHandle;
 const osThreadAttr_t AlarmTask_attributes = {
   .name = "AlarmTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityLow6,
 };
 /* Definitions for FaultTask */
 osThreadId_t FaultTaskHandle;
@@ -219,7 +217,6 @@ static void MX_CAN1_Init(void);
 static void MX_CAN2_Init(void);
 static void MX_SPI2_Init(void);
 static void MX_ADC1_Init(void);
-static void MX_IWDG_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_I2C2_Init(void);
 static void MX_USART6_UART_Init(void);
@@ -292,7 +289,6 @@ int main(void)
   MX_CAN2_Init();
   MX_SPI2_Init();
   MX_ADC1_Init();
-//  MX_IWDG_Init();
   MX_TIM2_Init();
   MX_I2C2_Init();
   MX_USART6_UART_Init();
@@ -412,9 +408,8 @@ void SystemClock_Config(void)
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-  RCC_OscInitStruct.LSIState = RCC_LSI_ON;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = 4;
@@ -829,34 +824,6 @@ static void MX_I2C2_Init(void)
   /* USER CODE BEGIN I2C2_Init 2 */
 
   /* USER CODE END I2C2_Init 2 */
-
-}
-
-/**
-  * @brief IWDG Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_IWDG_Init(void)
-{
-
-  /* USER CODE BEGIN IWDG_Init 0 */
-
-  /* USER CODE END IWDG_Init 0 */
-
-  /* USER CODE BEGIN IWDG_Init 1 */
-
-  /* USER CODE END IWDG_Init 1 */
-  hiwdg.Instance = IWDG;
-  hiwdg.Init.Prescaler = IWDG_PRESCALER_32;
-  hiwdg.Init.Reload = 1999;
-  if (HAL_IWDG_Init(&hiwdg) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN IWDG_Init 2 */
-
-  /* USER CODE END IWDG_Init 2 */
 
 }
 
@@ -1650,7 +1617,6 @@ void StartTimeTask(void *argument)
 		  PSA.Alarm.AL16_HighOut2Pressure.Timer--;
 	  /*** WATCHDOG ***/
 	  /* If there's no problem, it refresh before reaching 0 */
-	  HAL_IWDG_Refresh(&hiwdg);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartTimeTask */
@@ -1773,24 +1739,26 @@ void StartSDTask(void *argument)
   /* USER CODE BEGIN StartSDTask */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
 
-	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+//	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
   /* Infinite loop */
   for(;;)
   {
 //	  vTaskPrioritySet(SDTaskHandle, osPriorityNormal);
-////	  f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
-//	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-//		memcpy(&fatman.Directory[1].DirectoryName, "TEST0", sizeof("FIGA"));
-//		memcpy(&fatman.Directory[1].FilePath, "TEST0/TEST0.TXT", sizeof("TEST0/TEST0.TXT"));
-//		fatman_init(1);
-//		memcpy(&fatman.Buffer, "Odio tutti\n", sizeof("Odio tutti\n"));
-//		fatman.Buffer_size = strlen("Odio tutti\n");
+	  f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+		memcpy(&fatman.Directory[1].DirectoryName, "TEST0", sizeof("FIGA"));
+		memcpy(&fatman.Directory[1].FilePath, "TEST0/TEST0.TXT", sizeof("TEST0/TEST0.TXT"));
+		fatman_init(1);
+		memcpy(&fatman.Buffer, "Odio tutti\n", sizeof("Odio tutti\n"));
+		fatman.Buffer_size = strlen("Odio tutti\n");
+//		vTaskPrioritySet(SDTaskHandle, osPriorityNormal);
 //		fatman_write(1);
+//		vTaskPrioritySet(SDTaskHandle, osPriorityLow);
 //	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-////	  f_mount(NULL, (TCHAR const*)SDPath, 0);
+	  f_mount(NULL, (TCHAR const*)SDPath, 0);
 //	  vTaskPrioritySet(SDTaskHandle, osPriorityLow);
 
-	  vTaskDelayUntil(&TaskDelayTimer, 10 * deciseconds);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartSDTask */
 }

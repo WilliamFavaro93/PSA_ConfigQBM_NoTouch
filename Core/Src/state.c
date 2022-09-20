@@ -19,7 +19,6 @@
 
 /* CYCLE: Adsorption_1 -> Compensation_1 -> Compensation_2 -> Adsorption_2 -> Compensation_1 -> Compensation_2 -> */
 
-//uint8_t charState[2]; /* Send the state by UART communication during DEBUG */
 extern PSAStruct PSA;
 
 
