@@ -93,35 +93,35 @@ osThreadId_t StateTaskHandle;
 const osThreadAttr_t StateTask_attributes = {
   .name = "StateTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow6,
+  .priority = (osPriority_t) osPriorityNormal3,
 };
 /* Definitions for OutTask */
 osThreadId_t OutTaskHandle;
 const osThreadAttr_t OutTask_attributes = {
   .name = "OutTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow6,
+  .priority = (osPriority_t) osPriorityNormal4,
 };
 /* Definitions for ModeTask */
 osThreadId_t ModeTaskHandle;
 const osThreadAttr_t ModeTask_attributes = {
   .name = "ModeTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow6,
+  .priority = (osPriority_t) osPriorityNormal5,
 };
 /* Definitions for TimeTask */
 osThreadId_t TimeTaskHandle;
 const osThreadAttr_t TimeTask_attributes = {
   .name = "TimeTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow7,
+  .priority = (osPriority_t) osPriorityNormal7,
 };
 /* Definitions for CAN2TxTask */
 osThreadId_t CAN2TxTaskHandle;
 const osThreadAttr_t CAN2TxTask_attributes = {
   .name = "CAN2TxTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow5,
+  .priority = (osPriority_t) osPriorityNormal2,
 };
 /* Definitions for ErrorManager */
 osThreadId_t ErrorManagerHandle;
@@ -135,21 +135,21 @@ osThreadId_t SDTaskHandle;
 const osThreadAttr_t SDTask_attributes = {
   .name = "SDTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow4,
+  .priority = (osPriority_t) osPriorityNormal1,
 };
 /* Definitions for CAN1RxTxTask */
 osThreadId_t CAN1RxTxTaskHandle;
 const osThreadAttr_t CAN1RxTxTask_attributes = {
   .name = "CAN1RxTxTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow3,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for AlarmTask */
 osThreadId_t AlarmTaskHandle;
 const osThreadAttr_t AlarmTask_attributes = {
   .name = "AlarmTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow6,
+  .priority = (osPriority_t) osPriorityNormal6,
 };
 /* Definitions for FaultTask */
 osThreadId_t FaultTaskHandle;
