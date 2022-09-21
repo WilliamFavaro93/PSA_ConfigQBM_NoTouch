@@ -26,7 +26,8 @@
 /* Time structure ------------------------------------------------------------*/
 typedef struct
 {
-	uint16_t NextStateTimer;
+	uint16_t StateTimer;
+
 	uint16_t Adsorption_1;
 	uint16_t Adsorption_2;
 	uint16_t Compensation_0;
@@ -229,6 +230,7 @@ typedef struct{
 	uint8_Mode Mode;				/**< the mode structure managed by ModeTask */
 	/* State */
 	int State; 						/**< the number that identified thestate, managed by StateTask */
+	uint8_t StateUpdated;
 //	uint16_t NextState;
 	uint16_t ReceiveValveMessage;
 	/* OUT */
@@ -273,9 +275,11 @@ typedef struct{
 
 } PSAStruct;
 
+void PSA_UpdateState();
 void PSA_Relay_RunningAndOutNotUsed();
 void PSA_Relay_RunningAndOutUsed();
 void PSA_Relay_GoingStandby();
 void PSA_Relay_Standby();
+
 
 #endif /* PSA_H_ */

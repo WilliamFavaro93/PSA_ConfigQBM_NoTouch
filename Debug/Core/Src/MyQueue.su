@@ -1,8 +1,0 @@
-myqueue.c:33:6:MyQueue_Init	24	static
-myqueue.c:43:6:MyQueue_InsertElement	24	static
-myqueue.c:62:10:MyQueue_GetAverageValue	8	static
-myqueue.c:70:10:MyQueue_GetLastValue	8	static
-myqueue.c:82:1:MyQueue_RemoveLastInsertElement	16	static
-myqueue.c:92:6:MyQueue_test_InsertBigNumberOfSameValueElements	88	static
-myqueue.c:108:6:MyQueue_test_InsertIncresingValueElements	88	static
-myqueue.c:121:6:MyQueue_test_all	8	static

@@ -1,4 +1,0 @@
-psa.c:22:6:PSA_Relay_RunningAndOutNotUsed	4	static
-psa.c:30:6:PSA_Relay_RunningAndOutUsed	4	static
-psa.c:38:6:PSA_Relay_GoingStandby	4	static
-psa.c:46:6:PSA_Relay_Standby	4	static

@@ -1,2 +1,0 @@
-timecounter.c:11:6:TimeCounter_AddDecisecond	16	static
-timecounter.c:37:10:TimeCounter_GetTotalHours	16	static

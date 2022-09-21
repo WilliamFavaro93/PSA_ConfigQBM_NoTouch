@@ -32,10 +32,7 @@ extern "C" {
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include <psa.h>
-#include <state.h>
-#include <myqueue.h>
-#include <timecounter.h>
+
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/

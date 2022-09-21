@@ -31,7 +31,6 @@
 #include "mcp2515.h"
 #include "myqueue.h"
 #include "psa.h"
-#include "state.h"
 #include "timecounter.h"
 #include "alarm.h"
 #include "stdio.h"
@@ -1274,7 +1273,14 @@ uint16_t Convert_Command_Value(uint8_t * Command, uint8_t Command_Size, uint8_t 
 
 void AssignDefaultValue()
 {
-	State_DebugInit(); /* Inizializza i valori dei timer per il debug */
+	/* Inizializza i valori dei timer per il debug */
+	PSA.Time.Adsorption_1 = 27;
+	PSA.Time.Adsorption_2 = 27;
+	PSA.Time.Compensation_0 = 1;
+	PSA.Time.Compensation_1 = 1;
+	PSA.Time.Compensation_2 = 1;
+	PSA.Time.PreStandby_1 = 5;
+	PSA.Time.PreStandby_2 = 5;
 
 	PSA.Mode.Ready = 0x01;								/* Altrimenti non parte */
 
@@ -1371,29 +1377,62 @@ void StartStateTask(void *argument)
   /* USER CODE BEGIN StartStateTask */
 	/* Main purpose of StateTask is to manage the value of PSA.State. No other tasks can change its value, but they have to ask StateTask to do it for them. */
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
-	int NextState = 0;
   /* Infinite loop */
   for(;;)
   {
 
-	  if(!PSA.Time.NextStateTimer)
+	  if(PSA.Mode.Ready)
 	  {
-		  PSA.State = NextState;
-		  NextState = State_NextState(PSA.State);
-		  PSA.CAN_2.TransmitValveMessage = 0xFF;
+		  PSA.StateUpdated = 0;
+		  if((PSA.Mode.Run) && (PSA.State < 1))
+		  {
+			  PSA.State = 1;
+			  PSA_UpdateState();
+		  }
+
+		  if((PSA.Mode.Standby) && (PSA.State > 0))
+		  {
+			  PSA.State = -2;
+			  PSA_UpdateState();
+		  }
+
+		  if(!PSA.Time.StateTimer)
+		  {
+			  if(PSA.State)
+			  {
+				  PSA.State++;
+			  }
+
+			  if(PSA.State > 8)
+			  {
+				  PSA.State = 1;
+			  }
+
+			  PSA_UpdateState();
+		  }
 	  }
 
-	  /* Check if the mode is changing */
-	  if(PSA.Mode.Standby && (PSA.State > 0))
-	  {/* ModeTask ask to Standby */
-		  PSA.State = -2;
-		  NextState = State_NextState(PSA.State);
-	  }
-	  else if(PSA.Mode.Run && (!PSA.State))
-	  {/* ModeTask ask to Run */
-		  PSA.State = 1;
-		  NextState = State_NextState(PSA.State);
-	  }
+//	  if(!PSA.Time.NextStateTimer))
+//	  {
+//		  if(!PSA.State)
+//			  PSA.State++;
+//		  if(PSA.State > 0)
+//			  PSA.State %= 9;
+//		  PSA_State();
+//		  PSA.CAN_2.TransmitValveMessage = 0xFF;
+//	  }
+//
+//	  /* Check if the mode is changing */
+//	  if(PSA.Mode.Standby && (PSA.State > 0))
+//	  {/* ModeTask ask to Standby */
+//		  PSA.State = -2;
+//		  PSA_State();
+//	  }
+//	  else if(PSA.Mode.Run && (!PSA.State))
+//	  {/* ModeTask ask to Run */
+//		  PSA.State = 1;
+//		  PSA_State();
+//	  }
 
 	  vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
@@ -1634,7 +1673,7 @@ void StartTimeTask(void *argument)
 {
   /* USER CODE BEGIN StartTimeTask */
 	/* Init Refresher */
-	State_DebugInit();
+	PSA_DebugInit();
 	PSA.Time.ValveAlive_ReceiveMessageRefresh = 100;
 	PSA.Time.ValveAlive_SendMessageRefresh = 10;
 	/* Init Timer */
@@ -1654,8 +1693,8 @@ void StartTimeTask(void *argument)
 	  TimeCounter_AddDecisecond(&TotalWorking);
 	  /*** TIMER ***/
 	  /* When a timer reach 0, something happens and it refresh */
-	  if(PSA.Time.NextStateTimer)
-		  PSA.Time.NextStateTimer--;
+	  if(PSA.Time.StateTimer)
+		  PSA.Time.StateTimer--;
 	  if(PSA.Time.ValveAlive_ReceiveMessageTimer)
 		  PSA.Time.ValveAlive_ReceiveMessageTimer--;
 	  if(PSA.Time.ValveAlive_SendMessageTimer)
