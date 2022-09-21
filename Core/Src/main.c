@@ -1706,6 +1706,8 @@ void StartTimeTask(void *argument)
 		  PSA.Alarm.AL05_LowProcessTankPressure.Timer--;
 	  if(PSA.Alarm.AL16_HighOut2Pressure.Timer)
 		  PSA.Alarm.AL16_HighOut2Pressure.Timer--;
+	  if(PSA.Alarm.MissingSDCard.Timer)
+		  PSA.Alarm.MissingSDCard.Timer--;
 	  /*** WATCHDOG ***/
 	  /* If there's no problem, it refresh before reaching 0 */
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
@@ -1761,7 +1763,7 @@ void StartCAN2TxTask(void *argument)
 
 	  if(PSA.CAN_2.State == HAL_OK)
 	  {
-		  if((PSA.CAN_2.TransmitValveMessage)||(1))
+		  if(1)
 		  {
 			  PSA.CAN_2.State = HAL_CAN_AddTxMessage(&hcan2, &TxValveMxHeader, PSA.ValveState, &TxMailbox);
 			  PSA.CAN_2.TransmitValveMessage = 0x00;
@@ -1834,20 +1836,24 @@ void StartSDTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-//	  vTaskPrioritySet(SDTaskHandle, osPriorityNormal);
-	  f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
-	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+	  /**/
+	  if(1)
+	  {
+		  HAL_SD_Init(&hsd);
+	  }
+
+	  if(1)
+	  {
+	  	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+	  	HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
 		memcpy(&fatman.Directory[1].DirectoryName, "TEST0", sizeof("FIGA"));
 		memcpy(&fatman.Directory[1].FilePath, "TEST0/TEST0.TXT", sizeof("TEST0/TEST0.TXT"));
 		fatman_init(1);
 		memcpy(&fatman.Buffer, "Odio tutti\n", sizeof("Odio tutti\n"));
 		fatman.Buffer_size = strlen("Odio tutti\n");
-//		vTaskPrioritySet(SDTaskHandle, osPriorityNormal);
-//		fatman_write(1);
-//		vTaskPrioritySet(SDTaskHandle, osPriorityLow);
-//	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-	  f_mount(NULL, (TCHAR const*)SDPath, 0);
-//	  vTaskPrioritySet(SDTaskHandle, osPriorityLow);
+		fatman_write(1);
+		f_mount(NULL, (TCHAR const*)SDPath, 0);
+	  }
 
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
@@ -2016,11 +2022,11 @@ void StartCAN1RxTxTask(void *argument)
 void StartAlarmTask(void *argument)
 {
   /* USER CODE BEGIN StartAlarmTask */
-	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 1);
+	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 2);
 	Alarm_Init(&PSA.Alarm.AL02_LowAirPressure, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
-	Alarm_Init(&PSA.Alarm.MissingSDCard, 1, 1);
+	Alarm_Init(&PSA.Alarm.MissingSDCard, 2, 2);
   /* Infinite loop */
   TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
@@ -2028,28 +2034,28 @@ void StartAlarmTask(void *argument)
 	  if(!PSA.Alarm.AL01_CANbusError.Timer)
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure, (0));
 
-	  if(PSA.Alarm.AL02_LowAirPressure.isTriggered)
+	  if(!PSA.Alarm.AL02_LowAirPressure.isTriggered)
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
-			  	  	  	  	  (PSA.B1_IncomingAirPressure.Value > PSA.B1_IncomingAirPressure.LowerThreshold));
+			  	  	  	  	  (PSA.B1_IncomingAirPressure.Value < PSA.B1_IncomingAirPressure.LowerThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
-		 			  	  	  (PSA.B1_IncomingAirPressure.Value > PSA.B1_IncomingAirPressure.UpperThreshold));
+		 			  	  	  (PSA.B1_IncomingAirPressure.Value < PSA.B1_IncomingAirPressure.UpperThreshold));
 
-	  if(PSA.Alarm.AL05_LowProcessTankPressure.isTriggered)
+	  if(!PSA.Alarm.AL05_LowProcessTankPressure.isTriggered)
 		  Alarm_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
-			  	  	  	  	  (PSA.B3_ProcessTankPressure.Value > PSA.B3_ProcessTankPressure.LowerThreshold));
+			  	  	  	  	  (PSA.B3_ProcessTankPressure.Value < PSA.B3_ProcessTankPressure.LowerThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
-		  			  	  	  (PSA.B3_ProcessTankPressure.Value > PSA.B3_ProcessTankPressure.UpperThreshold));
+		  			  	  	  (PSA.B3_ProcessTankPressure.Value < PSA.B3_ProcessTankPressure.UpperThreshold));
 
-	  if(PSA.Alarm.AL16_HighOut2Pressure.isTriggered)
+	  if(!PSA.Alarm.AL16_HighOut2Pressure.isTriggered)
 		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
-			  	  	  	  	  (PSA.B4_OutputPressure_2.Value < PSA.B4_OutputPressure_2.UpperThreshold));
+			  	  	  	  	  (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.UpperThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
-		  			  	  	  (PSA.B4_OutputPressure_2.Value < PSA.B4_OutputPressure_2.LowerThreshold));
+		  			  	  	  (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.LowerThreshold));
 
-	  Alarm_CheckCondition(&PSA.Alarm.MissingSDCard, (hsd.ErrorCode != 4));
+	  Alarm_CheckCondition(&PSA.Alarm.MissingSDCard, (hsd.ErrorCode));
 
 
 	  vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);

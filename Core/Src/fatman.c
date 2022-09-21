@@ -39,15 +39,18 @@ ManageSD fatman;
 void fatman_init(uint8_t ID)
 {
 	/* If the file does not exist, create the directory */
-	f_mkdir((TCHAR const*)fatman.Directory[ID].DirectoryName);
+//	if(!fatman.State)
+		fatman.State = f_mkdir((TCHAR const*)fatman.Directory[ID].DirectoryName);
 
 	/* It creates the file */
-	f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[ID].FilePath, FA_CREATE_ALWAYS|FA_WRITE);
+//	if(!fatman.State)
+		fatman.State = f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[ID].FilePath, FA_CREATE_ALWAYS|FA_WRITE);
 
 	/* Save the file and close */
 	memcpy(&fatman.Directory[ID].SaveFIL, &fatman.OpenFIL, sizeof(FIL));
 
-	f_close(&fatman.OpenFIL);
+//	if(!fatman.State)
+		fatman.State = f_close(&fatman.OpenFIL);
 	/* Update Directory State */
 	fatman.Directory[ID].FileIsCreated = 1;
 	fatman.Directory[ID].AlreadyWrittenOnce = 0;
@@ -63,10 +66,13 @@ void fatman_write(uint8_t ID)
 {
 	/* Write the text saved in fm.rwFileBuffer in the file targeted by fm.Directory[ID].FilePath */
 	uint32_t byteswritten;
+
 	memcpy(&fatman.OpenFIL, &fatman.Directory[ID].SaveFIL, sizeof(FIL));
 	fatman.OpenFile_ID = ID;
-	f_write(&fatman.OpenFIL, (void *)&fatman.Buffer, fatman.Buffer_size, (void *)&byteswritten);
-	f_sync(&fatman.OpenFIL);
+//	if(!fatman.State)
+		fatman.State = f_write(&fatman.OpenFIL, (void *)&fatman.Buffer, fatman.Buffer_size, (void *)&byteswritten);
+//	if(!fatman.State)
+		fatman.State = f_sync(&fatman.OpenFIL);
 
 	/* Save the FIL */
 	memcpy(&fatman.Directory[ID].SaveFIL, &fatman.OpenFIL, sizeof(FIL));
@@ -77,7 +83,8 @@ void fatman_write(uint8_t ID)
 	memset(&fatman.Buffer, 0, BUFFER_SIZE);
 
 	/* Close fm.OpenFIL */
-	f_close(&fatman.OpenFIL);
+//	if(!fatman.State)
+		fatman.State = f_close(&fatman.OpenFIL);
 	fatman.OpenFile_ID = 0;
 }
 
@@ -93,7 +100,7 @@ void fatman_read()
 	uint32_t bytesread = 0;
 
 	/* It opens the file, if it exists, in read-only mode */
-	f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[0].FilePath, FA_READ);
+	fatman.State =f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[0].FilePath, FA_READ);
 
 
 	fatman.OpenFile_ID = N_DIRECTORY + 1;
@@ -102,13 +109,13 @@ void fatman_read()
 	fatman.Directory[0].FileIsCreated = 1;
 	fatman.Directory[0].AlreadyWrittenOnce = 0;
 
-	f_read(&fatman.OpenFIL, &fatman.Buffer, BUFFER_SIZE, (void *)&bytesread);
+	fatman.State =f_read(&fatman.OpenFIL, &fatman.Buffer, BUFFER_SIZE, (void *)&bytesread);
 	fatman.Buffer_size = bytesread;
 
 	fatman.Directory[0].AlreadyWrittenOnce = 1;
 
 	/* Close fm.OpenFIL */
-	f_close(&fatman.OpenFIL);
+	fatman.State =f_close(&fatman.OpenFIL);
 	fatman.OpenFile_ID = 0;
 }
 

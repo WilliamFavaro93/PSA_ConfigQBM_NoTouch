@@ -38,7 +38,7 @@
   */
 typedef struct
 {
-	uint8_t State;
+	FRESULT State;
 	char DirectoryName[DIRECTORYNAME_LENGTH];	/**< Directory's Name					*/
 	char FilePath[FILEPATH_LENGTH];				/**< Path of the file					*/
 	FIL SaveFIL;									/**< FIL structure of the file 			*/
