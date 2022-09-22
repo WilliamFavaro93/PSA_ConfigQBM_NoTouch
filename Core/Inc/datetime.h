@@ -56,6 +56,7 @@ void DateTime_Update(DateTime* DateTime, uint16_t year, uint8_t month, uint8_t d
 void DateTime_AddSecond();
 void DateTime_setDateString(char* separator);
 void DateTime_setTimeString(char* separator);
+uint8_t DateTime_ItsaNewDay();
 /* Public Automated Testing Function -----------------------------------------*/
 
 #endif /* INC_DATETIME_H_ */

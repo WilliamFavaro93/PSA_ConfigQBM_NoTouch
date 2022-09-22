@@ -37,18 +37,15 @@ ManageSD fatman;
 void fatman_init(uint8_t ID)
 {
 	/* If the file does not exist, create the directory */
-//	if(!fatman.State)
-		fatman.State = f_mkdir((TCHAR const*)fatman.Directory[ID].DirectoryName);
+	f_mkdir((TCHAR const*)fatman.Directory[ID].DirectoryName);
 
 	/* It creates the file */
-//	if(!fatman.State)
-		fatman.State = f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[ID].FilePath, FA_CREATE_ALWAYS|FA_WRITE);
+	f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[ID].FilePath, FA_CREATE_ALWAYS|FA_WRITE);
 
 	/* Save the file and close */
 	memcpy(&fatman.Directory[ID].SaveFIL, &fatman.OpenFIL, sizeof(FIL));
+	f_close(&fatman.OpenFIL);
 
-//	if(!fatman.State)
-		fatman.State = f_close(&fatman.OpenFIL);
 	/* Update Directory State */
 	fatman.Directory[ID].FileIsCreated = 1;
 	fatman.Directory[ID].AlreadyWrittenOnce = 0;
@@ -67,10 +64,9 @@ void fatman_write(uint8_t ID)
 
 	memcpy(&fatman.OpenFIL, &fatman.Directory[ID].SaveFIL, sizeof(FIL));
 	fatman.OpenFile_ID = ID;
-//	if(!fatman.State)
-		fatman.State = f_write(&fatman.OpenFIL, (void *)&fatman.Buffer, fatman.Buffer_size, (void *)&byteswritten);
-//	if(!fatman.State)
-		fatman.State = f_sync(&fatman.OpenFIL);
+
+	f_write(&fatman.OpenFIL, (void *)&fatman.Buffer[0], fatman.Buffer_size, (void *)&byteswritten);
+	f_sync(&fatman.OpenFIL);
 
 	/* Save the FIL */
 	memcpy(&fatman.Directory[ID].SaveFIL, &fatman.OpenFIL, sizeof(FIL));
@@ -81,8 +77,7 @@ void fatman_write(uint8_t ID)
 	memset(&fatman.Buffer, 0, BUFFER_SIZE);
 
 	/* Close fm.OpenFIL */
-//	if(!fatman.State)
-		fatman.State = f_close(&fatman.OpenFIL);
+	f_close(&fatman.OpenFIL);
 	fatman.OpenFile_ID = 0;
 }
 
@@ -98,7 +93,7 @@ void fatman_read()
 	uint32_t bytesread = 0;
 
 	/* It opens the file, if it exists, in read-only mode */
-	fatman.State =f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[0].FilePath, FA_READ);
+	f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[0].FilePath, FA_READ);
 
 
 	fatman.OpenFile_ID = N_DIRECTORY + 1;
@@ -107,19 +102,41 @@ void fatman_read()
 	fatman.Directory[0].FileIsCreated = 1;
 	fatman.Directory[0].AlreadyWrittenOnce = 0;
 
-	fatman.State =f_read(&fatman.OpenFIL, &fatman.Buffer, BUFFER_SIZE, (void *)&bytesread);
+	f_read(&fatman.OpenFIL, &fatman.Buffer, BUFFER_SIZE, (void *)&bytesread);
 	fatman.Buffer_size = bytesread;
 
 	fatman.Directory[0].AlreadyWrittenOnce = 1;
 
 	/* Close fm.OpenFIL */
-	fatman.State =f_close(&fatman.OpenFIL);
+	f_close(&fatman.OpenFIL);
 	fatman.OpenFile_ID = 0;
 }
 
-void fatman_copy(uint8_t ID)
+void fatman_rename(uint8_t ID, char * NameFile, uint8_t NameFile_length)
 {
+	uint8_t i = 0;
+	uint8_t DirectoryName_length = 0;
+	/* fm.Directory[1].FilePath = "FILE/20220805_FILE" */
+	memset((void *)fatman.Directory[ID].FilePath, 0, 30);
 
+	DirectoryName_length = strlen((char *)fatman.Directory[ID].DirectoryName);
+
+	memcpy(&fatman.Directory[ID].FilePath[i], (char *)fatman.Directory[ID].DirectoryName, DirectoryName_length);
+	i += DirectoryName_length;
+
+	memcpy(&fatman.Directory[ID].FilePath[i], "/", 1);
+	i++;
+
+	memcpy(&fatman.Directory[ID].FilePath[i], (char const*)NameFile, NameFile_length);
+	i += NameFile_length;
+
+	memcpy(&fatman.Directory[ID].FilePath[i], "_", 1);
+	i++;
+
+	memcpy(&fatman.Directory[ID].FilePath[i], (char const*)fatman.Directory[ID].DirectoryName, DirectoryName_length);
+	i += DirectoryName_length;
+
+	memcpy(&fatman.Directory[ID].FilePath[i], ".TXT", 4);
 }
 /*** PRIVATE METHODs ***/
 
@@ -365,6 +382,23 @@ void fm_test_read()
 	fatman_write(ID);
 }
 
+void fm_test_rename()
+{
+	uint8_t ID = 7;
+	uint8_t NameDir[] = "TEST7";
+	uint8_t NameFile[] = "20220922";
+	uint8_t wtext[] = "Il Rinomina funziona Bene!!\n";
+	/* fm.Directory[1].DirectoryName = "FILE" */
+	memcpy(&fatman.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
+	/* fm.Directory[1].FilePath = "FILE/20220805_FILE" */
+	fatman_rename(ID, (char*)NameFile, 8);
+	/* Fatman */
+	fatman_init(ID);
+	memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
+	fatman.Buffer_size = strlen((char const*)wtext);
+	fatman_write(ID);
+}
+
 #endif /* UNIT_TEST */
 
 /*
@@ -385,6 +419,8 @@ void fatman_test_all()
 
 	fm_test_WHItheBufferIsTooBig();
 	fm_test_read();
+
+	fm_test_rename();
 
 	f_mount(NULL, (TCHAR const*)SDPath, 0);
 #endif /* FATMAN_UTEST */

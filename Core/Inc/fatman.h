@@ -66,7 +66,7 @@ typedef struct
 void fatman_init(uint8_t Directory_ID);
 void fatman_write(uint8_t Directory_ID);
 void fatman_read();
-void fatman_copy(uint8_t Directory_ID);
+void fatman_rename(uint8_t Directory_ID, char * NameFile, uint8_t NameFile_length);
 void fatman_test_all();
 
 

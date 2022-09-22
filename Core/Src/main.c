@@ -295,9 +295,28 @@ int main(void)
   MX_FATFS_Init();
   MX_DMA_Init();
   /* USER CODE BEGIN 2 */
-  DateTime_test_all();
-  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-  while(1){}
+//	fatman_test_all();
+//	HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+//	while(1){}
+
+
+//  DateTime_Init(2022, 9, 2, 12, 14, 0);
+//  DateTime_setDateString("/");
+//  DateTime_setTimeString(":");
+//
+//  strcat((char *)fatman.Buffer, (char const *)today.DateString_withSeparator);
+//  strcat((char *)fatman.Buffer, " ");
+//  strcat((char *)fatman.Buffer, (char const *)today.TimeString_withSeparator);
+//  strcat((char *)fatman.Buffer, " ");
+//  if(PSA.Alarm.AL02_LowAirPressure.isTriggered)
+//  	  strcat((char *)fatman.Buffer, "AL02 Pressione Bassa Aria Ingresso <<<");
+//  else
+//	  strcat((char *)fatman.Buffer, "AL02 Pressione Bassa Aria Ingresso >>>");
+//  while(1){}
+
+//  fatman_test_all();
+//  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+//  while(1){}
 
   AssignDefaultValue();
 
@@ -1463,7 +1482,7 @@ void StartOutTask(void *argument)
 			  PSA.Out2.Working = 0;
 			  PSA.Command.EnableOut1_DisableOut2 = 0;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  if(PSA.Command.EnableOut2_DisableOut1)
@@ -1474,7 +1493,7 @@ void StartOutTask(void *argument)
 			  PSA.Out1.Working = 0;
 			  PSA.Command.EnableOut2_DisableOut1 = 0;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  if(PSA.Command.EnableOut1_EnableOut2)
@@ -1483,14 +1502,14 @@ void StartOutTask(void *argument)
 			  PSA.Out1.Enable = 1;
 			  PSA.Command.EnableOut1_EnableOut2 = 0;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  if(PSA.Command.SetPriorityOut1)
 		  {
 			  PSA.OUTPriority = 1;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  if(PSA.Command.SetPriorityOut2)
@@ -1522,21 +1541,21 @@ void StartOutTask(void *argument)
 				  PSA.Out2.Ready = 1;
 			  }
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  if ((PSA.Mode.Run) && ((PSA.Out1.Enable) && (!PSA.Out2.Enable)) && ((!PSA.Out1.Ready) && (!PSA.Out2.Ready)))
 		  {
 			  PSA.Out1.Ready = 1;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  if ((PSA.Mode.Run) && ((!PSA.Out1.Enable) && (PSA.Out2.Enable)) && ((!PSA.Out1.Ready) && (!PSA.Out2.Ready)))
 		  {
 			  PSA.Out2.Ready = 1;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  /*** OUT-WORKING CONDICTION ***/
@@ -1544,14 +1563,14 @@ void StartOutTask(void *argument)
 		  {
 			  PSA.Out1.Working = 1;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  if((PSA.Mode.Run) && (PSA.Out2.Ready) && (PSA.KE2_OxygenSensor_2.Value < PSA.KE2_OxygenSensor_2.LowerThreshold))
 		  {/* If KE < SO2-1 -> OUT1 open*/
 			  PSA.Out2.Working = 1;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  /*** OUT-SWAPPING CONDICTION ***/
@@ -1561,7 +1580,7 @@ void StartOutTask(void *argument)
 			  PSA.Out1.Working = 0;
 			  PSA.Out2.Ready = 1;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  if((PSA.Mode.Run) && (PSA.Out2.Working) && (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.UpperThreshold) && (PSA.KE1_OxygenSensor_1.LowerThreshold && PSA.Out1.Enable))
@@ -1570,14 +1589,14 @@ void StartOutTask(void *argument)
 			  PSA.Out2.Ready = 0;
 			  PSA.Out2.Working = 0;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  if(/*PSA.OUT_1*/(PSA.Mode.Standby) && (PSA.Out1.Ready))
 		  {
 			  PSA.Out1.Working = 0;
 		  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 		  if((PSA.Mode.Standby) && (PSA.Out2.Ready))
@@ -1611,7 +1630,7 @@ void StartModeTask(void *argument)
 		  PSA.Mode.Run = 0x01;
 //		  PSA.Mode.Ready = 0x01;
 	  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 	  /* Run + BlockingAlarm -> Standby */
@@ -1620,7 +1639,7 @@ void StartModeTask(void *argument)
 		  PSA.Mode.Run = 0x00;
 		  PSA.Mode.Standby = 0x01;
 	  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 	  /* Run + OUT1 -> Standby */
@@ -1629,7 +1648,7 @@ void StartModeTask(void *argument)
 		  PSA.Mode.Run = 0x00;
 		  PSA.Mode.Standby = 0x01;
 	  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 	  /* Run + OUT2 -> Standby */
@@ -1638,7 +1657,7 @@ void StartModeTask(void *argument)
 		  PSA.Mode.Run = 0x00;
 		  PSA.Mode.Standby = 0x01;
 	  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 	  /* Standby + OUT1 -> Run */
@@ -1647,7 +1666,7 @@ void StartModeTask(void *argument)
 		  PSA.Mode.Run = 0x01;
 		  PSA.Mode.Standby = 0x00;
 	  }
-#if !DEBUG
+#ifndef DEBUG
 	  else
 #endif
 	  /* Standby + OUT2 -> Run */
@@ -1673,7 +1692,6 @@ void StartTimeTask(void *argument)
 {
   /* USER CODE BEGIN StartTimeTask */
 	/* Init Refresher */
-	PSA_DebugInit();
 	PSA.Time.ValveAlive_ReceiveMessageRefresh = 100;
 	PSA.Time.ValveAlive_SendMessageRefresh = 10;
 	/* Init Timer */
@@ -1832,28 +1850,54 @@ void StartSDTask(void *argument)
   /* USER CODE BEGIN StartSDTask */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
 
-//	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+	/* Initialize the name of directory */
+	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+
+	if(1)
+	{
+		DateTime_Init(2022, 9, 22, 14, 4, 0);
+		DateTime_setDateString(NULL);
+		DateTime_setDateString("/");
+		DateTime_setTimeString(NULL);
+		DateTime_setTimeString(":");
+	}
+
+	if(1)
+	{
+		memcpy(&fatman.Directory[1].DirectoryName, "EVENT", 5);
+		fatman_rename(1, (char*)today.DateString, 8);
+		fatman_init(1);
+	}
+
   /* Infinite loop */
   for(;;)
   {
-	  /**/
-	  if(1)
+
+	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+
+	  if(hsd.ErrorCode)
 	  {
 		  HAL_SD_Init(&hsd);
 	  }
 
 	  if(1)
 	  {
-	  	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
-	  	HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-		memcpy(&fatman.Directory[1].DirectoryName, "TEST0", sizeof("FIGA"));
-		memcpy(&fatman.Directory[1].FilePath, "TEST0/TEST0.TXT", sizeof("TEST0/TEST0.TXT"));
-		fatman_init(1);
-		memcpy(&fatman.Buffer, "Odio tutti\n", sizeof("Odio tutti\n"));
-		fatman.Buffer_size = strlen("Odio tutti\n");
-		fatman_write(1);
-		f_mount(NULL, (TCHAR const*)SDPath, 0);
+		  memcpy(&fatman.Buffer[0], (char*)today.DateString_withSeparator, 12);
+		  memcpy(&fatman.Buffer[12], (char*)today.TimeString_withSeparator, 8);
+		  memcpy(&fatman.Buffer[21], "AL05 Bassa Pressione Serbatoio di Processo\n", 44);
+		  fatman.Buffer_size = 64;
+		  fatman_write(1);
+		  PSA.Alarm.AL05_LowProcessTankPressure.toWriteToSD = 0;
 	  }
+
+//	  if(1)
+//	  {
+//		  memcpy(&fatman.Buffer, "Odio tutti\n", 11);
+//		  fatman.Buffer_size = 11;
+//		  fatman_write(1);
+//	  }
+
+
 
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }

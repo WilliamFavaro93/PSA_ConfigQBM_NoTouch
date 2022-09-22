@@ -28,6 +28,8 @@ typedef struct
 {
 	uint8_t isEnabled;
 	uint8_t isTriggered;
+	uint8_t toWriteToSD;
+
 	uint16_t Timer;
 	uint16_t RefreshTimer_ON;
 	uint16_t RefreshTimer_OFF;
