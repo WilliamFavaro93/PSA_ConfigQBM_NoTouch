@@ -19,10 +19,8 @@
 #include <datetime.h>
 #include <stdio.h>
 /* Defines -------------------------------------------------------------------*/
-#if DEBUG
-	#define DATETIME_AUTEST 1
-#else /* DEBUG */
-	#define DATETIME_AUTEST 0
+#ifdef DEBUG
+	#define DATETIME_AUTEST
 #endif /* DEBUG */
 
 /* Variables -----------------------------------------------------------------*/
@@ -102,8 +100,12 @@ void DateTime_AddSecond()
 					{
 						today.day %= (30+1);
 					}
-					else
+					else if((today.year % 4))
+					{
 						today.day %= (28+1);
+					}
+					else
+						today.day %= (29+1);
 
 					if(today.day == 0)
 					{
@@ -250,58 +252,48 @@ void DateTime_setTimeString(char* separator)
 }
 
 /* Private Function ----------------------------------------------------------*/
-#define DATETIME_AUTEST 1
-#if DATETIME_AUTEST
+#ifdef DATETIME_AUTEST
 
-uint8_t DateTime_test_AddSecond()
+void DateTime_test_AddSecond()
 {
-	uint8_t error = 0x01;
 	DateTime_Init(2022, 8, 5, 11, 37, 0);
 	DateTime_UpdateString();
-	if(strcmp(&today.TimeString, "113700") != 0)
-		return error;
+	while(strcmp(&today.TimeString, "113700")){}
 
 	DateTime_AddSecond();
 	DateTime_UpdateString();
-	if(strcmp(&today.TimeString, "113701") != 0)
-		return error;
-
-	return 0;
+	while(strcmp(&today.TimeString, "113701")){}
 }
 
-uint8_t DateTime_test_NewDay()
+void DateTime_test_NewDay()
 {
-	uint8_t error = 0x01;
 	DateTime_Init(2021, 12, 31, 23, 59, 59);
-	DateTime_ItsaNewDay();
+	while(DateTime_ItsaNewDay()){}
 	DateTime_AddSecond();
+	while(!DateTime_ItsaNewDay()){}
 	DateTime_UpdateString();
-	if(strcmp(&today.TimeString, "000000") != 0)
-		return error;
-	if(strcmp(&today.TimeString, "20220101") != 0)
-		return error;
-
-	return 0;
+	while(strcmp(&today.TimeString, "000000")){}
+	while(strcmp(&today.DateString, "20220101")){}
 }
 
-uint8_t DateTime_test_NewYear()
+void DateTime_test_NewYear()
 {
-	uint8_t error = 0x01;
+
 	DateTime_Init(2021, 12, 31, 23, 59, 59);
 	DateTime_AddSecond();
 	DateTime_UpdateString();
-	if(strcmp(&today.TimeString, "000000") != 0)
-		return error;
-	if(strcmp(&today.DateString, "20220101") != 0)
-		return error;
-
-	return 0;
+	while(strcmp(&today.TimeString, "000000")){}
+	while(strcmp(&today.DateString, "20220101")){}
 }
 
-uint8_t DateTime_test_UpdateString()
+void DateTime_test_its29february()
 {
-
+	DateTime_Init(2020, 2, 28, 23, 59, 59);
+	DateTime_AddSecond();
+	DateTime_UpdateString();
+	while(strcmp(&today.DateString, "20200229")){}
 }
+
 
 #endif /* DATETIME_AUTEST */
 
@@ -310,19 +302,14 @@ uint8_t DateTime_test_UpdateString()
  * @author William Favaro
  * @date 05/08/2022
  */
-uint8_t DateTime_test_all()
+void DateTime_test_all()
 {
-#if DATETIME_AUTEST
-	uint8_t error;
-
-	error = DateTime_test_AddSecond() * 0x01;
-	error = DateTime_test_NewDay() * 0x02;
-	error = DateTime_test_NewYear() * 0x04;
-
-	if(error)
-		return error;
+#ifdef DATETIME_AUTEST
+	DateTime_test_AddSecond();
+	DateTime_test_NewDay();
+	DateTime_test_NewYear();
+	DateTime_test_its29february();
 #endif /* DATETIME_UTEST */
-	return 0;
 }
 
 /* End of the file -----------------------------------------------------------*/

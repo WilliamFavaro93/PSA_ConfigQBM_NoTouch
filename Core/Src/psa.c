@@ -15,10 +15,19 @@
   ******************************************************************************
   */
 
+/* Includes ------------------------------------------------------------------*/
 #include <psa.h>
 
+/* Defines -------------------------------------------------------------------*/
+/* Variables -----------------------------------------------------------------*/
 PSAStruct PSA;
 
+/* Private Function definition -----------------------------------------------*/
+/*
+ * @brief This method is default starting value in debug mode
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_DebugInit()
 {
 #if (DEBUG)
@@ -32,6 +41,11 @@ void PSA_DebugInit()
 #endif /* DEBUG */
 }
 
+/*
+ * @brief This method add the value of out1 or out2, if active, to the CAN message
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_OutValve()
 {
 	PSA.ValveState[1] = 0;
@@ -45,6 +59,11 @@ void PSA_OutValve()
 	}
 }
 
+/*
+ * @brief This method update the value of psa structure when it reachs Adsorption1 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_Adsorption1()
 {
 
@@ -54,6 +73,11 @@ void PSA_Adsorption1()
 
 }
 
+/*
+ * @brief This method update the value of psa structure when it reachs Compensation0 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_Compensation0()
 {
 	PSA.ValveState[0] = 0x00;
@@ -62,6 +86,11 @@ void PSA_Compensation0()
 
 }
 
+/*
+ * @brief This method update the value of psa structure when it reachs Compensation1 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_Compensation1()
 {
 	PSA.ValveState[0] = 0xA0;
@@ -70,12 +99,23 @@ void PSA_Compensation1()
 
 }
 
+/*
+ * @brief This method update the value of psa structure when it reachs Compensation2 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_Compensation2()
 {
 	PSA.ValveState[0] = 0x24;
 	PSA_OutValve();
 	PSA.Time.StateTimer = PSA.Time.Compensation_2; /* 5 ds */
 }
+
+/*
+ * @brief This method update the value of psa structure when it reachs Adsorption2 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_Adsorption2()
 {
 	PSA.ValveState[0] = 0xB8;
@@ -83,18 +123,34 @@ void PSA_Adsorption2()
 	PSA.Time.StateTimer = PSA.Time.Adsorption_2; /* 275 ds */
 }
 
-/* -> Standby1 -> Standby2 -> Standby3 -> */
+/*
+ * @brief This method update the value of psa structure when it reachs PreStandby1 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_PreStandby1()
 {
 	PSA.ValveState[0] = 0x08;
 	PSA.Time.StateTimer = PSA.Time.PreStandby_1; /* 50 ds */
 
 }
+
+/*
+ * @brief This method update the value of psa structure when it reachs PreStandby2 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_PreStandby2()
 {
 	PSA.ValveState[0] = 0x48;
 	PSA.Time.StateTimer = PSA.Time.PreStandby_2; /* 50 ds */
 }
+
+/*
+ * @brief This method update the value of psa structure when it reachs Standby state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_Standby()
 {
 	PSA.ValveState[0] = 0x00;
@@ -104,7 +160,11 @@ void PSA_Standby()
 
 
 
-
+/*
+ * @brief This method select the method to update psa structure
+ * @author William Favaro
+ * @date 21/09/2022
+ */
 void PSA_UpdateState()
 {
 

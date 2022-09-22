@@ -17,13 +17,11 @@
 /* Includes ------------------------------------------------------------------*/
 #include "alarm.h"
 /* Defines -------------------------------------------------------------------*/
-#if DEBUG
-	#define ALARM_AUTEST 1
-#else /* DEBUG */
-	#define ALARM_AUTEST 0
+#ifdef DEBUG
+	#define ALARM_AUTEST
 #endif /* DEBUG */
 /* Variables -----------------------------------------------------------------*/
-#if ALARM_AUTEST
+#ifdef ALARM_AUTEST
 	Alarm test;
 #endif /* ALARM_AUTEST */
 /* Private Function definition -----------------------------------------------*/
@@ -99,7 +97,7 @@ void Alarm_Enable(Alarm * Alarm)
 }
 /* Private Function ----------------------------------------------------------*/
 /* Public Automated Testing Function -----------------------------------------*/
-#if ALARM_AUTEST
+#ifdef ALARM_AUTEST
 void Alarm_test_Triggered()
 {
 	Alarm_Init(&test, 5, 5);
@@ -195,7 +193,7 @@ void Alarm_test_ConditionKeepsChanging()
 
 void Alarm_test_all()
 {
-#if ALARM_AUTEST
+#ifdef ALARM_AUTEST
 	Alarm_test_Triggered();
 	Alarm_test_FromTriggeredToNoTriggered();
 	Alarm_test_DisabledAlarm_AlarmMustNotTrigger();

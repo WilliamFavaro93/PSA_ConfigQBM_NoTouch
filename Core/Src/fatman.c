@@ -19,10 +19,8 @@
 #include "fatman.h"
 
 /* Defines -------------------------------------------------------------------*/
-#if DEBUG
-	#define FATMAN_AUTEST 1
-#else
-	#define FATMAN_AUTEST 0
+#ifdef DEBUG
+	#define FATMAN_AUTEST
 #endif /* DEBUG */
 /* Variables -----------------------------------------------------------------*/
 ManageSD fatman;
@@ -128,7 +126,7 @@ void fatman_copy(uint8_t ID)
 
 /*** UNIT TEST ***/
 /* WHI == WhatHappensIf */
-#if FATMAN_AUTEST
+#ifdef FATMAN_AUTEST
 
 /*
  * The purpose of this test is to see if it works normally
@@ -376,7 +374,7 @@ void fm_test_read()
  */
 void fatman_test_all()
 {
-#if FATMAN_AUTEST
+#ifdef FATMAN_AUTEST
 	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
 
 	fm_test_NormalUse1();
