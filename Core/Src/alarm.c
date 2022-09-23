@@ -57,8 +57,8 @@ void Alarm_CheckCondition(Alarm * Alarm, uint8_t condition)
 	/* Check if Timer is 0 */
 	if(!Alarm->Timer)
 	{
-		Alarm->isTriggered = !Alarm->isTriggered;
-		Alarm->toWriteToSD = !Alarm->toWriteToSD;
+		Alarm->isTriggered = !(Alarm->isTriggered);
+		Alarm->toWriteToSD = 1;
 	}
 
 	/* Check the Timer condition */

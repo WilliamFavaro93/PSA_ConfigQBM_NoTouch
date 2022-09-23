@@ -241,6 +241,7 @@ uint16_t Convert_Command_Value(uint8_t * Command, uint8_t Command_Size, uint8_t 
 void AssignDefaultValue();
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan);
+void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage);
 //void WriteFileInSD(ManageDirectory * directory, DateTime * today, uint8_t * textToWrite);
 /* USER CODE END PFP */
 
@@ -1292,6 +1293,9 @@ uint16_t Convert_Command_Value(uint8_t * Command, uint8_t Command_Size, uint8_t 
 
 void AssignDefaultValue()
 {
+	/* DateTime */
+	DateTime_Init(2022, 9, 23, 0, 0, 0);
+
 	/* Inizializza i valori dei timer per il debug */
 	PSA.Time.Adsorption_1 = 27;
 	PSA.Time.Adsorption_2 = 27;
@@ -1325,15 +1329,6 @@ void AssignDefaultValue()
 	PSA.Out1.Enable = 1;
 	PSA.KE2_OxygenSensor_2.LowerThreshold = 2; 			//SO2-2
 	PSA.Out2.Enable = 1;
-
-//	/* I timer forse conviene inizializzarli nel TimeTask */
-//	PSA.ReceiveValveMessage.Refresh = 1000;
-//	PSA.ReceiveValveMessage.Timer = PSA.ReceiveValveMessage.Refresh;
-//	PSA.CAN_2.TransmitAliveMessage.Refresh = 10;
-//	PSA.CAN_2.TransmitAliveMessage.Timer = PSA.CAN_2.TransmitAliveMessage.Refresh;
-
-	/* DateTime */
-	DateTime_Init(2022, 7, 11, 10, 25, 0);
 }
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
@@ -1355,6 +1350,23 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	}
 }
 
+void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage)
+{
+	if(Alarm->toWriteToSD)
+	{
+	  memcpy(&fatman.Buffer[0], (char*)today.DateString_withSeparator, 10);
+	  memcpy(&fatman.Buffer[11], (char*)today.TimeString_withSeparator, 8);
+	  memcpy(&fatman.Buffer[20], (char*)AlarmMessage, sizeofAlarmMessage);
+	  if(Alarm->isTriggered)
+		  memcpy(&fatman.Buffer[20 + sizeofAlarmMessage], "<<<", sizeof("<<<"));
+	  else
+		  memcpy(&fatman.Buffer[20 + sizeofAlarmMessage], ">>>", sizeof(">>>"));
+	  memcpy(&fatman.Buffer[99], "\n", 1);
+	  fatman.Buffer_size = 100;
+	  fatman_write(1);
+	  Alarm->toWriteToSD = 0;
+	}
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -1698,11 +1710,19 @@ void StartTimeTask(void *argument)
 	PSA.Time.ValveAlive_ReceiveMessageTimer = PSA.Time.ValveAlive_ReceiveMessageRefresh;
 	PSA.Time.ValveAlive_SendMessageTimer = PSA.Time.ValveAlive_SendMessageRefresh;
 
+	/* */
+	uint8_t today_deciseconds = 0;
 
   /* Infinite loop */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
+	  /*** DATETIME ***/
+	  today_deciseconds++;
+	  today_deciseconds %= 10;
+	  if(!today_deciseconds)
+		  DateTime_AddSecond();
+
 	  /*** TIME COUNTER ***/
 	  if(PSA.Out1.Ready)
 		  TimeCounter_AddDecisecond(&PulldownWorking);
@@ -1880,23 +1900,60 @@ void StartSDTask(void *argument)
 		  HAL_SD_Init(&hsd);
 	  }
 
-	  if(1)
-	  {
-		  memcpy(&fatman.Buffer[0], (char*)today.DateString_withSeparator, 12);
-		  memcpy(&fatman.Buffer[12], (char*)today.TimeString_withSeparator, 8);
-		  memcpy(&fatman.Buffer[21], "AL05 Bassa Pressione Serbatoio di Processo\n", 44);
-		  fatman.Buffer_size = 64;
-		  fatman_write(1);
-		  PSA.Alarm.AL05_LowProcessTankPressure.toWriteToSD = 0;
-	  }
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL01_CANbusError,
+			  	  	  	  	  	  "AL01 Errore CAN Bus",
+								  sizeof("AL01 Errore CAN Bus"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL02_LowAirPressure,
+			  	  	  	  	  	  "AL02 Bassa Pressione Aria in Ingresso",
+								  sizeof("AL02 Bassa Pressione Aria in Ingresso"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL05_LowProcessTankPressure,
+			  	  	  	  	  	  "AL05 Bassa Pressione Serbatoio di Processo",
+								  sizeof("AL05 Bassa Pressione Serbatoio di Processo"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL11_External,
+			  	  	  	  	  	  "AL11 Allarme Esterno",
+								  sizeof("AL11 Allarme Esterno"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL16_HighOut2Pressure,
+			  	  	  	  	  	  "AL16 Alta Pressione OUT 2",
+								  sizeof("AL16 Alta Pressione OUT 2"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL17_HighDewpoint,
+			  	  	  	  	  	  "AL17 Valore alto di Dewpoint",
+								  sizeof("AL17 Valore alto di Dewpoint"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL18_HighDewpoint,
+			  	  	  	  	  	  "AL18 Valore alto di Dewpoint",
+								  sizeof("AL18 Valore alto di Dewpoint"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL20_PCComunicationFault,
+			  	  	  	  	  	  "AL20 Guasto Comunicazione PC",
+								  sizeof("AL20 Guasto Comunicazione PC"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL31_B1ProbeFault,
+	  			  	  	  	  	  "AL31 Guasto Sonda B1",
+								  sizeof("AL31 Guasto Sonda B1"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL32_B2ProbeFault,
+	  			  	  	  	  	  "AL32 Guasto Sonda B2",
+								  sizeof("AL32 Guasto Sonda B2"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL33_B3ProbeFault,
+	  			  	  	  	  	  "AL33 Guasto Sonda B3",
+								  sizeof("AL33 Guasto Sonda B3"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL34_B4ProbeFault,
+	  			  	  	  	  	  "AL34 Guasto Sonda B4",
+								  sizeof("AL34 Guasto Sonda B4"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.MissingSDCard,
+	  			  	  	  	  	  "MicroSD Assente",
+								  sizeof("MicroSD Assente"));
 
-//	  if(1)
+
+//	  if(PSA.Alarm.AL05_LowProcessTankPressure.toWriteToSD)
 //	  {
-//		  memcpy(&fatman.Buffer, "Odio tutti\n", 11);
-//		  fatman.Buffer_size = 11;
+//		  memcpy(&fatman.Buffer[0], (char*)today.DateString_withSeparator, 10);
+//		  memcpy(&fatman.Buffer[11], (char*)today.TimeString_withSeparator, 8);
+//		  if(PSA.Alarm.AL05_LowProcessTankPressure.isTriggered)
+//			  memcpy(&fatman.Buffer[20], "AL05 Bassa Pressione Serbatoio di Processo <<<", sizeof("AL05 Bassa Pressione Serbatoio di Processo <<<"));
+//		  else
+//			  memcpy(&fatman.Buffer[20], "AL05 Bassa Pressione Serbatoio di Processo <<<", sizeof("AL05 Bassa Pressione Serbatoio di Processo <<<"));
+//		  memcpy(&fatman.Buffer[99], "\n", 1);
+//		  fatman.Buffer_size = 100;
 //		  fatman_write(1);
+//		  PSA.Alarm.AL05_LowProcessTankPressure.toWriteToSD = 0;
 //	  }
-
 
 
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
