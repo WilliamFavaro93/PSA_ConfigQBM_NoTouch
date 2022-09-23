@@ -54,8 +54,10 @@ typedef struct
 void DateTime_Init(uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uint8_t minutes, uint8_t seconds);
 void DateTime_Update(DateTime* DateTime, uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uint8_t minutes, uint8_t seconds);
 void DateTime_AddSecond();
-void DateTime_setDateString(char* separator);
-void DateTime_setTimeString(char* separator);
+void DateTime_setDateString();
+void DateTime_setDateString_withSeparator(char* separator);
+void DateTime_setTimeString();
+void DateTime_setTimeString_withSeparator(char* separator);
 uint8_t DateTime_ItsaNewDay();
 /* Public Automated Testing Function -----------------------------------------*/
 

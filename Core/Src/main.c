@@ -198,8 +198,17 @@ const TickType_t deciseconds = pdMS_TO_TICKS(100);
 const TickType_t centiseconds = pdMS_TO_TICKS(10);
 const TickType_t milliseconds = pdMS_TO_TICKS(1);
 
-//CAN_RxHeaderTypeDef RxHeader;
-//uint8_t RxData[8];
+typedef struct
+{
+	uint8_t TimeTask;
+	uint8_t ModeTask;
+	uint8_t AlarmTask;
+	uint8_t OutTask;
+	uint8_t StateTask;
+	uint8_t SDTask;
+} TaskManage;
+
+TaskManage TaskManager;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -242,7 +251,6 @@ void AssignDefaultValue();
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage);
-//void WriteFileInSD(ManageDirectory * directory, DateTime * today, uint8_t * textToWrite);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -296,28 +304,6 @@ int main(void)
   MX_FATFS_Init();
   MX_DMA_Init();
   /* USER CODE BEGIN 2 */
-//	fatman_test_all();
-//	HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-//	while(1){}
-
-
-//  DateTime_Init(2022, 9, 2, 12, 14, 0);
-//  DateTime_setDateString("/");
-//  DateTime_setTimeString(":");
-//
-//  strcat((char *)fatman.Buffer, (char const *)today.DateString_withSeparator);
-//  strcat((char *)fatman.Buffer, " ");
-//  strcat((char *)fatman.Buffer, (char const *)today.TimeString_withSeparator);
-//  strcat((char *)fatman.Buffer, " ");
-//  if(PSA.Alarm.AL02_LowAirPressure.isTriggered)
-//  	  strcat((char *)fatman.Buffer, "AL02 Pressione Bassa Aria Ingresso <<<");
-//  else
-//	  strcat((char *)fatman.Buffer, "AL02 Pressione Bassa Aria Ingresso >>>");
-//  while(1){}
-
-//  fatman_test_all();
-//  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-//  while(1){}
 
   AssignDefaultValue();
 
@@ -1703,6 +1689,7 @@ void StartModeTask(void *argument)
 void StartTimeTask(void *argument)
 {
   /* USER CODE BEGIN StartTimeTask */
+	TaskManager.TimeTask = 1;
 	/* Init Refresher */
 	PSA.Time.ValveAlive_ReceiveMessageRefresh = 100;
 	PSA.Time.ValveAlive_SendMessageRefresh = 10;
@@ -1717,12 +1704,15 @@ void StartTimeTask(void *argument)
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
+	  TaskManager.TimeTask = 1;
 	  /*** DATETIME ***/
 	  today_deciseconds++;
 	  today_deciseconds %= 10;
 	  if(!today_deciseconds)
+	  {
 		  DateTime_AddSecond();
-
+		  DateTime_UpdateString();
+	  }
 	  /*** TIME COUNTER ***/
 	  if(PSA.Out1.Ready)
 		  TimeCounter_AddDecisecond(&PulldownWorking);
@@ -1876,10 +1866,7 @@ void StartSDTask(void *argument)
 	if(1)
 	{
 		DateTime_Init(2022, 9, 22, 14, 4, 0);
-		DateTime_setDateString(NULL);
-		DateTime_setDateString("/");
-		DateTime_setTimeString(NULL);
-		DateTime_setTimeString(":");
+		DateTime_UpdateString();
 	}
 
 	if(1)
@@ -1906,9 +1893,7 @@ void StartSDTask(void *argument)
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL02_LowAirPressure,
 			  	  	  	  	  	  "AL02 Bassa Pressione Aria in Ingresso",
 								  sizeof("AL02 Bassa Pressione Aria in Ingresso"));
-	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL05_LowProcessTankPressure,
-			  	  	  	  	  	  "AL05 Bassa Pressione Serbatoio di Processo",
-								  sizeof("AL05 Bassa Pressione Serbatoio di Processo"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL05_LowProcessTankPressure, "AL05 Bassa Pressione Serbatoio di Processo", sizeof("AL05 Bassa Pressione Serbatoio di Processo"));
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL11_External,
 			  	  	  	  	  	  "AL11 Allarme Esterno",
 								  sizeof("AL11 Allarme Esterno"));
@@ -2123,11 +2108,11 @@ void StartCAN1RxTxTask(void *argument)
 void StartAlarmTask(void *argument)
 {
   /* USER CODE BEGIN StartAlarmTask */
-	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 2);
-	Alarm_Init(&PSA.Alarm.AL02_LowAirPressure, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
-	Alarm_Init(&PSA.Alarm.MissingSDCard, 2, 2);
+//	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 5);
+//	Alarm_Init(&PSA.Alarm.AL02_LowAirPressure, 5, 5);
+//	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
+//	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
+//	Alarm_Init(&PSA.Alarm.MissingSDCard, 5, 5);
   /* Infinite loop */
   TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)

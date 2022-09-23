@@ -51,13 +51,23 @@ void Alarm_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_O
 void Alarm_CheckCondition(Alarm * Alarm, uint8_t condition)
 {
 	/* Check if Alarm is Enable */
-	if(!Alarm->isEnabled)
+	if(!(Alarm->isEnabled))
 		return;
 
 	/* Check if Timer is 0 */
-	if(!Alarm->Timer)
+	if(!(Alarm->Timer))
 	{
-		Alarm->isTriggered = !(Alarm->isTriggered);
+		if(Alarm->isTriggered)
+		{
+			Alarm->isTriggered = 0;
+			Alarm->Timer = Alarm->RefreshTimer_ON;
+		}
+		else
+		{
+			Alarm->isTriggered = 1;
+			Alarm->Timer = Alarm->RefreshTimer_OFF;
+		}
+
 		Alarm->toWriteToSD = 1;
 	}
 
