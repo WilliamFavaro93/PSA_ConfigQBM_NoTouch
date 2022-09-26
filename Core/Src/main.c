@@ -133,7 +133,7 @@ const osThreadAttr_t ErrorManager_attributes = {
 osThreadId_t SDTaskHandle;
 const osThreadAttr_t SDTask_attributes = {
   .name = "SDTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal1,
 };
 /* Definitions for CAN1RxTxTask */
@@ -147,7 +147,7 @@ const osThreadAttr_t CAN1RxTxTask_attributes = {
 osThreadId_t AlarmTaskHandle;
 const osThreadAttr_t AlarmTask_attributes = {
   .name = "AlarmTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal6,
 };
 /* Definitions for FaultTask */
@@ -1357,7 +1357,7 @@ void StartDefaultTask(void *argument)
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
-		 vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
+	vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END 5 */
 }
@@ -2098,8 +2098,9 @@ void StartAlarmTask(void *argument)
 //	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
 //	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
 //	Alarm_Init(&PSA.Alarm.MissingSDCard, 5, 5);
+
+	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
-  TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
 	  if(!PSA.Alarm.AL01_CANbusError.Timer)
