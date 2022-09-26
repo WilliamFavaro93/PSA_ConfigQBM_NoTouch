@@ -87,25 +87,28 @@ void fatman_write(uint8_t ID)
  * @date 05/08/2022
  * @param ID The number that identifies the directory and the file
  */
-void fatman_read()
+void fatman_read(uint8_t ID)
 {
 //	uint8_t status;
 	uint32_t bytesread = 0;
+	uint8_t fm_state = 0;
 
 	/* It opens the file, if it exists, in read-only mode */
-	f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[0].FilePath, FA_READ);
+	fm_state = f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[ID].FilePath, FA_READ);
 
+	if(fm_state)
+	{
+		fatman.OpenFile_ID = N_DIRECTORY + 1;
 
-	fatman.OpenFile_ID = N_DIRECTORY + 1;
+		/* Update Directory State */
+		fatman.Directory[ID].FileIsCreated = 1;
+		fatman.Directory[ID].AlreadyWrittenOnce = 0;
 
-	/* Update Directory State */
-	fatman.Directory[0].FileIsCreated = 1;
-	fatman.Directory[0].AlreadyWrittenOnce = 0;
+		f_read(&fatman.OpenFIL, &fatman.Buffer, BUFFER_SIZE, (void *)&bytesread);
+		fatman.Buffer_size = bytesread;
 
-	f_read(&fatman.OpenFIL, &fatman.Buffer, BUFFER_SIZE, (void *)&bytesread);
-	fatman.Buffer_size = bytesread;
-
-	fatman.Directory[0].AlreadyWrittenOnce = 1;
+		fatman.Directory[ID].AlreadyWrittenOnce = 1;
+	}
 
 	/* Close fm.OpenFIL */
 	f_close(&fatman.OpenFIL);
@@ -377,7 +380,7 @@ void fm_test_read()
 	fatman_init(ID);
 
 	memcpy(fatman.Directory[0].FilePath, "TEST6/20220830_TEST6_01.TXT", sizeof("TEST6/20220830_TEST6_01.TXT"));
-	fatman_read();
+	fatman_read(ID);
 
 	fatman_write(ID);
 }

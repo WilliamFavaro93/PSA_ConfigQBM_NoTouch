@@ -45,6 +45,8 @@ DateTime today_LastUpdate;
  */
 void DateTime_Init(uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uint8_t minutes, uint8_t seconds)
 {
+	today.Enable = 1;
+
 	today.year = year;
 	today.month = month;
 	today.day = day;
@@ -52,6 +54,14 @@ void DateTime_Init(uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uin
 	today.hours = hours;
 	today.minutes = minutes;
 	today.seconds = seconds;
+
+	if((today.month > 3) && (today.day > 27) && (today.hours > 2))
+	{
+		if((today.month < 10) && (today.day < 30) && (today.hours < 3))
+			today.DailyLight = 0;
+		else
+			today.DailyLight = 1;
+	}
 
 	/* Update the datetime today_LastUpdate*/
 	memcpy(&today_LastUpdate, &today, sizeof(DateTime));
@@ -64,48 +74,65 @@ void DateTime_Init(uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uin
  */
 void DateTime_AddSecond()
 {
+	if(!today.Enable)
+		return;
+
 	today.seconds++;
 	today.seconds %= 60;
-		if(today.seconds == 0)
+	if(today.seconds == 0)
+	{
+		today.minutes++;
+		today.minutes %= 60;
+		if(today.minutes == 0)
 		{
-			today.minutes++;
-			today.minutes %= 60;
-			if(today.minutes == 0)
+			today.hours++;
+			today.hours %= 24;
+			if(today.hours == 0)
 			{
-				today.hours++;
-				today.hours %= 24;
-				if(today.hours == 0)
+				today.day++;
+				if((today.month == 1)||(today.month == 3)||(today.month == 5)||(today.month == 7)||(today.month == 8)||(today.month == 10)||(today.month == 12))
 				{
-					today.day++;
-					if((today.month == 1)||(today.month == 3)||(today.month == 5)||(today.month == 7)||(today.month == 8)||(today.month == 10)||(today.month == 12))
-					{
-						today.day %= (31+1);
-					}
-					else if((today.month == 4)||(today.month == 6)||(today.month == 9)||(today.month == 11))
-					{
-						today.day %= (30+1);
-					}
-					else if((today.year % 4))
-					{
-						today.day %= (28+1);
-					}
-					else
-						today.day %= (29+1);
+					today.day %= (31+1);
+				}
+				else if((today.month == 4)||(today.month == 6)||(today.month == 9)||(today.month == 11))
+				{
+					today.day %= (30+1);
+				}
+				else if((today.year % 4))
+				{
+					today.day %= (28+1);
+				}
+				else
+					today.day %= (29+1);
 
-					if(today.day == 0)
+				if(today.day == 0)
+				{
+					today.day++; /* The day start with 1 instead of 0 */
+					today.month++;
+					today.month %= (12+1);
+					if(today.month == 0)
 					{
-						today.day++; /* The day start with 1 instead of 0 */
-						today.month++;
-						today.month %= (12+1);
-						if(today.month == 0)
-						{
-							today.month++; /* The month start with 1 instead of 0 */
-							today.year++;
-						}
+						today.month++; /* The month start with 1 instead of 0 */
+						today.year++;
 					}
 				}
 			}
 		}
+	}
+	/* 27 marzo, 2:00, no daylight -> -1h, daylight */
+	if((today.month == 3)&&(today.day == 27)&&(today.hours == 3)&&(!today.DailyLight))
+	{
+		today.DailyLight = 1;
+		today.hours = 2;
+	}
+
+	/* 30 ottobre, 3:00, daylight -> +1h, no daylight */
+	if((today.month == 3)&&(today.day == 27)&&(today.hours == 2)&&(today.DailyLight))
+	{
+		today.DailyLight = 0;
+		today.hours = 3;
+	}
+
 }
 
 /*
@@ -115,6 +142,9 @@ void DateTime_AddSecond()
  */
 uint8_t DateTime_ItsaNewDay()
 {
+	if(!today.Enable)
+		return 0;
+
 	int8_t result = 0;
 	/* Compare if it is a new day */
 	if((today.day > today_LastUpdate.day)||(today.month > today_LastUpdate.month)||(today.year > today_LastUpdate.year))
@@ -136,6 +166,9 @@ uint8_t DateTime_ItsaNewDay()
  */
 void DateTime_setDateString()
 {
+	if(!today.Enable)
+		return;
+
 	char yy[4];
 	char mm[2]="00";
 	char dd[2]="00";
@@ -170,6 +203,9 @@ void DateTime_setDateString()
  */
 void DateTime_setDateString_withSeparator(char* separator)
 {
+	if(!today.Enable)
+		return;
+
 	char yy[4];
 	char mm[2]="00";
 	char dd[2]="00";
@@ -209,6 +245,9 @@ void DateTime_setDateString_withSeparator(char* separator)
  */
 void DateTime_setTimeString()
 {
+	if(!today.Enable)
+		return;
+
 	char hh[2]="00";
 	char mm[2]="00";
 	char ss[2]="00";
@@ -247,6 +286,9 @@ void DateTime_setTimeString()
  */
 void DateTime_setTimeString_withSeparator(char* separator)
 {
+	if(!today.Enable)
+		return;
+
 	char hh[2]="00";
 	char mm[2]="00";
 	char ss[2]="00";
@@ -288,6 +330,9 @@ void DateTime_setTimeString_withSeparator(char* separator)
  */
 void DateTime_UpdateString()
 {
+	if(!today.Enable)
+		return;
+
 	DateTime_setDateString();
 	DateTime_setDateString_withSeparator("/");
 	DateTime_setTimeString();

@@ -197,18 +197,6 @@ const TickType_t seconds = pdMS_TO_TICKS(1000);
 const TickType_t deciseconds = pdMS_TO_TICKS(100);
 const TickType_t centiseconds = pdMS_TO_TICKS(10);
 const TickType_t milliseconds = pdMS_TO_TICKS(1);
-
-typedef struct
-{
-	uint8_t TimeTask;
-	uint8_t ModeTask;
-	uint8_t AlarmTask;
-	uint8_t OutTask;
-	uint8_t StateTask;
-	uint8_t SDTask;
-} TaskManage;
-
-TaskManage TaskManager;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -304,7 +292,6 @@ int main(void)
   MX_FATFS_Init();
   MX_DMA_Init();
   /* USER CODE BEGIN 2 */
-
   AssignDefaultValue();
 
   HAL_CAN_Start(&hcan2);
@@ -1281,6 +1268,7 @@ void AssignDefaultValue()
 {
 	/* DateTime */
 	DateTime_Init(2022, 9, 23, 0, 0, 0);
+	DateTime_UpdateString();
 
 	/* Inizializza i valori dei timer per il debug */
 	PSA.Time.Adsorption_1 = 27;
@@ -1369,14 +1357,6 @@ void StartDefaultTask(void *argument)
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
-//	  	  if(1)
-//	  		  HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_4);
-//#if DEBUG
-//	  	  else
-//#endif
-//	  	  if(1)
-//	  		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_5);
-
 		 vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END 5 */
@@ -1689,7 +1669,6 @@ void StartModeTask(void *argument)
 void StartTimeTask(void *argument)
 {
   /* USER CODE BEGIN StartTimeTask */
-	TaskManager.TimeTask = 1;
 	/* Init Refresher */
 	PSA.Time.ValveAlive_ReceiveMessageRefresh = 100;
 	PSA.Time.ValveAlive_SendMessageRefresh = 10;
@@ -1704,7 +1683,6 @@ void StartTimeTask(void *argument)
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
-	  TaskManager.TimeTask = 1;
 	  /*** DATETIME ***/
 	  today_deciseconds++;
 	  today_deciseconds %= 10;
@@ -1863,18 +1841,25 @@ void StartSDTask(void *argument)
 	/* Initialize the name of directory */
 	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
 
-	if(1)
+	if(0)
 	{
 		DateTime_Init(2022, 9, 22, 14, 4, 0);
 		DateTime_UpdateString();
 	}
 
+	/* This task do not work until datetime it's initialized */
+	while(!today.Enable){}
+	/* Initialize all the directory and file */
 	if(1)
 	{
 		memcpy(&fatman.Directory[1].DirectoryName, "EVENT", 5);
 		fatman_rename(1, (char*)today.DateString, 8);
+//		fatman_read(1);
 		fatman_init(1);
+//		if(!fatman.Buffer_size)
+//			fatman_write(1);
 	}
+	vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
 
   /* Infinite loop */
   for(;;)

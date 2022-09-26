@@ -40,6 +40,9 @@ typedef struct
 	uint8_t minutes;					/**< minute number	*/
 	uint8_t seconds;					/**< second number	*/
 
+	uint8_t DailyLight;					/**< define if it's daily light	*/
+	uint8_t Enable;						/**< define if it's enable */
+
 	char DateString[9];					/**< array of char that identifies the date.
 										Example: "20220829" 							*/
 	char DateString_withSeparator[12];		/**< array of char that identifies the date.
