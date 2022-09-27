@@ -112,7 +112,7 @@ const osThreadAttr_t ModeTask_attributes = {
 osThreadId_t TimeTaskHandle;
 const osThreadAttr_t TimeTask_attributes = {
   .name = "TimeTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal7,
 };
 /* Definitions for CAN2TxTask */
@@ -122,32 +122,25 @@ const osThreadAttr_t CAN2TxTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal2,
 };
-/* Definitions for ErrorManager */
-osThreadId_t ErrorManagerHandle;
-const osThreadAttr_t ErrorManager_attributes = {
-  .name = "ErrorManager",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
 /* Definitions for SDTask */
 osThreadId_t SDTaskHandle;
 const osThreadAttr_t SDTask_attributes = {
   .name = "SDTask",
-  .stack_size = 256 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal1,
 };
 /* Definitions for CAN1RxTxTask */
 osThreadId_t CAN1RxTxTaskHandle;
 const osThreadAttr_t CAN1RxTxTask_attributes = {
   .name = "CAN1RxTxTask",
-  .stack_size = 128 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for AlarmTask */
 osThreadId_t AlarmTaskHandle;
 const osThreadAttr_t AlarmTask_attributes = {
   .name = "AlarmTask",
-  .stack_size = 256 * 4,
+  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal6,
 };
 /* Definitions for FaultTask */
@@ -197,6 +190,8 @@ const TickType_t seconds = pdMS_TO_TICKS(1000);
 const TickType_t deciseconds = pdMS_TO_TICKS(100);
 const TickType_t centiseconds = pdMS_TO_TICKS(10);
 const TickType_t milliseconds = pdMS_TO_TICKS(1);
+
+UBaseType_t BaseStackHighWaterMark;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -224,7 +219,6 @@ void StartOutTask(void *argument);
 void StartModeTask(void *argument);
 void StartTimeTask(void *argument);
 void StartCAN2TxTask(void *argument);
-void StartErrorManager(void *argument);
 void StartSDTask(void *argument);
 void StartCAN1RxTxTask(void *argument);
 void StartAlarmTask(void *argument);
@@ -239,11 +233,11 @@ void AssignDefaultValue();
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage);
+void DirectoryInit(uint8_t ID, char * nameDir, uint8_t nameDir_length);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
 /* USER CODE END 0 */
 
 /**
@@ -339,9 +333,6 @@ int main(void)
 
   /* creation of CAN2TxTask */
   CAN2TxTaskHandle = osThreadNew(StartCAN2TxTask, NULL, &CAN2TxTask_attributes);
-
-  /* creation of ErrorManager */
-  ErrorManagerHandle = osThreadNew(StartErrorManager, NULL, &ErrorManager_attributes);
 
   /* creation of SDTask */
   SDTaskHandle = osThreadNew(StartSDTask, NULL, &SDTask_attributes);
@@ -1341,6 +1332,19 @@ void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t si
 	  Alarm->toWriteToSD = 0;
 	}
 }
+
+void DirectoryInit(uint8_t ID, char * nameDir, uint8_t nameDir_length)
+{
+	memcpy(&fatman.Directory[ID].DirectoryName, (char *)nameDir, nameDir_length);
+	fatman_rename(ID, (char *)today.DateString, 8);
+
+	memcpy(fatman.Directory[0].FilePath, (char *)fatman.Directory[ID].FilePath, sizeof(fatman.Directory[0].FilePath));
+	fatman_read();
+
+	fatman_init(ID);
+	if(fatman.Buffer_size)
+		fatman_write(ID);
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -1357,6 +1361,7 @@ void StartDefaultTask(void *argument)
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
+	uxTaskGetStackHighWaterMark((TaskHandle_t *)SDTaskHandle);
 	vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END 5 */
@@ -1684,13 +1689,7 @@ void StartTimeTask(void *argument)
   for(;;)
   {
 	  /*** DATETIME ***/
-	  today_deciseconds++;
-	  today_deciseconds %= 10;
-	  if(!today_deciseconds)
-	  {
-		  DateTime_AddSecond();
-		  DateTime_UpdateString();
-	  }
+	  DateTime_AddDeciSecond();
 	  /*** TIME COUNTER ***/
 	  if(PSA.Out1.Ready)
 		  TimeCounter_AddDecisecond(&PulldownWorking);
@@ -1791,41 +1790,6 @@ void StartCAN2TxTask(void *argument)
   /* USER CODE END StartCAN2TxTask */
 }
 
-/* USER CODE BEGIN Header_StartErrorManager */
-/**
-* @brief Function implementing the ErrorManager thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartErrorManager */
-void StartErrorManager(void *argument)
-{
-  /* USER CODE BEGIN StartErrorManager */
-	TickType_t TaskDelayTimer = xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-	  if(PSA.CAN_2.State)
-	  {
-		  MX_CAN2_Init();
-		  PSA.CAN_2.State = HAL_CAN_Start(&hcan2);
-		  HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING);
-		  if(!PSA.CAN_2.State)
-		  {
-//			  PSA.Alarm.AL01_CANbusError = 0x00;
-			  PSA.Alarm.State &= ~0x0000000000000001U;
-		  }
-	  }
-	  if(!PSA.CANSPI.State)
-	  {
-		  MX_SPI2_Init();
-		  PSA.CANSPI.State = CANSPI_Initialize();
-	  }
-	  vTaskDelayUntil(&TaskDelayTimer, 1 * seconds);
-  }
-  /* USER CODE END StartErrorManager */
-}
-
 /* USER CODE BEGIN Header_StartSDTask */
 /**
 * @brief Function implementing the SDTask thread.
@@ -1850,15 +1814,19 @@ void StartSDTask(void *argument)
 	/* This task do not work until datetime it's initialized */
 	while(!today.Enable){}
 	/* Initialize all the directory and file */
-	if(1)
-	{
-		memcpy(&fatman.Directory[1].DirectoryName, "EVENT", 5);
-		fatman_rename(1, (char*)today.DateString, 8);
-//		fatman_read(1);
-		fatman_init(1);
-//		if(!fatman.Buffer_size)
+	DirectoryInit(1, "EVENT", 5);
+//	if(1)
+//	{
+//		memcpy(&fatman.Directory[1].DirectoryName, "EVENT", 5);
+//		fatman_rename(1, (char*)today.DateString, 8);
+//
+//		memcpy(fatman.Directory[0].FilePath, (char *)fatman.Directory[1].FilePath, sizeof(fatman.Directory[0].FilePath));
+//		fatman_read();
+//
+//		fatman_init(1);
+//		if(fatman.Buffer_size)
 //			fatman_write(1);
-	}
+//	}
 	vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
 
   /* Infinite loop */
@@ -2078,6 +2046,13 @@ void StartCAN1RxTxTask(void *argument)
 				  PSA.CANSPI.State = CANSPI_Transmit(&rxMessage);
 			  }
 		  }
+
+		  else if(!PSA.CANSPI.State)
+		  {
+			  MX_SPI2_Init();
+			  PSA.CANSPI.State = CANSPI_Initialize();
+		  }
+
 		  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
 	  }
   /* USER CODE END StartCAN1RxTxTask */

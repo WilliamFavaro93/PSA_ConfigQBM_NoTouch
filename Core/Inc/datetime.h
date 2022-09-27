@@ -40,6 +40,8 @@ typedef struct
 	uint8_t minutes;					/**< minute number	*/
 	uint8_t seconds;					/**< second number	*/
 
+	uint8_t deciseconds;				/**< decisecond number	*/
+
 	uint8_t DailyLight;					/**< define if it's daily light	*/
 	uint8_t Enable;						/**< define if it's enable */
 

@@ -116,6 +116,8 @@ void DateTime_AddSecond()
 						today.year++;
 					}
 				}
+				DateTime_setDateString();
+				DateTime_setDateString_withSeparator(":");
 			}
 		}
 	}
@@ -133,6 +135,24 @@ void DateTime_AddSecond()
 		today.hours = 3;
 	}
 
+	DateTime_setTimeString();
+	DateTime_setTimeString_withSeparator(":");
+}
+
+/*
+ * @brief This method is used to update the structure as if a decisecond had passed
+ * @author William Favaro
+ * @date 05/08/2022
+ */
+void DateTime_AddDeciSecond()
+{
+	if(!today.Enable)
+		return;
+
+	today.deciseconds++;
+	today.deciseconds %= 10;
+	if(today.deciseconds == 0)
+		DateTime_AddSecond();
 }
 
 /*
