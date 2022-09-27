@@ -41,6 +41,8 @@ void Alarm_CheckCondition(Alarm * Alarm, uint8_t condition);
 void Alarm_Disable(Alarm * Alarm);
 void Alarm_Enable(Alarm * Alarm);
 /* Public Automated Testing Function -----------------------------------------*/
+#ifdef DEBUG
 void Alarm_test_all();
+#endif /* DEBUG */
 
 #endif /* INC_ALARM_H_ */

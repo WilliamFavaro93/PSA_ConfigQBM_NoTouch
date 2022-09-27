@@ -18,16 +18,7 @@
 #include <myqueue.h>
 
 /* Defines -------------------------------------------------------------------*/
-#if DEBUG
-	#define MYQUEUE_AUTEST 1
-#else /* DEBUG */
-	#define MYQUEUE_AUTEST 0
-#endif /* DEBUG */
 /* Variables -----------------------------------------------------------------*/
-#if MYQUEUE_AUTEST
-	MyQueue test;
-#endif /* MYQUEUE_AUTEST */
-
 /* Private Function definition -----------------------------------------------*/
 /* Public Function -----------------------------------------------------------*/
 void MyQueue_Init(MyQueue *Queue)
@@ -78,51 +69,5 @@ uint16_t MyQueue_GetLastValue(MyQueue Queue)
 	}
 	return 0;
 }
-
-MyQueue_RemoveLastInsertElement(MyQueue *Queue)
-{
-	/* TODO */
-}
 /* Private Function ----------------------------------------------------------*/
-/* Public Automated Testing Function -----------------------------------------*/
-#if MYQUEUE_AUTEST
-/*
- * This method is just for testing with debug this code
- */
-void MyQueue_test_InsertBigNumberOfSameValueElements()
-{
-	uint16_t AverageElement = 30;
-
-	MyQueue_Init(&test);
-	for(uint8_t i=0; i<120; i++){
-		MyQueue_InsertElement(&test, AverageElement);
-	}
-
-	while(!(MyQueue_GetAverageValue(test) == AverageElement)){}
-	while(!(MyQueue_GetLastValue(test) == AverageElement)){}
-}
-
-/*
- * This method is just for testing with debug this code
- */
-void MyQueue_test_InsertIncresingValueElements()
-{
-	uint16_t StartingElement = 1600;
-
-	for(uint8_t i=0; i < MYQUEUE_N_MAX_ELEMENT; i++){
-		MyQueue_InsertElement(&test, StartingElement + i);
-	}
-
-	while(!(MyQueue_GetAverageValue(test) > (1600))){}
-	while(!(MyQueue_GetAverageValue(test) < (1600 + MYQUEUE_N_MAX_ELEMENT))){}
-}
-#endif /* MYQUEUE_AUTEST */
-
-void MyQueue_test_all()
-{
-#if MYQUEUE_AUTEST
-	MyQueue_test_InsertBigNumberOfSameValueElements();
-	MyQueue_test_InsertIncresingValueElements();
-#endif /* MYQUEUE_AUTEST */
-}
 /* End of the file -----------------------------------------------------------*/

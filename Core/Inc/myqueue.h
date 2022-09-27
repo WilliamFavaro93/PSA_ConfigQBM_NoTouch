@@ -37,7 +37,6 @@ typedef struct{
 /* Public Function definition ------------------------------------------------*/
 void MyQueue_Init(MyQueue *Queue);
 void MyQueue_InsertElement(MyQueue *Queue, int16_t ElementToInsert);
-void MyQueue_RemoveLastInsertElement(MyQueue *Queue);
 uint16_t MyQueue_GetAverageValue(MyQueue Queue);
 uint16_t MyQueue_GetLastValue(MyQueue Queue);
 /* Public Automated Testing Function -----------------------------------------*/

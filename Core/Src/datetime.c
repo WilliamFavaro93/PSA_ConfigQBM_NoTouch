@@ -19,9 +19,6 @@
 #include <datetime.h>
 #include <stdio.h>
 /* Defines -------------------------------------------------------------------*/
-#ifdef DEBUG
-	#define DATETIME_AUTEST
-#endif /* DEBUG */
 
 /* Variables -----------------------------------------------------------------*/
 DateTime today;
@@ -360,64 +357,4 @@ void DateTime_UpdateString()
 }
 
 /* Private Function ----------------------------------------------------------*/
-#ifdef DATETIME_AUTEST
-
-void DateTime_test_AddSecond()
-{
-	DateTime_Init(2022, 8, 5, 11, 37, 0);
-	DateTime_UpdateString();
-	while(strcmp(&today.TimeString, "113700")){}
-
-	DateTime_AddSecond();
-	DateTime_UpdateString();
-	while(strcmp(&today.TimeString, "113701")){}
-}
-
-void DateTime_test_NewDay()
-{
-	DateTime_Init(2021, 12, 31, 23, 59, 59);
-	while(DateTime_ItsaNewDay()){}
-	DateTime_AddSecond();
-	while(!DateTime_ItsaNewDay()){}
-	DateTime_UpdateString();
-	while(strcmp(&today.TimeString, "000000")){}
-	while(strcmp(&today.DateString, "20220101")){}
-}
-
-void DateTime_test_NewYear()
-{
-
-	DateTime_Init(2021, 12, 31, 23, 59, 59);
-	DateTime_AddSecond();
-	DateTime_UpdateString();
-	while(strcmp(&today.TimeString, "000000")){}
-	while(strcmp(&today.DateString, "20220101")){}
-}
-
-void DateTime_test_its29february()
-{
-	DateTime_Init(2020, 2, 28, 23, 59, 59);
-	DateTime_AddSecond();
-	DateTime_UpdateString();
-	while(strcmp(&today.DateString, "20200229")){}
-}
-
-
-#endif /* DATETIME_AUTEST */
-
-/*
- * @brief This method is used to test if the module works as wanted. If the return is 0, the test result is passed.
- * @author William Favaro
- * @date 05/08/2022
- */
-void DateTime_test_all()
-{
-#ifdef DATETIME_AUTEST
-	DateTime_test_AddSecond();
-	DateTime_test_NewDay();
-	DateTime_test_NewYear();
-	DateTime_test_its29february();
-#endif /* DATETIME_UTEST */
-}
-
 /* End of the file -----------------------------------------------------------*/
