@@ -40,5 +40,7 @@ void MyQueue_InsertElement(MyQueue *Queue, int16_t ElementToInsert);
 uint16_t MyQueue_GetAverageValue(MyQueue Queue);
 uint16_t MyQueue_GetLastValue(MyQueue Queue);
 /* Public Automated Testing Function -----------------------------------------*/
+#ifdef DEBUG
 void MyQueue_test_all();
+#endif /* DEBUG */
 #endif /* MYQUEUE_H_ */

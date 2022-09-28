@@ -51,19 +51,23 @@ typedef struct
 										Example: "2022/08/29" where '/' is the separator*/
 	char TimeString[7];					/**< array of char that identifies the time.
 										Example: "102300"  								*/
-	char TimeString_withSeparator[9];		/**< array of char that identifies the date.
+	char TimeString_withSeparator[10];		/**< array of char that identifies the date.
 										Example: "10:23:00" where ':' is the separator	*/
 } DateTime;
 
 /* Public Function definition ------------------------------------------------*/
 void DateTime_Init(uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uint8_t minutes, uint8_t seconds);
-void DateTime_Update(DateTime* DateTime, uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uint8_t minutes, uint8_t seconds);
+//void DateTime_Update(DateTime* DateTime, uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uint8_t minutes, uint8_t seconds);
 void DateTime_AddSecond();
-void DateTime_setDateString();
-void DateTime_setDateString_withSeparator(char* separator);
-void DateTime_setTimeString();
-void DateTime_setTimeString_withSeparator(char* separator);
-uint8_t DateTime_ItsaNewDay();
+void DateTime_AddDeciSecond();
+void ConvertNumberIntoString(uint16_t number, char * pointerToCharArray, uint8_t CharArray_length);
+//void DateTime_setDateString();
+//void DateTime_setDateString_withSeparator(char* separator);
+//void DateTime_setTimeString();
+//void DateTime_setTimeString_withSeparator(char* separator);
+//uint8_t DateTime_ItsaNewDay();
 /* Public Automated Testing Function -----------------------------------------*/
-
+#ifdef DEBUG
+void DateTime_test_all();
+#endif /* DEBUG */
 #endif /* INC_DATETIME_H_ */

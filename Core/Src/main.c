@@ -112,7 +112,7 @@ const osThreadAttr_t ModeTask_attributes = {
 osThreadId_t TimeTaskHandle;
 const osThreadAttr_t TimeTask_attributes = {
   .name = "TimeTask",
-  .stack_size = 256 * 4,
+  .stack_size = 512 * 4,
   .priority = (osPriority_t) osPriorityNormal7,
 };
 /* Definitions for CAN2TxTask */
@@ -286,6 +286,9 @@ int main(void)
   MX_FATFS_Init();
   MX_DMA_Init();
   /* USER CODE BEGIN 2 */
+  DateTime_test_all();
+  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+  while(1){}
   AssignDefaultValue();
 
   HAL_CAN_Start(&hcan2);
@@ -1259,7 +1262,6 @@ void AssignDefaultValue()
 {
 	/* DateTime */
 	DateTime_Init(2022, 9, 23, 0, 0, 0);
-	DateTime_UpdateString();
 
 	/* Inizializza i valori dei timer per il debug */
 	PSA.Time.Adsorption_1 = 27;
@@ -1361,7 +1363,6 @@ void StartDefaultTask(void *argument)
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
-	uxTaskGetStackHighWaterMark((TaskHandle_t *)SDTaskHandle);
 	vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END 5 */
@@ -1681,9 +1682,6 @@ void StartTimeTask(void *argument)
 	PSA.Time.ValveAlive_ReceiveMessageTimer = PSA.Time.ValveAlive_ReceiveMessageRefresh;
 	PSA.Time.ValveAlive_SendMessageTimer = PSA.Time.ValveAlive_SendMessageRefresh;
 
-	/* */
-	uint8_t today_deciseconds = 0;
-
   /* Infinite loop */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
   for(;;)
@@ -1808,7 +1806,6 @@ void StartSDTask(void *argument)
 	if(0)
 	{
 		DateTime_Init(2022, 9, 22, 14, 4, 0);
-		DateTime_UpdateString();
 	}
 
 	/* This task do not work until datetime it's initialized */

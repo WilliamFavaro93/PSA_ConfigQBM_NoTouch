@@ -62,12 +62,14 @@ typedef struct
 	uint16_t Buffer_size;						/**< size of the buffer 			*/
 } ManageSD;
 
-/* Exported functions --------------------------------------------------------*/
+/* Public Function definition ------------------------------------------------*/
 void fatman_init(uint8_t Directory_ID);
 void fatman_write(uint8_t Directory_ID);
 void fatman_read();
 void fatman_rename(uint8_t Directory_ID, char * NameFile, uint8_t NameFile_length);
+/* Public Automated Testing Function -----------------------------------------*/
+#ifdef DEBUG
 void fatman_test_all();
-
+#endif /* DEBUG */
 
 #endif /* INC_FATMAN_H_ */

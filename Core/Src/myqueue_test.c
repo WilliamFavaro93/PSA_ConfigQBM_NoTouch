@@ -13,7 +13,7 @@
   ******************************************************************************
   */
 
-
+#ifdef DEBUG
 /* Includes ------------------------------------------------------------------*/
 #include <myqueue.h>
 /* Defines -------------------------------------------------------------------*/
@@ -59,4 +59,5 @@ void MyQueue_test_InsertIncresingValueElements()
 	while(!(MyQueue_GetAverageValue(test) > (1600))){}
 	while(!(MyQueue_GetAverageValue(test) < (1600 + MYQUEUE_N_MAX_ELEMENT))){}
 }
+#endif /* DEBUG */
 /* End of the file -----------------------------------------------------------*/

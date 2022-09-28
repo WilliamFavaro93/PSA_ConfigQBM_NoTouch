@@ -22,13 +22,36 @@
 
 /* Variables -----------------------------------------------------------------*/
 DateTime today;
-DateTime today_LastUpdate;
 
 /* Private Function definition -----------------------------------------------*/
 
+void DateTime_setDateString();
+void DateTime_setDateString_withSeparator();
+void DateTime_setTimeString();
+void DateTime_setTimeString_withSeparator();
+void DateTime_AddSecond();
 
 
 /* Public Function -----------------------------------------------------------*/
+void ConvertNumberIntoString(uint16_t number, char * pointerToCharArray, uint8_t CharArray_length)
+{
+	for(uint8_t i = 0; i <= CharArray_length; i++)
+	{
+		pointerToCharArray[i] = '0';
+	}
+
+	uint8_t i = 0;
+	/* while(n): n=0 when number is copied or i = CharArrayLength */
+	while(!((number == 0) || (i == CharArray_length)))
+	{
+		uint8_t remainder = number % 10;
+		pointerToCharArray[CharArray_length - i - 1] = remainder + '0';
+
+		number /= 10;
+		i++;
+	}
+}
+
 /*
  * @brief This method is used to initialize or update the char[] of the DateTime
  * @author William Favaro
@@ -60,10 +83,29 @@ void DateTime_Init(uint16_t year, uint8_t month, uint8_t day, uint8_t hours, uin
 			today.DailyLight = 1;
 	}
 
-	/* Update the datetime today_LastUpdate*/
-	memcpy(&today_LastUpdate, &today, sizeof(DateTime));
+	DateTime_setDateString();
+	DateTime_setDateString_withSeparator("/");
+	DateTime_setTimeString();
+	DateTime_setTimeString_withSeparator(":");
 }
 
+/*
+ * @brief This method is used to update the structure as if a decisecond had passed
+ * @author William Favaro
+ * @date 05/08/2022
+ */
+void DateTime_AddDeciSecond()
+{
+	if(!today.Enable)
+		return;
+
+	today.deciseconds++;
+	today.deciseconds %= 10;
+	if(today.deciseconds == 0)
+		DateTime_AddSecond();
+}
+
+/* Private Function ----------------------------------------------------------*/
 /*
  * @brief This method is used to update the structure as if a second had passed
  * @author William Favaro
@@ -114,7 +156,7 @@ void DateTime_AddSecond()
 					}
 				}
 				DateTime_setDateString();
-				DateTime_setDateString_withSeparator(":");
+				DateTime_setDateString_withSeparator("/");
 			}
 		}
 	}
@@ -137,45 +179,6 @@ void DateTime_AddSecond()
 }
 
 /*
- * @brief This method is used to update the structure as if a decisecond had passed
- * @author William Favaro
- * @date 05/08/2022
- */
-void DateTime_AddDeciSecond()
-{
-	if(!today.Enable)
-		return;
-
-	today.deciseconds++;
-	today.deciseconds %= 10;
-	if(today.deciseconds == 0)
-		DateTime_AddSecond();
-}
-
-/*
- * @brief This method return if it's a new day from last time that was used this method or DateTime_Init
- * @author William Favaro
- * @date 05/08/2022
- */
-uint8_t DateTime_ItsaNewDay()
-{
-	if(!today.Enable)
-		return 0;
-
-	int8_t result = 0;
-	/* Compare if it is a new day */
-	if((today.day > today_LastUpdate.day)||(today.month > today_LastUpdate.month)||(today.year > today_LastUpdate.year))
-	{
-		result = 1;
-	}
-	/* Update the datetime today_LastUpdate*/
-	memcpy(&today_LastUpdate, &today, sizeof(DateTime));
-	/* return the result */
-	return result;
-}
-
-/*** PRIVATE METHODs ***/
-/*
  * @brief This method update today.DateString or today.DateString_wSeparator
  * @author William Favaro
  * @date 05/08/2022
@@ -186,30 +189,9 @@ void DateTime_setDateString()
 	if(!today.Enable)
 		return;
 
-	char yy[4];
-	char mm[2]="00";
-	char dd[2]="00";
-
-	sprintf(yy, "%d", today.year);
-	if(today.month > 9)
-		sprintf(mm, "%d", today.month);
-	else
-		sprintf(&mm[1], "%d", today.month);
-	if(today.day > 9)
-		sprintf(dd, "%d", today.day);
-	else
-		sprintf(&dd[1], "%d", today.day);
-
-	today.DateString[0] = yy[0];
-	today.DateString[1] = yy[1];
-	today.DateString[2] = yy[2];
-	today.DateString[3] = yy[3];
-
-	today.DateString[4] = mm[0];
-	today.DateString[5] = mm[1];
-
-	today.DateString[6] = dd[0];
-	today.DateString[7] = dd[1];
+	ConvertNumberIntoString(today.year, &today.DateString[0], 4);
+	ConvertNumberIntoString(today.month, &today.DateString[4], 2);
+	ConvertNumberIntoString(today.day, &today.DateString[6], 2);
 }
 
 /*
@@ -223,35 +205,11 @@ void DateTime_setDateString_withSeparator(char* separator)
 	if(!today.Enable)
 		return;
 
-	char yy[4];
-	char mm[2]="00";
-	char dd[2]="00";
-
-	sprintf(yy, "%d", today.year);
-	if(today.month > 9)
-		sprintf(mm, "%d", today.month);
-	else
-		sprintf(&mm[1], "%d", today.month);
-	if(today.day > 9)
-		sprintf(dd, "%d", today.day);
-	else
-		sprintf(&dd[1], "%d", today.day);
-
-
-	today.DateString_withSeparator[0] = yy[0];
-	today.DateString_withSeparator[1] = yy[1];
-	today.DateString_withSeparator[2] = yy[2];
-	today.DateString_withSeparator[3] = yy[3];
-
+	ConvertNumberIntoString(today.year, &today.DateString_withSeparator[0], 4);
 	today.DateString_withSeparator[4] = separator[0];
-
-	today.DateString_withSeparator[5] = mm[0];
-	today.DateString_withSeparator[6] = mm[1];
-
+	ConvertNumberIntoString(today.month, &today.DateString_withSeparator[5], 2);
 	today.DateString_withSeparator[7] = separator[0];
-
-	today.DateString_withSeparator[8] = dd[0];
-	today.DateString_withSeparator[9] = dd[1];
+	ConvertNumberIntoString(today.day, &today.DateString_withSeparator[8], 2);
 }
 
 /*
@@ -265,34 +223,9 @@ void DateTime_setTimeString()
 	if(!today.Enable)
 		return;
 
-	char hh[2]="00";
-	char mm[2]="00";
-	char ss[2]="00";
-
-	if(today.hours > 9)
-		sprintf(hh, "%d", today.hours);
-	else
-		sprintf(&hh[1], "%d", today.hours);
-	if(today.minutes > 9)
-		sprintf(mm, "%d", today.minutes);
-	else
-		sprintf(&mm[1], "%d", today.minutes);
-	if(today.seconds > 9)
-		sprintf(ss, "%d", today.seconds);
-	else
-		sprintf(&ss[1], "%d", today.seconds);
-//	sprintf(dd, "%d", today->day);
-
-
-	today.TimeString[0] = hh[0];
-	today.TimeString[1] = hh[1];
-
-	today.TimeString[2] = mm[0];
-	today.TimeString[3] = mm[1];
-
-	today.TimeString[4] = ss[0];
-	today.TimeString[5] = ss[1];
-
+	ConvertNumberIntoString(today.hours, &today.TimeString[0], 2);
+	ConvertNumberIntoString(today.minutes, &today.TimeString[2], 2);
+	ConvertNumberIntoString(today.seconds, &today.TimeString[4], 2);
 }
 
 /*
@@ -306,54 +239,11 @@ void DateTime_setTimeString_withSeparator(char* separator)
 	if(!today.Enable)
 		return;
 
-	char hh[2]="00";
-	char mm[2]="00";
-	char ss[2]="00";
-
-	if(today.hours > 9)
-		sprintf(hh, "%d", today.hours);
-	else
-		sprintf(&hh[1], "%d", today.hours);
-	if(today.minutes > 9)
-		sprintf(mm, "%d", today.minutes);
-	else
-		sprintf(&mm[1], "%d", today.minutes);
-	if(today.seconds > 9)
-		sprintf(ss, "%d", today.seconds);
-	else
-		sprintf(&ss[1], "%d", today.seconds);
-//	sprintf(dd, "%d", today->day);
-
-
-	today.TimeString_withSeparator[0] = hh[0];
-	today.TimeString_withSeparator[1] = hh[1];
-
+	ConvertNumberIntoString(today.hours, &today.TimeString_withSeparator[0], 2);
 	today.TimeString_withSeparator[2] = separator[0];
-
-	today.TimeString_withSeparator[3] = mm[0];
-	today.TimeString_withSeparator[4] = mm[1];
-
+	ConvertNumberIntoString(today.minutes, &today.TimeString_withSeparator[3], 2);
 	today.TimeString_withSeparator[5] = separator[0];
-
-	today.TimeString_withSeparator[6] = ss[0];
-	today.TimeString_withSeparator[7] = ss[1];
-}
-
-/*
- * @brief This method is used to update the char[] of the DateTime
- * @author William Favaro
- * @date 05/08/2022
- * @note you should use it after the update of DateTime_Init() or DateTime_AddSecond()
- */
-void DateTime_UpdateString()
-{
-	if(!today.Enable)
-		return;
-
-	DateTime_setDateString();
-	DateTime_setDateString_withSeparator("/");
-	DateTime_setTimeString();
-	DateTime_setTimeString_withSeparator(":");
+	ConvertNumberIntoString(today.seconds, &today.TimeString_withSeparator[6], 2);
 }
 
 /* Private Function ----------------------------------------------------------*/
