@@ -34,6 +34,7 @@
 #include "timecounter.h"
 #include "alarm.h"
 #include "stdio.h"
+#include "alarm_datetime_fatman.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -75,6 +76,7 @@ DMA_HandleTypeDef hdma_sdio_tx;
 SPI_HandleTypeDef hspi2;
 
 TIM_HandleTypeDef htim2;
+TIM_HandleTypeDef htim7;
 
 UART_HandleTypeDef huart6;
 
@@ -213,6 +215,7 @@ static void MX_I2C2_Init(void);
 static void MX_USART6_UART_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_DMA_Init(void);
+static void MX_TIM7_Init(void);
 void StartDefaultTask(void *argument);
 void StartStateTask(void *argument);
 void StartOutTask(void *argument);
@@ -285,10 +288,11 @@ int main(void)
   MX_SDIO_SD_Init();
   MX_FATFS_Init();
   MX_DMA_Init();
+  MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-  DateTime_test_all();
-  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-  while(1){}
+//  DateTime_test_all();
+//  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+//  while(1){}
   AssignDefaultValue();
 
   HAL_CAN_Start(&hcan2);
@@ -1022,6 +1026,44 @@ static void MX_TIM2_Init(void)
 }
 
 /**
+  * @brief TIM7 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_TIM7_Init(void)
+{
+
+  /* USER CODE BEGIN TIM7_Init 0 */
+
+  /* USER CODE END TIM7_Init 0 */
+
+  TIM_MasterConfigTypeDef sMasterConfig = {0};
+
+  /* USER CODE BEGIN TIM7_Init 1 */
+
+  /* USER CODE END TIM7_Init 1 */
+  htim7.Instance = TIM7;
+  htim7.Init.Prescaler = 179;
+  htim7.Init.CounterMode = TIM_COUNTERMODE_UP;
+  htim7.Init.Period = 99;
+  htim7.Init.AutoReloadPreload = TIM_AUTORELOAD_PRELOAD_DISABLE;
+  if (HAL_TIM_Base_Init(&htim7) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
+  sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
+  if (HAL_TIMEx_MasterConfigSynchronization(&htim7, &sMasterConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN TIM7_Init 2 */
+
+  /* USER CODE END TIM7_Init 2 */
+
+}
+
+/**
   * @brief USART6 Initialization Function
   * @param None
   * @retval None
@@ -1317,36 +1359,6 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	}
 }
 
-void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage)
-{
-	if(Alarm->toWriteToSD)
-	{
-	  memcpy(&fatman.Buffer[0], (char*)today.DateString_withSeparator, 10);
-	  memcpy(&fatman.Buffer[11], (char*)today.TimeString_withSeparator, 8);
-	  memcpy(&fatman.Buffer[20], (char*)AlarmMessage, sizeofAlarmMessage);
-	  if(Alarm->isTriggered)
-		  memcpy(&fatman.Buffer[20 + sizeofAlarmMessage], "<<<", sizeof("<<<"));
-	  else
-		  memcpy(&fatman.Buffer[20 + sizeofAlarmMessage], ">>>", sizeof(">>>"));
-	  memcpy(&fatman.Buffer[99], "\n", 1);
-	  fatman.Buffer_size = 100;
-	  fatman_write(1);
-	  Alarm->toWriteToSD = 0;
-	}
-}
-
-void DirectoryInit(uint8_t ID, char * nameDir, uint8_t nameDir_length)
-{
-	memcpy(&fatman.Directory[ID].DirectoryName, (char *)nameDir, nameDir_length);
-	fatman_rename(ID, (char *)today.DateString, 8);
-
-	memcpy(fatman.Directory[0].FilePath, (char *)fatman.Directory[ID].FilePath, sizeof(fatman.Directory[0].FilePath));
-	fatman_read();
-
-	fatman_init(ID);
-	if(fatman.Buffer_size)
-		fatman_write(ID);
-}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -1414,29 +1426,6 @@ void StartStateTask(void *argument)
 			  PSA_UpdateState();
 		  }
 	  }
-
-//	  if(!PSA.Time.NextStateTimer))
-//	  {
-//		  if(!PSA.State)
-//			  PSA.State++;
-//		  if(PSA.State > 0)
-//			  PSA.State %= 9;
-//		  PSA_State();
-//		  PSA.CAN_2.TransmitValveMessage = 0xFF;
-//	  }
-//
-//	  /* Check if the mode is changing */
-//	  if(PSA.Mode.Standby && (PSA.State > 0))
-//	  {/* ModeTask ask to Standby */
-//		  PSA.State = -2;
-//		  PSA_State();
-//	  }
-//	  else if(PSA.Mode.Run && (!PSA.State))
-//	  {/* ModeTask ask to Run */
-//		  PSA.State = 1;
-//		  PSA_State();
-//	  }
-
 	  vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartStateTask */

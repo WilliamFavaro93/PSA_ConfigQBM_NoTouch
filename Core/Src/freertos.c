@@ -45,7 +45,8 @@
 
 /* Private variables ---------------------------------------------------------*/
 /* USER CODE BEGIN Variables */
-
+extern TIM_HandleTypeDef htim7;
+volatile unsigned long ulStatsTimerTicks;
 /* USER CODE END Variables */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -62,12 +63,13 @@ void vApplicationIdleHook(void);
 /* Functions needed when configGENERATE_RUN_TIME_STATS is on */
 __weak void configureTimerForRunTimeStats(void)
 {
-
+	ulStatsTimerTicks = 0;
+	HAL_TIM_Base_Start_IT(&htim7);
 }
 
 __weak unsigned long getRunTimeCounterValue(void)
 {
-return 0;
+	return ulStatsTimerTicks;
 }
 /* USER CODE END 1 */
 
