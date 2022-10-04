@@ -30,6 +30,7 @@
 #include "fatman.h"
 #include "mcp2515.h"
 #include "myqueue.h"
+#include "mytimer.h"
 #include "psa.h"
 #include "timecounter.h"
 #include "alarm.h"
@@ -45,7 +46,11 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 /* USER CODE END PD */
-
+#ifdef DEBUG
+	#define relse
+#else
+	#define relse else
+#endif
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 /* USER CODE END PM */
@@ -188,12 +193,10 @@ extern DateTime today;
 uCAN_MSG rxMessage;
 extern ManageSD fatman;
 
-const TickType_t seconds = pdMS_TO_TICKS(1000);
-const TickType_t deciseconds = pdMS_TO_TICKS(100);
+const TickType_t seconds      = pdMS_TO_TICKS(1000);
+const TickType_t deciseconds  = pdMS_TO_TICKS(100);
 const TickType_t centiseconds = pdMS_TO_TICKS(10);
 const TickType_t milliseconds = pdMS_TO_TICKS(1);
-
-UBaseType_t BaseStackHighWaterMark;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -293,6 +296,8 @@ int main(void)
 //  DateTime_test_all();
 //  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
 //  while(1){}
+
+
   AssignDefaultValue();
 
   HAL_CAN_Start(&hcan2);
@@ -1685,21 +1690,58 @@ void StartTimeTask(void *argument)
 	  TimeCounter_AddDecisecond(&TotalWorking);
 	  /*** TIMER ***/
 	  /* When a timer reach 0, something happens and it refresh */
-	  if(PSA.Time.StateTimer)
-		  PSA.Time.StateTimer--;
-	  if(PSA.Time.ValveAlive_ReceiveMessageTimer)
-		  PSA.Time.ValveAlive_ReceiveMessageTimer--;
-	  if(PSA.Time.ValveAlive_SendMessageTimer)
-		  PSA.Time.ValveAlive_SendMessageTimer--;
-	  /* ALARM TIMER */
-	  if(PSA.Alarm.AL02_LowAirPressure.Timer)
-		  PSA.Alarm.AL02_LowAirPressure.Timer--;
-	  if(PSA.Alarm.AL05_LowProcessTankPressure.Timer)
-		  PSA.Alarm.AL05_LowProcessTankPressure.Timer--;
-	  if(PSA.Alarm.AL16_HighOut2Pressure.Timer)
-		  PSA.Alarm.AL16_HighOut2Pressure.Timer--;
-	  if(PSA.Alarm.MissingSDCard.Timer)
-		  PSA.Alarm.MissingSDCard.Timer--;
+	  MyTimer_SubtractDeciSecond(&PSA.Time.StateTimer);
+	  MyTimer_SubtractDeciSecond(&PSA.Time.ValveAlive_ReceiveMessageTimer);
+	  MyTimer_SubtractDeciSecond(&PSA.Time.ValveAlive_SendMessageTimer);
+//	  if(PSA.Time.StateTimer)
+//		  PSA.Time.StateTimer--;
+//	  if(PSA.Time.ValveAlive_ReceiveMessageTimer)
+//		  PSA.Time.ValveAlive_ReceiveMessageTimer--;
+//	  if(PSA.Time.ValveAlive_SendMessageTimer)
+//		  PSA.Time.ValveAlive_SendMessageTimer--;
+	  /*** ALARM TIMER ***/
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL01_CANbusError.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL02_LowAirPressure.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL05_LowProcessTankPressure.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL11_External.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL16_HighOut2Pressure.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL17_HighDewpoint.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL18_HighDewpoint.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL19_HighOut1Pressure.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL20_PCComunicationFault.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL31_B1ProbeFault.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL32_B2ProbeFault.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL33_B3ProbeFault.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL34_B4ProbeFault.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.MissingSDCard.Timer);
+//	  if(PSA.Alarm.AL01_CANbusError.Timer)
+//		  PSA.Alarm.AL01_CANbusError.Timer--;
+//	  if(PSA.Alarm.AL02_LowAirPressure.Timer)
+//		  PSA.Alarm.AL02_LowAirPressure.Timer--;
+//	  if(PSA.Alarm.AL05_LowProcessTankPressure.Timer)
+//		  PSA.Alarm.AL05_LowProcessTankPressure.Timer--;
+//	  if(PSA.Alarm.AL11_External.Timer)
+//		  PSA.Alarm.AL11_External.Timer--;
+//	  if(PSA.Alarm.AL16_HighOut2Pressure.Timer)
+//		  PSA.Alarm.AL16_HighOut2Pressure.Timer--;
+//	  if(PSA.Alarm.AL17_HighDewpoint.Timer)
+//		  PSA.Alarm.AL17_HighDewpoint.Timer--;
+//	  if(PSA.Alarm.AL18_HighDewpoint.Timer)
+//		  PSA.Alarm.AL18_HighDewpoint.Timer--;
+//	  if(PSA.Alarm.AL19_HighOut1Pressure.Timer)
+//		  PSA.Alarm.AL19_HighOut1Pressure.Timer--;
+//	  if(PSA.Alarm.AL20_PCComunicationFault.Timer)
+//		  PSA.Alarm.AL20_PCComunicationFault.Timer--;
+//	  if(PSA.Alarm.AL31_B1ProbeFault.Timer)
+//		  PSA.Alarm.AL31_B1ProbeFault.Timer--;
+//	  if(PSA.Alarm.AL32_B2ProbeFault.Timer)
+//		  PSA.Alarm.AL32_B2ProbeFault.Timer--;
+//	  if(PSA.Alarm.AL33_B3ProbeFault.Timer)
+//		  PSA.Alarm.AL33_B3ProbeFault.Timer--;
+//	  if(PSA.Alarm.AL34_B4ProbeFault.Timer)
+//		  PSA.Alarm.AL34_B4ProbeFault.Timer--;
+//	  if(PSA.Alarm.MissingSDCard.Timer)
+//		  PSA.Alarm.MissingSDCard.Timer--;
 	  /*** WATCHDOG ***/
 	  /* If there's no problem, it refresh before reaching 0 */
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
@@ -1791,48 +1833,38 @@ void StartSDTask(void *argument)
 
 	/* Initialize the name of directory */
 	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
-
-	if(0)
-	{
-		DateTime_Init(2022, 9, 22, 14, 4, 0);
-	}
-
 	/* This task do not work until datetime it's initialized */
 	while(!today.Enable){}
 	/* Initialize all the directory and file */
 	DirectoryInit(1, "EVENT", 5);
-//	if(1)
-//	{
-//		memcpy(&fatman.Directory[1].DirectoryName, "EVENT", 5);
-//		fatman_rename(1, (char*)today.DateString, 8);
-//
-//		memcpy(fatman.Directory[0].FilePath, (char *)fatman.Directory[1].FilePath, sizeof(fatman.Directory[0].FilePath));
-//		fatman_read();
-//
-//		fatman_init(1);
-//		if(fatman.Buffer_size)
-//			fatman_write(1);
-//	}
 	vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
 
   /* Infinite loop */
   for(;;)
   {
-
+#ifdef DEBUG
 	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+#endif
 
+	  /* MOST SECURE WAY to AVOID BUGS:
+	   * rename filepath every time at the beginning of the task */
+	  fatman_rename(1, (char *)today.DateString, 8);
+	  /* if there is some problem. Try to re-init SD */
 	  if(hsd.ErrorCode)
 	  {
 		  HAL_SD_Init(&hsd);
 	  }
 
+	  /* If alarm trigger or stop to trigger, write it on SD */
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL01_CANbusError,
 			  	  	  	  	  	  "AL01 Errore CAN Bus",
 								  sizeof("AL01 Errore CAN Bus"));
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL02_LowAirPressure,
 			  	  	  	  	  	  "AL02 Bassa Pressione Aria in Ingresso",
 								  sizeof("AL02 Bassa Pressione Aria in Ingresso"));
-	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL05_LowProcessTankPressure, "AL05 Bassa Pressione Serbatoio di Processo", sizeof("AL05 Bassa Pressione Serbatoio di Processo"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL05_LowProcessTankPressure,
+			  	  	  	  	  	  "AL05 Bassa Pressione Serbatoio di Processo",
+								  sizeof("AL05 Bassa Pressione Serbatoio di Processo"));
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL11_External,
 			  	  	  	  	  	  "AL11 Allarme Esterno",
 								  sizeof("AL11 Allarme Esterno"));
@@ -1863,21 +1895,6 @@ void StartSDTask(void *argument)
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.MissingSDCard,
 	  			  	  	  	  	  "MicroSD Assente",
 								  sizeof("MicroSD Assente"));
-
-
-//	  if(PSA.Alarm.AL05_LowProcessTankPressure.toWriteToSD)
-//	  {
-//		  memcpy(&fatman.Buffer[0], (char*)today.DateString_withSeparator, 10);
-//		  memcpy(&fatman.Buffer[11], (char*)today.TimeString_withSeparator, 8);
-//		  if(PSA.Alarm.AL05_LowProcessTankPressure.isTriggered)
-//			  memcpy(&fatman.Buffer[20], "AL05 Bassa Pressione Serbatoio di Processo <<<", sizeof("AL05 Bassa Pressione Serbatoio di Processo <<<"));
-//		  else
-//			  memcpy(&fatman.Buffer[20], "AL05 Bassa Pressione Serbatoio di Processo <<<", sizeof("AL05 Bassa Pressione Serbatoio di Processo <<<"));
-//		  memcpy(&fatman.Buffer[99], "\n", 1);
-//		  fatman.Buffer_size = 100;
-//		  fatman_write(1);
-//		  PSA.Alarm.AL05_LowProcessTankPressure.toWriteToSD = 0;
-//	  }
 
 
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
