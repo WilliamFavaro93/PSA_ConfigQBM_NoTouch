@@ -46,11 +46,7 @@
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
 /* USER CODE END PD */
-#ifdef DEBUG
-	#define relse
-#else
-	#define relse else
-#endif
+
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 /* USER CODE END PM */
@@ -92,7 +88,7 @@ osThreadId_t defaultTaskHandle;
 const osThreadAttr_t defaultTask_attributes = {
   .name = "defaultTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal2,
 };
 /* Definitions for StateTask */
 osThreadId_t StateTaskHandle;
@@ -119,7 +115,7 @@ const osThreadAttr_t ModeTask_attributes = {
 osThreadId_t TimeTaskHandle;
 const osThreadAttr_t TimeTask_attributes = {
   .name = "TimeTask",
-  .stack_size = 512 * 4,
+  .stack_size = 256 * 4,
   .priority = (osPriority_t) osPriorityNormal7,
 };
 /* Definitions for CAN2TxTask */
@@ -171,28 +167,43 @@ const osThreadAttr_t RequestTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
+/* Definitions for B1_AcquisiTask */
+osThreadId_t B1_AcquisiTaskHandle;
+const osThreadAttr_t B1_AcquisiTask_attributes = {
+  .name = "B1_AcquisiTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal2,
+};
 /* Definitions for BinarySemCAN */
 osSemaphoreId_t BinarySemCANHandle;
 const osSemaphoreAttr_t BinarySemCAN_attributes = {
   .name = "BinarySemCAN"
 };
 /* USER CODE BEGIN PV */
-/*** QUEUE ***/
-/* Ho evitato di mettere le code all'interno di una struttura perchè è difficile accedere agli elementi di un array */
-MyQueue AirFlux;
-MyQueue Oxygen;
-MyQueue Nitrogen;
+/* To delete -----------------------------------------------------------------*/
+uint8_t B1_AcquisitionSimulator;
 
-/*** TIMECOUNTER ***/
+/* Queue ---------------------------------------------------------------------*/
+MyQueue B1_InputAirPressureQueue;
+MyQueue B2_OutputAirPressure_1Queue;
+MyQueue B3_ProcessTankAirPressureQueue;
+MyQueue B4_OutputAirPressure_2Queue;
+MyQueue IFM_AirFlowmeterQueue;
+MyQueue KE25_PercentualOxygenInTheAirQueue;
+MyQueue DW_DewpointAirTemperatureQueue;
+
+/* TimeCounter ---------------------------------------------------------------*/
 TimeCounter PulldownWorking;
 TimeCounter MaintenanceWorking;
 TimeCounter TotalWorking;
+
 /*** PSA ***/
 extern PSAStruct PSA;
 extern DateTime today;
 uCAN_MSG rxMessage;
 extern ManageSD fatman;
 
+/* Time Constant -------------------------------------------------------------*/
 const TickType_t seconds      = pdMS_TO_TICKS(1000);
 const TickType_t deciseconds  = pdMS_TO_TICKS(100);
 const TickType_t centiseconds = pdMS_TO_TICKS(10);
@@ -231,6 +242,7 @@ void StartAlarmTask(void *argument);
 void StartFaultTask(void *argument);
 void StartValveTask(void *argument);
 void StartRequestTask(void *argument);
+void StartB1_AcquisiTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 int __io_putchar(int character);
@@ -363,6 +375,9 @@ int main(void)
 
   /* creation of RequestTask */
   RequestTaskHandle = osThreadNew(StartRequestTask, NULL, &RequestTask_attributes);
+
+  /* creation of B1_AcquisiTask */
+  B1_AcquisiTaskHandle = osThreadNew(StartB1_AcquisiTask, NULL, &B1_AcquisiTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1308,7 +1323,7 @@ uint16_t Convert_Command_Value(uint8_t * Command, uint8_t Command_Size, uint8_t 
 void AssignDefaultValue()
 {
 	/* DateTime */
-	DateTime_Init(2022, 9, 23, 0, 0, 0);
+	DateTime_Init(2022, 10, 5, 23, 59, 0);
 
 	/* Inizializza i valori dei timer per il debug */
 	PSA.Time.Adsorption_1 = 27;
@@ -1321,23 +1336,23 @@ void AssignDefaultValue()
 
 	PSA.Mode.Ready = 0x01;								/* Altrimenti non parte */
 
-	PSA.B1_IncomingAirPressure.LowerThreshold = 500; 	//SB1L
-	PSA.B1_IncomingAirPressure.Value = 710;				/* Altrimenti non parte */
-	PSA.B1_IncomingAirPressure.UpperThreshold = 700; 	//SB1H
+	PSA.B1_InputAirPressure.LowerThreshold = 500; 	//SB1L
+	PSA.B1_InputAirPressure.Value = 710;				/* Altrimenti non parte */
+	PSA.B1_InputAirPressure.UpperThreshold = 700; 	//SB1H
 
-	PSA.B3_ProcessTankPressure.LowerThreshold = 500; 	//SB3L
-	PSA.B3_ProcessTankPressure.Value = 600;
-	PSA.B3_ProcessTankPressure.UpperThreshold = 700; 	//SB3H
+	PSA.B3_ProcessTankAirPressure.LowerThreshold = 500; 	//SB3L
+	PSA.B3_ProcessTankAirPressure.Value = 600;
+	PSA.B3_ProcessTankAirPressure.UpperThreshold = 700; 	//SB3H
 
-	PSA.B2_OutputPressure_1.LowerThreshold = 500; 		//SB2L
-	PSA.B2_OutputPressure_1.Value = 600;
-	PSA.B2_OutputPressure_1.UpperThreshold = 700; 		//SB2H
+	PSA.B2_OutputAirPressure_1.LowerThreshold = 500; 		//SB2L
+	PSA.B2_OutputAirPressure_1.Value = 600;
+	PSA.B2_OutputAirPressure_1.UpperThreshold = 700; 		//SB2H
 
-	PSA.B4_OutputPressure_2.LowerThreshold = 500; 		//SB4L
-	PSA.B4_OutputPressure_2.Value = 600;
-	PSA.B4_OutputPressure_2.UpperThreshold = 700; 		//SB4H
+	PSA.B4_OutputAirPressure_2.LowerThreshold = 500; 		//SB4L
+	PSA.B4_OutputAirPressure_2.Value = 600;
+	PSA.B4_OutputAirPressure_2.UpperThreshold = 700; 		//SB4H
 
-	PSA.OUTPriority = 2;								//PR_OUT
+	PSA.OutPriority = 2;								//PR_OUT
 
 	PSA.KE1_OxygenSensor_1.LowerThreshold = 4; 			//SO2-1
 	PSA.Out1.Enable = 1;
@@ -1377,10 +1392,16 @@ void StartDefaultTask(void *argument)
 {
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
-	vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
+	  if(B1_AcquisitionSimulator)
+	  {
+		  PSA.B1_InputAirPressure.Value = 600;
+		  PSA.B1_InputAirPressure.Acquisition = 1;
+	  }
+
+	vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END 5 */
 }
@@ -1485,23 +1506,23 @@ void StartOutTask(void *argument)
 #endif
 		  if(PSA.Command.SetPriorityOut1)
 		  {
-			  PSA.OUTPriority = 1;
+			  PSA.OutPriority = 1;
 		  }
 #ifndef DEBUG
 	  else
 #endif
 		  if(PSA.Command.SetPriorityOut2)
 		  {
-			  PSA.OUTPriority = 2;
+			  PSA.OutPriority = 2;
 		  }
 
 
 		  /*** STARTING CONDICTION ***/
 		  if((PSA.Mode.Run) && ((PSA.Out1.Enable) && (PSA.Out2.Enable)) && ((!PSA.Out1.Ready) && (!PSA.Out2.Ready)))
 		  {
-			  if((!PSA.KE1_OxygenSensor_1.LowerThreshold) && (!PSA.KE2_OxygenSensor_2.LowerThreshold) && ((PSA.OUTPriority == 1) || (PSA.OUTPriority == 2)))
+			  if((!PSA.KE1_OxygenSensor_1.LowerThreshold) && (!PSA.KE2_OxygenSensor_2.LowerThreshold) && ((PSA.OutPriority == 1) || (PSA.OutPriority == 2)))
 			  {/* (SO2-1 != OFF)&&(SO2-2 != OFF) -> OUT_priority */
-				  if(PSA.OUTPriority == 1)
+				  if(PSA.OutPriority == 1)
 				  {
 					  PSA.Out1.Ready = 1;
 				  }
@@ -1552,7 +1573,7 @@ void StartOutTask(void *argument)
 	  else
 #endif
 		  /*** OUT-SWAPPING CONDICTION ***/
-		  if((PSA.Mode.Run) && (PSA.Out1.Working) && (PSA.B2_OutputPressure_1.Value > PSA.B2_OutputPressure_1.UpperThreshold) && (PSA.KE2_OxygenSensor_2.LowerThreshold && PSA.Out2.Enable && !PSA.Alarm.AL16_HighOut2Pressure.isTriggered))
+		  if((PSA.Mode.Run) && (PSA.Out1.Working) && (PSA.B2_OutputAirPressure_1.Value > PSA.B2_OutputAirPressure_1.UpperThreshold) && (PSA.KE2_OxygenSensor_2.LowerThreshold && PSA.Out2.Enable && !PSA.Alarm.AL16_HighOut2Pressure.Trigger))
 		  {/* (Run + OUT_1 working) + B2 > SB2H + SO2-2!=OFF -> OUT1=OFF + OUT2 = Ready + AL*/
 			  PSA.Out1.Ready = 0;
 			  PSA.Out1.Working = 0;
@@ -1561,7 +1582,7 @@ void StartOutTask(void *argument)
 #ifndef DEBUG
 	  else
 #endif
-		  if((PSA.Mode.Run) && (PSA.Out2.Working) && (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.UpperThreshold) && (PSA.KE1_OxygenSensor_1.LowerThreshold && PSA.Out1.Enable))
+		  if((PSA.Mode.Run) && (PSA.Out2.Working) && (PSA.B4_OutputAirPressure_2.Value > PSA.B4_OutputAirPressure_2.UpperThreshold) && (PSA.KE1_OxygenSensor_1.LowerThreshold && PSA.Out1.Enable))
 		  {/* (Run + OUT_2 working) + B4 > SB4H + SO2-1=OFF -> OUT1=Ready + OUT2=OFF + AL */
 			  PSA.Out1.Ready = 1;
 			  PSA.Out2.Ready = 0;
@@ -1603,7 +1624,7 @@ void StartModeTask(void *argument)
   for(;;)
   {
 	  /* Ready + not Run + not Standby -> Run */
-	  if((PSA.Mode.Ready && !PSA.Mode.Run && !PSA.Mode.Standby) && ((PSA.B1_IncomingAirPressure.Value > PSA.B1_IncomingAirPressure.UpperThreshold) && ((PSA.KE1_OxygenSensor_1.LowerThreshold && PSA.Out1.Enable)||(PSA.KE2_OxygenSensor_2.LowerThreshold && PSA.Out2.Enable))))
+	  if((PSA.Mode.Ready && !PSA.Mode.Run && !PSA.Mode.Standby) && ((PSA.B1_InputAirPressure.Value > PSA.B1_InputAirPressure.UpperThreshold) && ((PSA.KE1_OxygenSensor_1.LowerThreshold && PSA.Out1.Enable)||(PSA.KE2_OxygenSensor_2.LowerThreshold && PSA.Out2.Enable))))
 	  {/* (Ready + NotRun + NotStb) && (B1 > SB1H) && ((SO2-1 != OFF)||(SO2-2 != OFF)): starting condition */
 		  PSA.Mode.Run = 0x01;
 //		  PSA.Mode.Ready = 0x01;
@@ -1612,7 +1633,7 @@ void StartModeTask(void *argument)
 	  else
 #endif
 	  /* Run + BlockingAlarm -> Standby */
-	  if(((PSA.Mode.Run) && (PSA.Out1.Ready||PSA.Out2.Ready)) && (PSA.Alarm.AL11_External.isTriggered||PSA.Alarm.AL16_HighOut2Pressure.isTriggered||PSA.Alarm.AL17_HighDewpoint.isTriggered))
+	  if(((PSA.Mode.Run) && (PSA.Out1.Ready||PSA.Out2.Ready)) && (PSA.Alarm.AL11_External.Trigger||PSA.Alarm.AL16_HighOut2Pressure.Trigger||PSA.Alarm.AL17_HighDewpoint.Trigger))
 	  {
 		  PSA.Mode.Run = 0x00;
 		  PSA.Mode.Standby = 0x01;
@@ -1621,7 +1642,7 @@ void StartModeTask(void *argument)
 	  else
 #endif
 	  /* Run + OUT1 -> Standby */
-	  if((PSA.Mode.Run && PSA.Out1.Working) && ((PSA.B2_OutputPressure_1.Value > PSA.B2_OutputPressure_1.UpperThreshold) && (!PSA.KE2_OxygenSensor_2.LowerThreshold || !PSA.Out2.Enable || PSA.Alarm.AL16_HighOut2Pressure.isTriggered)))
+	  if((PSA.Mode.Run && PSA.Out1.Working) && ((PSA.B2_OutputAirPressure_1.Value > PSA.B2_OutputAirPressure_1.UpperThreshold) && (!PSA.KE2_OxygenSensor_2.LowerThreshold || !PSA.Out2.Enable || PSA.Alarm.AL16_HighOut2Pressure.Trigger)))
 	  {/* Run + OUT1 + B2 > SB2H -> Standby */
 		  PSA.Mode.Run = 0x00;
 		  PSA.Mode.Standby = 0x01;
@@ -1630,7 +1651,7 @@ void StartModeTask(void *argument)
 	  else
 #endif
 	  /* Run + OUT2 -> Standby */
-	  if(((PSA.Mode.Run && PSA.Out2.Working)) && ((PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.UpperThreshold) && (!PSA.KE1_OxygenSensor_1.LowerThreshold || !PSA.Out1.Enable)))
+	  if(((PSA.Mode.Run && PSA.Out2.Working)) && ((PSA.B4_OutputAirPressure_2.Value > PSA.B4_OutputAirPressure_2.UpperThreshold) && (!PSA.KE1_OxygenSensor_1.LowerThreshold || !PSA.Out1.Enable)))
 	  {/* Run + OUT2 + B4 > SB4H -> Standby */
 		  PSA.Mode.Run = 0x00;
 		  PSA.Mode.Standby = 0x01;
@@ -1639,7 +1660,7 @@ void StartModeTask(void *argument)
 	  else
 #endif
 	  /* Standby + OUT1 -> Run */
-	  if((!PSA.State && PSA.Out1.Ready) && (PSA.B2_OutputPressure_1.Value < PSA.B2_OutputPressure_1.LowerThreshold))
+	  if((!PSA.State && PSA.Out1.Ready) && (PSA.B2_OutputAirPressure_1.Value < PSA.B2_OutputAirPressure_1.LowerThreshold))
 	  {/* Standby & B2 < SB2L & No Alarm -> Run*/
 		  PSA.Mode.Run = 0x01;
 		  PSA.Mode.Standby = 0x00;
@@ -1648,7 +1669,7 @@ void StartModeTask(void *argument)
 	  else
 #endif
 	  /* Standby + OUT2 -> Run */
-	  if((!PSA.State && PSA.Out2.Ready) && (PSA.B4_OutputPressure_2.Value < PSA.B4_OutputPressure_2.LowerThreshold))
+	  if((!PSA.State && PSA.Out2.Ready) && (PSA.B4_OutputAirPressure_2.Value < PSA.B4_OutputAirPressure_2.LowerThreshold))
 	  {/* Standby & B2 > SB2L & No Alarm -> Run*/
 		  PSA.Mode.Run = 0x01;
 		  PSA.Mode.Standby = 0x00;
@@ -1673,9 +1694,8 @@ void StartTimeTask(void *argument)
 	PSA.Time.ValveAlive_ReceiveMessageRefresh = 100;
 	PSA.Time.ValveAlive_SendMessageRefresh = 10;
 	/* Init Timer */
-	PSA.Time.ValveAlive_ReceiveMessageTimer = PSA.Time.ValveAlive_ReceiveMessageRefresh;
-	PSA.Time.ValveAlive_SendMessageTimer = PSA.Time.ValveAlive_SendMessageRefresh;
-
+	MyTimer_Refresh(&PSA.Time.ValveAlive_ReceiveMessageTimer, PSA.Time.ValveAlive_ReceiveMessageRefresh);
+	MyTimer_Refresh(&PSA.Time.ValveAlive_ReceiveMessageTimer, PSA.Time.ValveAlive_SendMessageRefresh);
   /* Infinite loop */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
   for(;;)
@@ -1693,12 +1713,6 @@ void StartTimeTask(void *argument)
 	  MyTimer_SubtractDeciSecond(&PSA.Time.StateTimer);
 	  MyTimer_SubtractDeciSecond(&PSA.Time.ValveAlive_ReceiveMessageTimer);
 	  MyTimer_SubtractDeciSecond(&PSA.Time.ValveAlive_SendMessageTimer);
-//	  if(PSA.Time.StateTimer)
-//		  PSA.Time.StateTimer--;
-//	  if(PSA.Time.ValveAlive_ReceiveMessageTimer)
-//		  PSA.Time.ValveAlive_ReceiveMessageTimer--;
-//	  if(PSA.Time.ValveAlive_SendMessageTimer)
-//		  PSA.Time.ValveAlive_SendMessageTimer--;
 	  /*** ALARM TIMER ***/
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL01_CANbusError.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL02_LowAirPressure.Timer);
@@ -1714,35 +1728,12 @@ void StartTimeTask(void *argument)
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL33_B3ProbeFault.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL34_B4ProbeFault.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.MissingSDCard.Timer);
-//	  if(PSA.Alarm.AL01_CANbusError.Timer)
-//		  PSA.Alarm.AL01_CANbusError.Timer--;
-//	  if(PSA.Alarm.AL02_LowAirPressure.Timer)
-//		  PSA.Alarm.AL02_LowAirPressure.Timer--;
-//	  if(PSA.Alarm.AL05_LowProcessTankPressure.Timer)
-//		  PSA.Alarm.AL05_LowProcessTankPressure.Timer--;
-//	  if(PSA.Alarm.AL11_External.Timer)
-//		  PSA.Alarm.AL11_External.Timer--;
-//	  if(PSA.Alarm.AL16_HighOut2Pressure.Timer)
-//		  PSA.Alarm.AL16_HighOut2Pressure.Timer--;
-//	  if(PSA.Alarm.AL17_HighDewpoint.Timer)
-//		  PSA.Alarm.AL17_HighDewpoint.Timer--;
-//	  if(PSA.Alarm.AL18_HighDewpoint.Timer)
-//		  PSA.Alarm.AL18_HighDewpoint.Timer--;
-//	  if(PSA.Alarm.AL19_HighOut1Pressure.Timer)
-//		  PSA.Alarm.AL19_HighOut1Pressure.Timer--;
-//	  if(PSA.Alarm.AL20_PCComunicationFault.Timer)
-//		  PSA.Alarm.AL20_PCComunicationFault.Timer--;
-//	  if(PSA.Alarm.AL31_B1ProbeFault.Timer)
-//		  PSA.Alarm.AL31_B1ProbeFault.Timer--;
-//	  if(PSA.Alarm.AL32_B2ProbeFault.Timer)
-//		  PSA.Alarm.AL32_B2ProbeFault.Timer--;
-//	  if(PSA.Alarm.AL33_B3ProbeFault.Timer)
-//		  PSA.Alarm.AL33_B3ProbeFault.Timer--;
-//	  if(PSA.Alarm.AL34_B4ProbeFault.Timer)
-//		  PSA.Alarm.AL34_B4ProbeFault.Timer--;
-//	  if(PSA.Alarm.MissingSDCard.Timer)
-//		  PSA.Alarm.MissingSDCard.Timer--;
 	  /*** WATCHDOG ***/
+	  /* New day */
+	  if((today.hours + today.minutes + today.seconds + today.deciseconds) == 0)
+	  {
+		  fatman.Directory[1].FileIsCreated = 0;
+	  }
 	  /* If there's no problem, it refresh before reaching 0 */
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
@@ -1846,9 +1837,12 @@ void StartSDTask(void *argument)
 	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
 #endif
 
-	  /* MOST SECURE WAY to AVOID BUGS:
-	   * rename filepath every time at the beginning of the task */
-	  fatman_rename(1, (char *)today.DateString, 8);
+	  /* new day, new file */
+	  if(!fatman.Directory[1].FileIsCreated)
+	  {
+		  fatman_rename(1, (char *)today.DateString, 8);
+		  fatman_init(1);
+	  }
 	  /* if there is some problem. Try to re-init SD */
 	  if(hsd.ErrorCode)
 	  {
@@ -1965,50 +1959,50 @@ void StartCAN1RxTxTask(void *argument)
 	//			  case 0x400032:
 	//				  PSA.Request.State |= (1U << 1);
 	//				  break;
-				  case 0x40000A:
-					  rxMessage.frame.data0 = 0x4B;
-					  uint16_t Oxygen_LastValue = MyQueue_GetLastValue(Oxygen);
-					  rxMessage.frame.data4 = Oxygen_LastValue >> 8;
-					  rxMessage.frame.data5 = Oxygen_LastValue;
-					  break;
-				  case 0x400002:
-					  rxMessage.frame.data0 = 0x4B;
-					  uint16_t Dewpoint = PSA.DP_IncomingAirDewpoint.Value;
-					  rxMessage.frame.data4 = Dewpoint >> 8;
-					  rxMessage.frame.data5 = Dewpoint;
-					  break;
-				  case 0x400003:
-					  rxMessage.frame.data0 = 0x4B;
-					  rxMessage.frame.data4 = PSA.B1_IncomingAirPressure.Value >> 8;
-					  rxMessage.frame.data5 = PSA.B1_IncomingAirPressure.Value;
-					  break;
-				  case 0x400004:
-					  rxMessage.frame.data0 = 0x4B;
-					  rxMessage.frame.data4 = PSA.B2_OutputPressure_1.Value >> 8;
-					  rxMessage.frame.data5 = PSA.B2_OutputPressure_1.Value;
-					  break;
-				  case 0x400005:
-					  rxMessage.frame.data0 = 0x4B;
-					  rxMessage.frame.data4 = PSA.B3_ProcessTankPressure.Value >> 8;
-					  rxMessage.frame.data5 = PSA.B3_ProcessTankPressure.Value;
-					  break;
-				  case 0x400006:
-					  rxMessage.frame.data0 = 0x4B;
-					  rxMessage.frame.data4 = PSA.B4_OutputPressure_2.Value >> 8;
-					  rxMessage.frame.data5 = PSA.B4_OutputPressure_2.Value;
-					  break;
-				  case 0x400001:
-					  rxMessage.frame.data0 = 0x4B;
-					  uint16_t AirFlux_LastValue = MyQueue_GetLastValue(AirFlux);
-					  rxMessage.frame.data4 = AirFlux_LastValue >> 8;
-					  rxMessage.frame.data5 = AirFlux_LastValue;
-					  break;
-				  case 0x40001D:
-					  rxMessage.frame.data0 = 0x4B;
-					  uint16_t AirFlux_AverageValue = MyQueue_GetAverageValue(AirFlux);
-					  rxMessage.frame.data4 = AirFlux_AverageValue >> 8;
-					  rxMessage.frame.data5 = AirFlux_AverageValue;
-					  break;
+//				  case 0x40000A:
+//					  rxMessage.frame.data0 = 0x4B;
+//					  uint16_t Oxygen_LastValue = MyQueue_GetLastValue(KE25_PercentualOxygenInTheAir);
+//					  rxMessage.frame.data4 = Oxygen_LastValue >> 8;
+//					  rxMessage.frame.data5 = Oxygen_LastValue;
+//					  break;
+//				  case 0x400002:
+//					  rxMessage.frame.data0 = 0x4B;
+//					  uint16_t Dewpoint = PSA.DP_IncomingAirDewpoint.Value;
+//					  rxMessage.frame.data4 = Dewpoint >> 8;
+//					  rxMessage.frame.data5 = Dewpoint;
+//					  break;
+//				  case 0x400003:
+//					  rxMessage.frame.data0 = 0x4B;
+//					  rxMessage.frame.data4 = PSA.B1_InputAirPressure.Value >> 8;
+//					  rxMessage.frame.data5 = PSA.B1_InputAirPressure.Value;
+//					  break;
+//				  case 0x400004:
+//					  rxMessage.frame.data0 = 0x4B;
+//					  rxMessage.frame.data4 = PSA.B2_OutputAirPressure_1.Value >> 8;
+//					  rxMessage.frame.data5 = PSA.B2_OutputAirPressure_1.Value;
+//					  break;
+//				  case 0x400005:
+//					  rxMessage.frame.data0 = 0x4B;
+//					  rxMessage.frame.data4 = PSA.B3_ProcessTankAirPressure.Value >> 8;
+//					  rxMessage.frame.data5 = PSA.B3_ProcessTankAirPressure.Value;
+//					  break;
+//				  case 0x400006:
+//					  rxMessage.frame.data0 = 0x4B;
+//					  rxMessage.frame.data4 = PSA.B4_OutputAirPressure_2.Value >> 8;
+//					  rxMessage.frame.data5 = PSA.B4_OutputAirPressure_2.Value;
+//					  break;
+//				  case 0x400001:
+//					  rxMessage.frame.data0 = 0x4B;
+//					  uint16_t AirFlux_LastValue = MyQueue_GetLastValue(IFM_AirFlowmeter);
+//					  rxMessage.frame.data4 = AirFlux_LastValue >> 8;
+//					  rxMessage.frame.data5 = AirFlux_LastValue;
+//					  break;
+//				  case 0x40001D:
+//					  rxMessage.frame.data0 = 0x4B;
+//					  uint16_t AirFlux_AverageValue = MyQueue_GetAverageValue(B1_InputAirPressureQueue);
+//					  rxMessage.frame.data4 = AirFlux_AverageValue >> 8;
+//					  rxMessage.frame.data5 = AirFlux_AverageValue;
+//					  break;
 	//			  case 0x40000D:
 	//				  PSA.Request.State |= (1U << 10);
 	//				  break;
@@ -2072,10 +2066,13 @@ void StartAlarmTask(void *argument)
 {
   /* USER CODE BEGIN StartAlarmTask */
 //	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 5);
-//	Alarm_Init(&PSA.Alarm.AL02_LowAirPressure, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL02_LowAirPressure, 5, 5);
 //	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
 //	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
 //	Alarm_Init(&PSA.Alarm.MissingSDCard, 5, 5);
+
+
+	Alarm_Init(&PSA.Alarm.AL31_B1ProbeFault, 5, 5);
 
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
@@ -2084,26 +2081,26 @@ void StartAlarmTask(void *argument)
 	  if(!PSA.Alarm.AL01_CANbusError.Timer)
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure, (0));
 
-	  if(!PSA.Alarm.AL02_LowAirPressure.isTriggered)
+	  if(!PSA.Alarm.AL02_LowAirPressure.Trigger)
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
-			  	  	  	  	  (PSA.B1_IncomingAirPressure.Value < PSA.B1_IncomingAirPressure.LowerThreshold));
+			  	  	  	  	  (PSA.B1_InputAirPressure.Value < PSA.B1_InputAirPressure.LowerThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
-		 			  	  	  (PSA.B1_IncomingAirPressure.Value < PSA.B1_IncomingAirPressure.UpperThreshold));
+		 			  	  	  (PSA.B1_InputAirPressure.Value < PSA.B1_InputAirPressure.UpperThreshold));
 
-	  if(!PSA.Alarm.AL05_LowProcessTankPressure.isTriggered)
+	  if(!PSA.Alarm.AL05_LowProcessTankPressure.Trigger)
 		  Alarm_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
-			  	  	  	  	  (PSA.B3_ProcessTankPressure.Value < PSA.B3_ProcessTankPressure.LowerThreshold));
+			  	  	  	  	  (PSA.B3_ProcessTankAirPressure.Value < PSA.B3_ProcessTankAirPressure.LowerThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
-		  			  	  	  (PSA.B3_ProcessTankPressure.Value < PSA.B3_ProcessTankPressure.UpperThreshold));
+		  			  	  	  (PSA.B3_ProcessTankAirPressure.Value < PSA.B3_ProcessTankAirPressure.UpperThreshold));
 
-	  if(!PSA.Alarm.AL16_HighOut2Pressure.isTriggered)
+	  if(!PSA.Alarm.AL16_HighOut2Pressure.Trigger)
 		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
-			  	  	  	  	  (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.UpperThreshold));
+			  	  	  	  	  (PSA.B4_OutputAirPressure_2.Value > PSA.B4_OutputAirPressure_2.UpperThreshold));
 	  else
 		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
-		  			  	  	  (PSA.B4_OutputPressure_2.Value > PSA.B4_OutputPressure_2.LowerThreshold));
+		  			  	  	  (PSA.B4_OutputAirPressure_2.Value > PSA.B4_OutputAirPressure_2.LowerThreshold));
 
 	  Alarm_CheckCondition(&PSA.Alarm.MissingSDCard, (hsd.ErrorCode));
 
@@ -2165,6 +2162,38 @@ void StartRequestTask(void *argument)
     osDelay(1);
   }
   /* USER CODE END StartRequestTask */
+}
+
+/* USER CODE BEGIN Header_StartB1_AcquisiTask */
+/**
+* @brief Function implementing the B1_AcquisiTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartB1_AcquisiTask */
+void StartB1_AcquisiTask(void *argument)
+{
+  /* USER CODE BEGIN StartB1_AcquisiTask */
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
+  /* Infinite loop */
+  for(;;)
+  {
+	  /* If received new acquisition value, ... */
+	  if((PSA.B1_InputAirPressure.Acquisition)
+			  && (PSA.B1_InputAirPressure.Value >= PSA.B1_InputAirPressure.LowerLimit)
+			  && (PSA.B1_InputAirPressure.Value <= PSA.B1_InputAirPressure.UpperLimit))
+	  {
+		  Alarm_CheckCondition(&PSA.Alarm.AL31_B1ProbeFault, 0);
+		  MyQueue_InsertElement(&B1_InputAirPressureQueue, PSA.B1_InputAirPressure.Value);
+		  PSA.B1_InputAirPressure.Acquisition = 0;
+	  }
+	  else
+	  {
+		  Alarm_CheckCondition(&PSA.Alarm.AL31_B1ProbeFault, 1);
+	  }
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
+  }
+  /* USER CODE END StartB1_AcquisiTask */
 }
 
 /**

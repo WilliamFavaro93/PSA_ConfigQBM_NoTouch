@@ -35,8 +35,8 @@
  */
 void Alarm_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
 {
-	Alarm->isEnabled = 1;
-	Alarm->isTriggered = 0;
+	Alarm->Enable = 1;
+	Alarm->Trigger = 0;
 	Alarm->RefreshTimer_ON = RefreshTimer_ON;
 	Alarm->RefreshTimer_OFF = RefreshTimer_OFF;
 	Alarm->Timer = Alarm->RefreshTimer_ON;
@@ -51,33 +51,33 @@ void Alarm_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_O
 void Alarm_CheckCondition(Alarm * Alarm, uint8_t condition)
 {
 	/* Check if Alarm is Enable */
-	if(!(Alarm->isEnabled))
+	if(!(Alarm->Enable))
 		return;
 
 	/* Check if Timer is 0 */
 	if(!(Alarm->Timer))
 	{
-		if(Alarm->isTriggered)
+		if(Alarm->Trigger)
 		{
-			Alarm->isTriggered = 0;
+			Alarm->Trigger = 0;
 			Alarm->Timer = Alarm->RefreshTimer_ON;
 		}
 		else
 		{
-			Alarm->isTriggered = 1;
+			Alarm->Trigger = 1;
 			Alarm->Timer = Alarm->RefreshTimer_OFF;
 		}
 
-		Alarm->toWriteToSD = 1;
+		Alarm->WriteToSD = 1;
 	}
 
 	/* Check the Timer condition */
-	if((condition) && (Alarm->isTriggered))
+	if((condition) && (Alarm->Trigger))
 	{
 		Alarm->Timer = Alarm->RefreshTimer_ON;
 	}
 
-	if((!condition) && (!Alarm->isTriggered))
+	if((!condition) && (!Alarm->Trigger))
 	{
 		Alarm->Timer = Alarm->RefreshTimer_OFF;
 	}
@@ -91,8 +91,8 @@ void Alarm_CheckCondition(Alarm * Alarm, uint8_t condition)
  */
 void Alarm_Disable(Alarm * Alarm)
 {
-	Alarm->isEnabled = 0;
-	Alarm->isTriggered = 0;
+	Alarm->Enable = 0;
+	Alarm->Trigger = 0;
 	Alarm->Timer = 0;
 }
 
@@ -104,8 +104,8 @@ void Alarm_Disable(Alarm * Alarm)
  */
 void Alarm_Enable(Alarm * Alarm)
 {
-	Alarm->isEnabled = 1;
-	Alarm->isTriggered = 0;
+	Alarm->Enable = 1;
+	Alarm->Trigger = 0;
 	Alarm->Timer = Alarm->RefreshTimer_ON;
 }
 /* Private Function ----------------------------------------------------------*/

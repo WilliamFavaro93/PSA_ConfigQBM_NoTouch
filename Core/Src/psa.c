@@ -23,23 +23,6 @@
 PSAStruct PSA;
 
 /* Private Function definition -----------------------------------------------*/
-/*
- * @brief This method is default starting value in debug mode
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_DebugInit()
-{
-#if (DEBUG)
-	PSA.Time.Adsorption_1 = 27;
-	PSA.Time.Adsorption_2 = 27;
-	PSA.Time.Compensation_0 = 1;
-	PSA.Time.Compensation_1 = 1;
-	PSA.Time.Compensation_2 = 1;
-	PSA.Time.PreStandby_1 = 5;
-	PSA.Time.PreStandby_2 = 5;
-#endif /* DEBUG */
-}
 
 /*
  * @brief This method add the value of out1 or out2, if active, to the CAN message
@@ -193,39 +176,43 @@ void PSA_UpdateState()
 		PSA_Compensation1();
 	if(PSA.State == 8)
 		PSA_Compensation2();
+
 	PSA.StateUpdated = 1;
 }
 
-
+//void AnalogInput(uint16_AnalogInput *AnalogInput, )
+//{
+//
+//}
 
 void PSA_Relay_RunningAndOutNotUsed()
 {
-	PSA.Relay.K1 = PSA_RELAY_ON;
-	PSA.Relay.K6 = PSA_RELAY_ON;
-	PSA.Relay.K5 = PSA_RELAY_ON;
-	PSA.Relay.K4 = PSA_RELAY_ON;
+	PSA.Relay.K1 = 1;
+	PSA.Relay.K6 = 1;
+	PSA.Relay.K5 = 1;
+	PSA.Relay.K4 = 1;
 }
 
 void PSA_Relay_RunningAndOutUsed()
 {
-	PSA.Relay.K1 = PSA_RELAY_ON;
-	PSA.Relay.K6 = PSA_RELAY_ON;
-	PSA.Relay.K5 = PSA_RELAY_ON;
-	PSA.Relay.K4 = PSA_RELAY_OFF;
+	PSA.Relay.K1 = 1;
+	PSA.Relay.K6 = 1;
+	PSA.Relay.K5 = 1;
+	PSA.Relay.K4 = 0;
 }
 
 void PSA_Relay_GoingStandby()
 {
-	PSA.Relay.K1 = PSA_RELAY_ON;
-	PSA.Relay.K6 = PSA_RELAY_ON;
-	PSA.Relay.K5 = PSA_RELAY_OFF;
-	PSA.Relay.K4 = PSA_RELAY_OFF;
+	PSA.Relay.K1 = 1;
+	PSA.Relay.K6 = 1;
+	PSA.Relay.K5 = 0;
+	PSA.Relay.K4 = 0;
 }
 
 void PSA_Relay_Standby()
 {
-	PSA.Relay.K1 = PSA_RELAY_ON;
-	PSA.Relay.K6 = PSA_RELAY_OFF;
-	PSA.Relay.K5 = PSA_RELAY_OFF;
-	PSA.Relay.K4 = PSA_RELAY_OFF;
+	PSA.Relay.K1 = 1;
+	PSA.Relay.K6 = 0;
+	PSA.Relay.K5 = 0;
+	PSA.Relay.K4 = 0;
 }

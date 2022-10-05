@@ -85,6 +85,10 @@ typedef struct{
 	uint16_t Value;				/**< value of the analog input */
 	uint16_t UpperThreshold;	/**< upper threshold of the analog input */
 	uint16_t LowerThreshold;	/**< lower threshold of the analog input */
+
+	uint16_t Acquisition;		/**< define if last acquisition value is alreaady saved in queue */
+	uint16_t UpperLimit;		/**< upper limit of the analog input */
+	uint16_t LowerLimit;		/**< lower limit of the analog input */
 }uint16_AnalogInput;
 
 
@@ -92,7 +96,6 @@ typedef struct{
  * 		Alarm 			-> It resets while the machine is working and when a condition happens
  */
 /* Alarm and Fault structure -------------------------------------------------*/
-
 typedef struct
 {
 	uint64_t State;
@@ -159,8 +162,7 @@ typedef struct
 	 	 	 	 	 	 1: Relay K4 is ON			*/
 } SetOfRelays;
 
-#define PSA_RELAY_OFF	0x00
-#define PSA_RELAY_ON	0x01
+
 /* Command structure ---------------------------------------------------------*/
 typedef struct
 {
@@ -203,7 +205,7 @@ typedef struct
 	uint16_t ID[20];
 } SetOfRequests;
 
-/*** CAN2 ***/
+/* Controller Area Network 2 structure ---------------------------------------*/
 typedef struct
 {
 	uint32_t Ide;
@@ -215,7 +217,7 @@ typedef struct
 	uint8_t ReceiveAliveMessage;
 } ManageCAN2;
 
-/*** CAN1 ***/
+/* Controller Area Network 1 structure ---------------------------------------*/
 typedef struct
 {
 	uint32_t Ide;
@@ -223,36 +225,33 @@ typedef struct
 
 } ManageCANSPI;
 
+/* Pressure Swing Adsorption structure ---------------------------------------*/
 typedef struct{
-	/* Time */
+	/* Time ------------------------------------------------------------------*/
 	uint16_Time Time;
-	/* Mode */
-	uint8_Mode Mode;				/**< the mode structure managed by ModeTask */
-	/* State */
-	int State; 						/**< the number that identified thestate, managed by StateTask */
+	/* Mode ------------------------------------------------------------------*/
+	uint8_Mode Mode;		/**< the mode structure managed by ModeTask */
+	/* State -----------------------------------------------------------------*/
+	int State; 				/**< the number that identified thestate, managed by StateTask */
 	uint8_t StateUpdated;
-//	uint16_t NextState;
 	uint16_t ReceiveValveMessage;
-	/* OUT */
+	/* Out -------------------------------------------------------------------*/
 	uint8_Out Out1;
 	uint8_Out Out2;
-//	uint8_t OUT_1;			/* OUT_1, OUT_2 */
-//	uint8_t OUT_2;			/* OUT_1, OUT_2 -> 0: Not used; 1: Can be used 2: Actually in use */
-	uint8_t OUTPriority;
+	uint8_t OutPriority;
 	/* ... */
 	uint8_t CloseDrain;
 
 	uint8_t ValveState[8];
-//	uint32_t MaskOutputPreview; // <- PSA.Valve.Module
 
 	/* Command */
 //	SetOfRequests Request;
 	SetOfCommands Command;
 	/* Analog Input */
-	uint16_AnalogInput B1_IncomingAirPressure;			/* B1: 0 - 16 bar */
-	uint16_AnalogInput B2_OutputPressure_1;				/* B2: 0 - 16 bar */
-	uint16_AnalogInput B3_ProcessTankPressure;			/* B3: 0 - 16 bar */
-	uint16_AnalogInput B4_OutputPressure_2;				/* B4: 0 - 16 bar */
+	uint16_AnalogInput B1_InputAirPressure;			/* B1: 0 - 16 bar */
+	uint16_AnalogInput B2_OutputAirPressure_1;		/* B2: 0 - 16 bar */
+	uint16_AnalogInput B3_ProcessTankAirPressure;	/* B3: 0 - 16 bar */
+	uint16_AnalogInput B4_OutputAirPressure_2;		/* B4: 0 - 16 bar */
 
 	uint16_AnalogInput DP_IncomingAirDewpoint;
 	uint16_AnalogInput FM_NitrogenFlowmeter;
@@ -270,9 +269,6 @@ typedef struct{
 	/* Task Management */
 	ManageCANSPI CANSPI;
 	ManageCAN2 CAN_2;
-//	ManageSD SD;
-
-
 } PSAStruct;
 
 void PSA_UpdateState();

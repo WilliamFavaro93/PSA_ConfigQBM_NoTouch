@@ -49,14 +49,14 @@ void Alarm_test_Triggered()
 	{
 		Alarm_CheckCondition(&test, condition);
 		test.Timer--;
-		while(!(test.isTriggered == 0))
+		while(!(test.Trigger == 0))
 		{
 
 		}
 	}
 
 	Alarm_CheckCondition(&test, condition);
-	while(!(test.isTriggered == 1))
+	while(!(test.Trigger == 1))
 	{
 
 	}
@@ -75,14 +75,14 @@ void Alarm_test_FromTriggeredToNoTriggered()
 	{
 		Alarm_CheckCondition(&test, condition);
 		test.Timer--;
-		while(!(test.isTriggered == 1))
+		while(!(test.Trigger == 1))
 		{
 			/* test failed */
 		}
 	}
 
 	Alarm_CheckCondition(&test, condition);
-	while(!(test.isTriggered == 0))
+	while(!(test.Trigger == 0))
 	{
 
 	}
@@ -103,14 +103,14 @@ void Alarm_test_DisabledAlarm_AlarmMustNotTrigger()
 	{
 		Alarm_CheckCondition(&test, condition);
 		test.Timer--;
-		while(!(test.isTriggered == 0))
+		while(!(test.Trigger == 0))
 		{
 			/* test failed */
 		}
 	}
 
 	Alarm_CheckCondition(&test, condition);
-	while(!(test.isTriggered == 0))
+	while(!(test.Trigger == 0))
 	{
 		/* test failed */
 	}
@@ -118,7 +118,7 @@ void Alarm_test_DisabledAlarm_AlarmMustNotTrigger()
 	Alarm_Enable(&test);
 
 	Alarm_CheckCondition(&test, condition);
-	while(!(test.isTriggered == 0))
+	while(!(test.Trigger == 0))
 	{
 		/* test failed */
 	}
@@ -139,7 +139,7 @@ void Alarm_test_ConditionKeepsChanging()
 
 		Alarm_CheckCondition(&test, condition);
 		test.Timer--;
-		while(!(test.isTriggered == 0))
+		while(!(test.Trigger == 0))
 		{
 			/* test failed */
 		}

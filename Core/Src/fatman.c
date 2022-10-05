@@ -3,8 +3,8 @@
   * @file   fatman.c
   * @author William Favaro
   * @date	13/07/2022
-  * @brief  fatman functions
-  * 		This module is created to simplify the usage of SD with STM32F4
+  * @brief  fatman functions.
+  * 		This module is created to simplify the usage of SD with STM32F4.
   *
   ******************************************************************************
   * @note
@@ -79,7 +79,6 @@ void fatman_write(uint8_t ID)
  * @brief This method is used to read the text inside a file
  * @author William Favaro
  * @date 05/08/2022
- * @param ID The number that identifies the directory and the file
  */
 void fatman_read()
 {
@@ -109,6 +108,11 @@ void fatman_read()
 	fatman.OpenFile_ID = 0;
 }
 
+/*
+ * @brief This method is used to rename the filepath
+ * @author William Favaro
+ * @date 05/08/2022
+ */
 void fatman_rename(uint8_t ID, char * NameFile, uint8_t NameFile_length)
 {
 	uint8_t i = 0;

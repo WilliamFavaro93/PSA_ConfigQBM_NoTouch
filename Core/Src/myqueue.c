@@ -3,8 +3,7 @@
   * @file   myqueue.c
   * @author William Favaro
   * @date	13/04/2022
-  * @brief  queue definition functions
-  * 		This module is created to simplify the usage of SD with STM32F4
+  * @brief  Queue definition functions.
   *
   ******************************************************************************
   * @note

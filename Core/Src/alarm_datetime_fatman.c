@@ -37,19 +37,19 @@ void DirectoryInit(uint8_t ID, char * nameDir, uint8_t nameDir_length)
 
 void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage)
 {
-	if(Alarm->toWriteToSD)
+	if(Alarm->WriteToSD)
 	{
 	  memcpy(&fatman.Buffer[0], (char*)today.DateString_withSeparator, 10);
 	  memcpy(&fatman.Buffer[11], (char*)today.TimeString_withSeparator, 8);
 	  memcpy(&fatman.Buffer[20], (char*)AlarmMessage, sizeofAlarmMessage);
-	  if(Alarm->isTriggered)
+	  if(Alarm->Trigger)
 		  memcpy(&fatman.Buffer[20 + sizeofAlarmMessage], "<<<", sizeof("<<<"));
 	  else
 		  memcpy(&fatman.Buffer[20 + sizeofAlarmMessage], ">>>", sizeof(">>>"));
 	  memcpy(&fatman.Buffer[99], "\n", 1);
 	  fatman.Buffer_size = 100;
 	  fatman_write(1);
-	  Alarm->toWriteToSD = 0;
+	  Alarm->WriteToSD = 0;
 	}
 }
 /* Private Function ----------------------------------------------------------*/

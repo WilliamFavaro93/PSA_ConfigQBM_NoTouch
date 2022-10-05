@@ -3,8 +3,7 @@
   * @file   myqueue.h
   * @author William Favaro
   * @date	13/04/2022
-  * @brief  queue definition functions
-  * 		This module is created to simplify the usage of SD with STM32F4
+  * @brief  Queue definition functions.
   *
   ******************************************************************************
   * @note
@@ -22,7 +21,6 @@
 #include <stdint.h>
 
 /* Defines -------------------------------------------------------------------*/
-#define MYQUEUE_DEBUG 1 /* 0: Ignore the code between #ifDEBUG and #endif */
 #define MYQUEUE_N_MAX_ELEMENT 30
 
 /* Typedef struct definition -------------------------------------------------*/
