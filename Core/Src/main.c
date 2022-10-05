@@ -174,6 +174,27 @@ const osThreadAttr_t B1_AcquisiTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal2,
 };
+/* Definitions for B2_AcquisiTask */
+osThreadId_t B2_AcquisiTaskHandle;
+const osThreadAttr_t B2_AcquisiTask_attributes = {
+  .name = "B2_AcquisiTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal2,
+};
+/* Definitions for B3_AcquisiTask */
+osThreadId_t B3_AcquisiTaskHandle;
+const osThreadAttr_t B3_AcquisiTask_attributes = {
+  .name = "B3_AcquisiTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal2,
+};
+/* Definitions for B4_AcquisiTask */
+osThreadId_t B4_AcquisiTaskHandle;
+const osThreadAttr_t B4_AcquisiTask_attributes = {
+  .name = "B4_AcquisiTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal2,
+};
 /* Definitions for BinarySemCAN */
 osSemaphoreId_t BinarySemCANHandle;
 const osSemaphoreAttr_t BinarySemCAN_attributes = {
@@ -243,6 +264,9 @@ void StartFaultTask(void *argument);
 void StartValveTask(void *argument);
 void StartRequestTask(void *argument);
 void StartB1_AcquisiTask(void *argument);
+void StartB2_AcquisiTask(void *argument);
+void StartB3_AcquisiTask(void *argument);
+void StartB4_AcquisiTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 int __io_putchar(int character);
@@ -378,6 +402,15 @@ int main(void)
 
   /* creation of B1_AcquisiTask */
   B1_AcquisiTaskHandle = osThreadNew(StartB1_AcquisiTask, NULL, &B1_AcquisiTask_attributes);
+
+  /* creation of B2_AcquisiTask */
+  B2_AcquisiTaskHandle = osThreadNew(StartB2_AcquisiTask, NULL, &B2_AcquisiTask_attributes);
+
+  /* creation of B3_AcquisiTask */
+  B3_AcquisiTaskHandle = osThreadNew(StartB3_AcquisiTask, NULL, &B3_AcquisiTask_attributes);
+
+  /* creation of B4_AcquisiTask */
+  B4_AcquisiTaskHandle = osThreadNew(StartB4_AcquisiTask, NULL, &B4_AcquisiTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1336,21 +1369,29 @@ void AssignDefaultValue()
 
 	PSA.Mode.Ready = 0x01;								/* Altrimenti non parte */
 
+	PSA.B1_InputAirPressure.LowerLimit = 0;
 	PSA.B1_InputAirPressure.LowerThreshold = 500; 	//SB1L
 	PSA.B1_InputAirPressure.Value = 710;				/* Altrimenti non parte */
 	PSA.B1_InputAirPressure.UpperThreshold = 700; 	//SB1H
+	PSA.B1_InputAirPressure.UpperLimit = 10000;
 
+	PSA.B3_ProcessTankAirPressure.LowerLimit = 0;
 	PSA.B3_ProcessTankAirPressure.LowerThreshold = 500; 	//SB3L
 	PSA.B3_ProcessTankAirPressure.Value = 600;
 	PSA.B3_ProcessTankAirPressure.UpperThreshold = 700; 	//SB3H
+	PSA.B3_ProcessTankAirPressure.UpperLimit = 10000;
 
+	PSA.B2_OutputAirPressure_1.LowerLimit = 0;
 	PSA.B2_OutputAirPressure_1.LowerThreshold = 500; 		//SB2L
 	PSA.B2_OutputAirPressure_1.Value = 600;
 	PSA.B2_OutputAirPressure_1.UpperThreshold = 700; 		//SB2H
+	PSA.B2_OutputAirPressure_1.UpperLimit = 10000;
 
+	PSA.B4_OutputAirPressure_2.LowerLimit = 0;
 	PSA.B4_OutputAirPressure_2.LowerThreshold = 500; 		//SB4L
 	PSA.B4_OutputAirPressure_2.Value = 600;
 	PSA.B4_OutputAirPressure_2.UpperThreshold = 700; 		//SB4H
+	PSA.B4_OutputAirPressure_2.UpperLimit = 10000;
 
 	PSA.OutPriority = 2;								//PR_OUT
 
@@ -1379,6 +1420,22 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	}
 }
 
+void CheckConditionToInsertValueIntoQueue(uint16_AnalogInput *AnalogInput, Alarm *Alarm, MyQueue *Queue)
+{
+	  /* If received new acquisition value, ... */
+	  if((AnalogInput->Acquisition)
+			  && (AnalogInput->Value >= AnalogInput->LowerLimit)
+			  && (AnalogInput->Value <= AnalogInput->UpperLimit))
+	  {
+		  Alarm_CheckCondition(Alarm, 0);
+		  MyQueue_InsertElement(Queue, AnalogInput->Value);
+		  AnalogInput->Acquisition = 0;
+	  }
+	  else
+	  {
+		  Alarm_CheckCondition(Alarm, 1);
+	  }
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_StartDefaultTask */
@@ -1397,8 +1454,26 @@ void StartDefaultTask(void *argument)
   {
 	  if(B1_AcquisitionSimulator)
 	  {
-		  PSA.B1_InputAirPressure.Value = 600;
-		  PSA.B1_InputAirPressure.Acquisition = 1;
+		  if(B1_AcquisitionSimulator == 1)
+		  {
+			  PSA.B1_InputAirPressure.Value = 400;
+			  PSA.B1_InputAirPressure.Acquisition = 1;
+		  }
+		  if(B1_AcquisitionSimulator == 2)
+		  {
+			  PSA.B1_InputAirPressure.Value = 500;
+			  PSA.B1_InputAirPressure.Acquisition = 1;
+		  }
+		  if(B1_AcquisitionSimulator == 3)
+		  {
+			  PSA.B1_InputAirPressure.Value = 600;
+			  PSA.B1_InputAirPressure.Acquisition = 1;
+		  }
+		  if(B1_AcquisitionSimulator == 4)
+		  {
+			  PSA.B1_InputAirPressure.Value = 700;
+			  PSA.B1_InputAirPressure.Acquisition = 1;
+		  }
 	  }
 
 	vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
@@ -2065,21 +2140,26 @@ void StartCAN1RxTxTask(void *argument)
 void StartAlarmTask(void *argument)
 {
   /* USER CODE BEGIN StartAlarmTask */
-//	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL02_LowAirPressure, 5, 5);
-//	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
-//	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
-//	Alarm_Init(&PSA.Alarm.MissingSDCard, 5, 5);
-
-
+	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
+//	Alarm_Init(&PSA.Alarm.AL11_External, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
+//	Alarm_Init(&PSA.Alarm.AL17_HighDewpoint, 5, 5);
+//	Alarm_Init(&PSA.Alarm.AL18_HighDewpoint, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL31_B1ProbeFault, 5, 5);
+//	Alarm_Init(&PSA.Alarm.AL32_B2ProbeFault, 5, 5);
+//	Alarm_Init(&PSA.Alarm.AL33_B3ProbeFault, 5, 5);
+//	Alarm_Init(&PSA.Alarm.AL34_B4ProbeFault, 5, 5);
+//	Alarm_Init(&PSA.Alarm.AL40_PsaDischanging, 5, 5);
+	Alarm_Init(&PSA.Alarm.MissingSDCard, 5, 5);
 
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
 	  if(!PSA.Alarm.AL01_CANbusError.Timer)
-		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure, (0));
+		  Alarm_CheckCondition(&PSA.Alarm.AL01_CANbusError, (0));
 
 	  if(!PSA.Alarm.AL02_LowAirPressure.Trigger)
 		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
@@ -2103,7 +2183,6 @@ void StartAlarmTask(void *argument)
 		  			  	  	  (PSA.B4_OutputAirPressure_2.Value > PSA.B4_OutputAirPressure_2.LowerThreshold));
 
 	  Alarm_CheckCondition(&PSA.Alarm.MissingSDCard, (hsd.ErrorCode));
-
 
 	  vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
@@ -2178,22 +2257,82 @@ void StartB1_AcquisiTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  /* If received new acquisition value, ... */
-	  if((PSA.B1_InputAirPressure.Acquisition)
-			  && (PSA.B1_InputAirPressure.Value >= PSA.B1_InputAirPressure.LowerLimit)
-			  && (PSA.B1_InputAirPressure.Value <= PSA.B1_InputAirPressure.UpperLimit))
-	  {
-		  Alarm_CheckCondition(&PSA.Alarm.AL31_B1ProbeFault, 0);
-		  MyQueue_InsertElement(&B1_InputAirPressureQueue, PSA.B1_InputAirPressure.Value);
-		  PSA.B1_InputAirPressure.Acquisition = 0;
-	  }
-	  else
-	  {
-		  Alarm_CheckCondition(&PSA.Alarm.AL31_B1ProbeFault, 1);
-	  }
+	  CheckConditionToInsertValueIntoQueue(
+			  &PSA.B1_InputAirPressure,
+			  &PSA.Alarm.AL31_B1ProbeFault,
+			  &B1_InputAirPressureQueue);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartB1_AcquisiTask */
+}
+
+/* USER CODE BEGIN Header_StartB2_AcquisiTask */
+/**
+* @brief Function implementing the B2_AcquisiTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartB2_AcquisiTask */
+void StartB2_AcquisiTask(void *argument)
+{
+  /* USER CODE BEGIN StartB2_AcquisiTask */
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
+  /* Infinite loop */
+  for(;;)
+  {
+	  CheckConditionToInsertValueIntoQueue(
+			  &PSA.B2_OutputAirPressure_1,
+			  &PSA.Alarm.AL32_B2ProbeFault,
+			  &B2_OutputAirPressure_1Queue);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
+  }
+  /* USER CODE END StartB2_AcquisiTask */
+}
+
+/* USER CODE BEGIN Header_StartB3_AcquisiTask */
+/**
+* @brief Function implementing the B3_AcquisiTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartB3_AcquisiTask */
+void StartB3_AcquisiTask(void *argument)
+{
+  /* USER CODE BEGIN StartB3_AcquisiTask */
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
+  /* Infinite loop */
+  for(;;)
+  {
+	  CheckConditionToInsertValueIntoQueue(
+			  &PSA.B3_OutputAirPressure_1,
+			  &PSA.Alarm.AL33_B3ProbeFault,
+			  &B3_ProcessTankAirPressureQueue);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
+  }
+  /* USER CODE END StartB3_AcquisiTask */
+}
+
+/* USER CODE BEGIN Header_StartB4_AcquisiTask */
+/**
+* @brief Function implementing the B4_AcquisiTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartB4_AcquisiTask */
+void StartB4_AcquisiTask(void *argument)
+{
+  /* USER CODE BEGIN StartB4_AcquisiTask */
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
+  /* Infinite loop */
+  for(;;)
+  {
+	  CheckConditionToInsertValueIntoQueue(
+			  &PSA.B4_OutputAirPressure_2,
+			  &PSA.Alarm.AL34_B4ProbeFault,
+			  &B4_OutputAirPressure_2Queue);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
+  }
+  /* USER CODE END StartB4_AcquisiTask */
 }
 
 /**
