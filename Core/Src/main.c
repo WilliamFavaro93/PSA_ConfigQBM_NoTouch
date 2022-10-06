@@ -619,7 +619,7 @@ static void MX_CAN2_Init(void)
   CAN2_Filter.FilterActivation = CAN_FILTER_ENABLE;
   CAN2_Filter.FilterBank = 18;
   CAN2_Filter.FilterFIFOAssignment = CAN_RX_FIFO1;
-  CAN2_Filter.FilterIdHigh = 0x701 << 5;
+  CAN2_Filter.FilterIdHigh = (0x701 << 5);
   CAN2_Filter.FilterIdLow = 0x0000;
   CAN2_Filter.FilterMode = CAN_FILTERMODE_IDMASK;
   CAN2_Filter.FilterScale = CAN_FILTERSCALE_32BIT;
@@ -1405,6 +1405,7 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	CAN_RxHeaderTypeDef RxHeader;
 	uint8_t RxData[8];
 	PSA.CAN_2.State = HAL_CAN_GetRxMessage(hcan, CAN_RX_FIFO1, &RxHeader, RxData);
+	HAL_GPIO_TogglePin(GPIOG, GPIO_PIN_5);
 	if(!PSA.CAN_2.State)
 	{
 		/* La condizione per verificare la condizione è:
@@ -1412,10 +1413,36 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 		 * DLC =1
 		 * Il primo dato diverso da 0x7F e 0xFF
 		 */
-		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 1) && (RxData[0] != 0x7F) && (RxData[0] != 0xFF))
+		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 1)
+				&& (RxData[0] != 0x7F) && (RxData[0] != 0xFF))
 		{
 			/* Valve are working -> Refresh Valve Timer */
 			Alarm_Enable(&PSA.Alarm.AL01_CANbusError);
+		}
+
+		/* Simulazione della ricezione di dati */
+		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 3) && (RxData[0] == 0x01))
+		{
+			PSA.B1_InputAirPressure.Value = (RxData[1] << 8) + (RxData[2] << 0);
+			PSA.B1_InputAirPressure.Acquisition = 1;
+		}
+
+		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 3) && (RxData[0] == 0x02))
+		{
+			PSA.B2_OutputAirPressure_1.Value = (RxData[1] << 8) + (RxData[2] << 0);
+			PSA.B2_OutputAirPressure_1.Acquisition = 1;
+		}
+
+		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 3) && (RxData[0] == 0x03))
+		{
+			PSA.B3_ProcessTankAirPressure.Value = (RxData[1] << 8) + (RxData[2] << 0);
+			PSA.B3_ProcessTankAirPressure.Acquisition = 1;
+		}
+
+		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 3) && (RxData[0] == 0x04))
+		{
+			PSA.B4_OutputAirPressure_2.Value = (RxData[1] << 8) + (RxData[2] << 0);
+			PSA.B4_OutputAirPressure_2.Acquisition = 1;
 		}
 	}
 }
@@ -2304,7 +2331,7 @@ void StartB3_AcquisiTask(void *argument)
   for(;;)
   {
 	  CheckConditionToInsertValueIntoQueue(
-			  &PSA.B3_OutputAirPressure_1,
+			  &PSA.B3_ProcessTankAirPressure,
 			  &PSA.Alarm.AL33_B3ProbeFault,
 			  &B3_ProcessTankAirPressureQueue);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
