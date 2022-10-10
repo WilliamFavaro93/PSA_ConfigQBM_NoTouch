@@ -28,8 +28,8 @@ typedef struct
 {
 	uint16_t StateTimer;
 
-	uint16_t Adsorption_1;
-	uint16_t Adsorption_2;
+	uint16_t Period;
+	uint16_t Adsorption;
 	uint16_t Compensation_0;
 	uint16_t Compensation_1;
 	uint16_t Compensation_2;

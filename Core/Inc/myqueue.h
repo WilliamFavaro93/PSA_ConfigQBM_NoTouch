@@ -29,11 +29,12 @@ typedef struct{
 	uint16_t AverageValue;
 	uint8_t NextElementPositionPointer;
 	uint8_t Size;
+	uint8_t MaxSize;
 	uint32_t Sum;
 }MyQueue;
 
 /* Public Function definition ------------------------------------------------*/
-void MyQueue_Init(MyQueue *Queue);
+void MyQueue_Init(MyQueue *Queue, uint8_t MaxSize);
 void MyQueue_InsertElement(MyQueue *Queue, int16_t ElementToInsert);
 uint16_t MyQueue_GetAverageValue(MyQueue Queue);
 uint16_t MyQueue_GetLastValue(MyQueue Queue);

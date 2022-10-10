@@ -21,12 +21,10 @@
 MyQueue test;
 /* Private Function definition -----------------------------------------------*/
 void MyQueue_test_InsertBigNumberOfSameValueElements();
-void MyQueue_test_InsertIncresingValueElements();
 /* Public Function -----------------------------------------------------------*/
 void MyQueue_test_all()
 {
 	MyQueue_test_InsertBigNumberOfSameValueElements();
-	MyQueue_test_InsertIncresingValueElements();
 }
 /* Private Function ----------------------------------------------------------*/
 /*
@@ -35,29 +33,22 @@ void MyQueue_test_all()
 void MyQueue_test_InsertBigNumberOfSameValueElements()
 {
 	uint16_t AverageElement = 30;
+	uint8_t MaxSize = 20;
+	uint16_t LastElement = 50;
 
-	MyQueue_Init(&test);
-	for(uint8_t i=0; i<120; i++){
+	MyQueue_Init(&test, MaxSize);
+
+	for(uint8_t i = 0; i < test.MaxSize; i++){
 		MyQueue_InsertElement(&test, AverageElement);
 	}
 
-	while(!(MyQueue_GetAverageValue(test) == AverageElement)){}
-	while(!(MyQueue_GetLastValue(test) == AverageElement)){}
-}
+	MyQueue_InsertElement(&test, LastElement);
 
-/*
- * This method is just for testing with debug this code
- */
-void MyQueue_test_InsertIncresingValueElements()
-{
-	uint16_t StartingElement = 1600;
+	while(!(MyQueue_GetLastValue(test) == LastElement)){}
 
-	for(uint8_t i=0; i < MYQUEUE_N_MAX_ELEMENT; i++){
-		MyQueue_InsertElement(&test, StartingElement + i);
-	}
+	uint32_t Sum = (test.MaxSize - 1) * AverageElement + LastElement;
 
-	while(!(MyQueue_GetAverageValue(test) > (1600))){}
-	while(!(MyQueue_GetAverageValue(test) < (1600 + MYQUEUE_N_MAX_ELEMENT))){}
+	while(!(test.Sum == Sum)){}
 }
 #endif /* DEBUG */
 /* End of the file -----------------------------------------------------------*/

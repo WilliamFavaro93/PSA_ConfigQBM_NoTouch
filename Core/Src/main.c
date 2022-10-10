@@ -329,7 +329,7 @@ int main(void)
   MX_DMA_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-//  DateTime_test_all();
+//  MyQueue_test_all();
 //  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
 //  while(1){}
 
@@ -1359,8 +1359,7 @@ void AssignDefaultValue()
 	DateTime_Init(2022, 10, 5, 23, 59, 0);
 
 	/* Inizializza i valori dei timer per il debug */
-	PSA.Time.Adsorption_1 = 27;
-	PSA.Time.Adsorption_2 = 27;
+	PSA.Time.Adsorption = 27;
 	PSA.Time.Compensation_0 = 1;
 	PSA.Time.Compensation_1 = 1;
 	PSA.Time.Compensation_2 = 1;

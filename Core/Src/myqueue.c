@@ -20,7 +20,7 @@
 /* Variables -----------------------------------------------------------------*/
 /* Private Function definition -----------------------------------------------*/
 /* Public Function -----------------------------------------------------------*/
-void MyQueue_Init(MyQueue *Queue)
+void MyQueue_Init(MyQueue *Queue, uint8_t MaxSize)
 {
 	for(int i=0; i < MYQUEUE_N_MAX_ELEMENT; i++){
 		Queue->Element[i] = 0;
@@ -28,21 +28,25 @@ void MyQueue_Init(MyQueue *Queue)
 	Queue->NextElementPositionPointer = 0;
 	Queue->AverageValue = 0;
 	Queue->Size = 0;
+	if(MaxSize > MYQUEUE_N_MAX_ELEMENT)
+		Queue->MaxSize = MYQUEUE_N_MAX_ELEMENT;
+	else
+		Queue->MaxSize = MaxSize;
 }
 
 void MyQueue_InsertElement(MyQueue *Queue, int16_t ElementToInsert)
 {
 	/* Setup: This piece of code is useless without Update AverageValue works together */
 	int16_t ElementToEliminate = 0;
-	if(Queue->Size==MYQUEUE_N_MAX_ELEMENT)
+	if(Queue->Size == Queue->MaxSize)
 		ElementToEliminate = Queue->Element[Queue->NextElementPositionPointer];
 	/* Insert the element */
 	Queue->Element[Queue->NextElementPositionPointer]=ElementToInsert;
 	/* Update Queue */
 	Queue->NextElementPositionPointer++;
-	if(Queue->NextElementPositionPointer==MYQUEUE_N_MAX_ELEMENT)
-		Queue->NextElementPositionPointer=0;
-	if(Queue->Size!=MYQUEUE_N_MAX_ELEMENT)
+	if(Queue->NextElementPositionPointer == Queue->MaxSize)
+		Queue->NextElementPositionPointer = 0;
+	if(Queue->Size != Queue->MaxSize)
 		Queue->Size++;
 	/* Update AverageValue */
 	Queue->Sum = Queue->Sum + ElementToInsert - ElementToEliminate;
@@ -66,6 +70,7 @@ uint16_t MyQueue_GetLastValue(MyQueue Queue)
 		else
 			return Queue.Element[Queue.Size];
 	}
+
 	return 0;
 }
 /* Private Function ----------------------------------------------------------*/
