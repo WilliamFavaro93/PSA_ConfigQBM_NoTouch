@@ -98,7 +98,8 @@ typedef struct{
 /* Alarm and Fault structure -------------------------------------------------*/
 typedef struct
 {
-	uint64_t State;
+	uint8_t AlarmsTriggered;		/**< number of alarms triggered */
+	uint8_t BlockingAlarmsTriggered;/**< number of blocking alarms triggered */
 
 	Alarm AL01_CANbusError;			/**< define if AL01 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL01 is not triggered
@@ -232,7 +233,8 @@ typedef struct{
 	/* Mode ------------------------------------------------------------------*/
 	uint8_Mode Mode;		/**< the mode structure managed by ModeTask */
 	/* State -----------------------------------------------------------------*/
-	int State; 				/**< the number that identified thestate, managed by StateTask */
+	int State; 		/**< the number that identified thestate, StateTask */
+	uint8_t Module;	/**< the number of modules */
 	uint8_t StateUpdated;
 	uint16_t ReceiveValveMessage;
 	/* Out -------------------------------------------------------------------*/
@@ -242,7 +244,7 @@ typedef struct{
 	/* ... */
 	uint8_t CloseDrain;
 
-	uint8_t ValveState[8];
+	uint8_t Valve[8];
 
 	/* Command */
 //	SetOfRequests Request;
@@ -255,8 +257,8 @@ typedef struct{
 
 	uint16_AnalogInput DP_IncomingAirDewpoint;
 	uint16_AnalogInput FM_NitrogenFlowmeter;
-	uint16_AnalogInput KE1_OxygenSensor_1;			/* KE: UpperTh = LowerTh*/
-	uint16_AnalogInput KE2_OxygenSensor_2;			/* KE: */
+	uint16_AnalogInput KE25_OxygenSensor_1;			/* KE: UpperTh = LowerTh*/
+	uint16_AnalogInput KE25_OxygenSensor_2;			/* KE: */
 	/* Digital Input */
 	uint8_DigitalInput IN5_RemoteStartOUT_2;
 	uint8_DigitalInput IN6_RemoteStartOUT_1;
@@ -271,7 +273,11 @@ typedef struct{
 	ManageCAN2 CAN_2;
 } PSAStruct;
 
+void PSA_Mode_Run();
+void PSA_Mode_Standby();
 void PSA_UpdateState();
+uint8_t PSA_Alarm_NumberOfAlarmsTriggered();
+uint8_t PSA_Alarm_NumberOfBlockingAlarmsTriggered();
 void PSA_Relay_RunningAndOutNotUsed();
 void PSA_Relay_RunningAndOutUsed();
 void PSA_Relay_GoingStandby();

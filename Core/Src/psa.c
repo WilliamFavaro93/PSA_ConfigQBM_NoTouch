@@ -31,14 +31,13 @@ PSAStruct PSA;
  */
 void PSA_OutValve()
 {
-	PSA.ValveState[1] = 0;
 	if(PSA.Out1.Working)
 	{
-		PSA.ValveState[0]++;
+		PSA.Valve[0] += 1;
 	}
 	else if(PSA.Out2.Working)
 	{
-		PSA.ValveState[1]++;
+		PSA.Valve[1] += 1;
 	}
 }
 
@@ -47,9 +46,10 @@ void PSA_OutValve()
  * @author William Favaro
  * @date 21/09/2022
  */
-void PSA_Adsorption1(uint8_t module)
+void PSA_Adsorption1(uint8_t Module)
 {
-	PSA.ValveState[module] = 0xC6;
+	if(PSA.Module > Module)
+		PSA.Valve[Module] = 0xC6;
 }
 
 /*
@@ -57,9 +57,10 @@ void PSA_Adsorption1(uint8_t module)
  * @author William Favaro
  * @date 21/09/2022
  */
-void PSA_Compensation0(uint8_t module)
+void PSA_Compensation0(uint8_t Module)
 {
-	PSA.ValveState[module] = 0x00;
+	if(PSA.Module > Module)
+		PSA.Valve[Module] = 0x00;
 }
 
 /*
@@ -67,9 +68,10 @@ void PSA_Compensation0(uint8_t module)
  * @author William Favaro
  * @date 21/09/2022
  */
-void PSA_Compensation1_1(uint8_t module)
+void PSA_Compensation1_1(uint8_t Module)
 {
-	PSA.ValveState[module] = 0x20;
+	if(PSA.Module > Module)
+		PSA.Valve[Module] = 0x20;
 }
 
 /*
@@ -77,9 +79,10 @@ void PSA_Compensation1_1(uint8_t module)
  * @author William Favaro
  * @date 21/09/2022
  */
-void PSA_Compensation1_2(uint8_t module)
+void PSA_Compensation1_2(uint8_t Module)
 {
-	PSA.ValveState[module] = 0x04;
+	if(PSA.Module > Module)
+		PSA.Valve[Module] = 0x04;
 }
 
 /*
@@ -87,10 +90,10 @@ void PSA_Compensation1_2(uint8_t module)
  * @author William Favaro
  * @date 21/09/2022
  */
-void PSA_Compensation2(uint8_t module)
+void PSA_Compensation2(uint8_t Module)
 {
-	PSA.ValveState[module] = 0x24;
-	PSA.Time.StateTimer = PSA.Time.Compensation_2; /* 5 ds */
+	if(PSA.Module > Module)
+		PSA.Valve[Module] = 0x24;
 }
 
 /*
@@ -98,9 +101,10 @@ void PSA_Compensation2(uint8_t module)
  * @author William Favaro
  * @date 21/09/2022
  */
-void PSA_Adsorption2(uint8_t module)
+void PSA_Adsorption2(uint8_t Module)
 {
-	PSA.ValveState[module] = 0xB8;
+	if(PSA.Module > Module)
+		PSA.Valve[Module] = 0xB8;
 }
 
 /*
@@ -108,9 +112,10 @@ void PSA_Adsorption2(uint8_t module)
  * @author William Favaro
  * @date 21/09/2022
  */
-void PSA_PreStandby1(uint8_t module)
+void PSA_PreStandby1(uint8_t Module)
 {
-	PSA.ValveState[module] = 0x08;
+	if(PSA.Module > Module)
+		PSA.Valve[Module] = 0x08;
 }
 
 /*
@@ -118,9 +123,10 @@ void PSA_PreStandby1(uint8_t module)
  * @author William Favaro
  * @date 21/09/2022
  */
-void PSA_PreStandby2(uint8_t module)
+void PSA_PreStandby2(uint8_t Module)
 {
-	PSA.ValveState[module] = 0x48;
+	if(PSA.Module > Module)
+		PSA.Valve[Module] = 0x48;
 }
 
 /*
@@ -128,9 +134,10 @@ void PSA_PreStandby2(uint8_t module)
  * @author William Favaro
  * @date 21/09/2022
  */
-void PSA_Standby(uint8_t module)
+void PSA_Standby(uint8_t Module)
 {
-	PSA.ValveState[module] = 0x00;
+	if(PSA.Module > Module)
+		PSA.Valve[Module] = 0x00;
 }
 
 
@@ -177,6 +184,10 @@ void PSA_Standby(uint8_t module)
 
 void PSA_UpdateState()
 {
+	/* Reset -----------------------------------------------------------------*/
+	PSA.Valve[0] = 0x00;
+	PSA.Valve[1] = 0x00;
+
 	/* Standby ---------------------------------------------------------------*/
 	if(PSA.State == -2)
 	{
@@ -188,7 +199,7 @@ void PSA_UpdateState()
 	{
 		PSA_PreStandby2(0);
 		PSA_PreStandby2(1);
-		PSA.Time.StateTimer = PSA.Time.PreStandby_1;
+		PSA.Time.StateTimer = PSA.Time.PreStandby_2;
 	}
 	if(PSA.State == 0)
 	{
@@ -227,7 +238,7 @@ void PSA_UpdateState()
 	{
 		PSA_Adsorption1(0);
 		PSA_Adsorption2(1);
-		PSA.Time.StateTimer = (PSA.Time.Adsorption - (PSA.Time.Compensation_0
+		PSA.Time.StateTimer = (PSA.Time.Adsorption + 1 - (PSA.Time.Compensation_0
 				+ PSA.Time.Compensation_1 + PSA.Time.Compensation_2))/2;
 	}
 	if(PSA.State == 6)
@@ -277,7 +288,7 @@ void PSA_UpdateState()
 	{
 		PSA_Adsorption2(0);
 		PSA_Adsorption1(1);
-		PSA.Time.StateTimer = (PSA.Time.Adsorption - (PSA.Time.Compensation_0
+		PSA.Time.StateTimer = (PSA.Time.Adsorption + 1 - (PSA.Time.Compensation_0
 				+ PSA.Time.Compensation_1 + PSA.Time.Compensation_2))/2;
 	}
 	if(PSA.State == 14)
@@ -301,6 +312,66 @@ void PSA_UpdateState()
 
 	PSA_OutValve();
 	PSA.StateUpdated = 1;
+}
+
+void PSA_Mode_Run()
+{
+	PSA.Mode.Run = 0x01;
+	PSA.Mode.Standby = 0x00;
+}
+
+void PSA_Mode_Standby()
+{
+	PSA.Mode.Run = 0x00;
+	PSA.Mode.Standby = 0x01;
+}
+
+uint8_t PSA_Alarm_NumberOfAlarmsTriggered()
+{
+	uint8_t alarm_count = 0;
+
+	if(PSA.Alarm.AL01_CANbusError.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL02_LowAirPressure.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL05_LowProcessTankPressure.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL11_External.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL16_HighOut2Pressure.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL17_HighDewpoint.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL18_HighDewpoint.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL19_HighOut1Pressure.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL20_PCComunicationFault.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL31_B1ProbeFault.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL32_B2ProbeFault.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL33_B3ProbeFault.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL34_B4ProbeFault.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL40_PsaDischanging.Trigger)
+		alarm_count++;
+
+	return alarm_count;
+}
+
+uint8_t PSA_Alarm_NumberOfBlockingAlarmsTriggered()
+{
+	uint8_t alarm_count = 0;
+
+	if(PSA.Alarm.AL11_External.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL17_HighDewpoint.Trigger)
+		alarm_count++;
+
+	return alarm_count;
 }
 
 void PSA_Relay_RunningAndOutNotUsed()
