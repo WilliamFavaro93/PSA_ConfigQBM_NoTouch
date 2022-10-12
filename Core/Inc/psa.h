@@ -255,7 +255,7 @@ typedef struct{
 	uint16_AnalogInput B3_ProcessTankAirPressure;	/* B3: 0 - 16 bar */
 	uint16_AnalogInput B4_OutputAirPressure_2;		/* B4: 0 - 16 bar */
 
-	uint16_AnalogInput DP_IncomingAirDewpoint;
+	uint16_AnalogInput DP_InputAirDewpoint;
 	uint16_AnalogInput FM_NitrogenFlowmeter;
 	uint16_AnalogInput KE25_OxygenSensor_1;			/* KE: UpperTh = LowerTh*/
 	uint16_AnalogInput KE25_OxygenSensor_2;			/* KE: */

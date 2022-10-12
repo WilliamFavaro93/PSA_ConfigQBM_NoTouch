@@ -1478,24 +1478,26 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 			PSA.B4_OutputAirPressure_2.Value = (RxData[1] << 8) + (RxData[2] << 0);
 			PSA.B4_OutputAirPressure_2.Acquisition = 1;
 		}
-	}
-}
 
-void CheckConditionToInsertValueIntoQueue(uint16_AnalogInput *AnalogInput, Alarm *Alarm, MyQueue *Queue)
-{
-	  /* If received new acquisition value, ... */
-	  if((AnalogInput->Acquisition)
-			  && (AnalogInput->Value >= AnalogInput->LowerLimit)
-			  && (AnalogInput->Value <= AnalogInput->UpperLimit))
-	  {
-		  Alarm_CheckCondition(Alarm, 0);
-		  MyQueue_InsertElement(Queue, AnalogInput->Value);
-		  AnalogInput->Acquisition = 0;
-	  }
-	  else
-	  {
-		  Alarm_CheckCondition(Alarm, 1);
-	  }
+		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 3) && (RxData[0] == 0x05))
+		{
+			PSA.DP_InputAirDewpoint.Value = (RxData[1] << 8) + (RxData[2] << 0);
+			PSA.DP_InputAirDewpoint.Acquisition = 1;
+		}
+
+		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 3) && (RxData[0] == 0x06))
+		{
+			PSA.FM_NitrogenFlowmeter.Value = (RxData[1] << 8) + (RxData[2] << 0);
+			PSA.FM_NitrogenFlowmeter.Acquisition = 1;
+		}
+
+		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 3) && (RxData[0] == 0x07))
+		{
+			PSA.KE25_OxygenSensor_1.Value = (RxData[1] << 8) + (RxData[2] << 0);
+			PSA.KE25_OxygenSensor_2.Value = (RxData[1] << 8) + (RxData[2] << 0);
+			PSA.B4_OutputAirPressure_2.Acquisition = 1;
+		}
+	}
 }
 /* USER CODE END 4 */
 
@@ -2294,7 +2296,7 @@ void StartB1_AcquisiTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  CheckConditionToInsertValueIntoQueue(
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.B1_InputAirPressure,
 			  &PSA.Alarm.AL31_B1ProbeFault,
 			  &B1_InputAirPressureQueue);
@@ -2317,7 +2319,7 @@ void StartB2_AcquisiTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  CheckConditionToInsertValueIntoQueue(
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.B2_OutputAirPressure_1,
 			  &PSA.Alarm.AL32_B2ProbeFault,
 			  &B2_OutputAirPressure_1Queue);
@@ -2340,7 +2342,7 @@ void StartB3_AcquisiTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  CheckConditionToInsertValueIntoQueue(
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.B3_ProcessTankAirPressure,
 			  &PSA.Alarm.AL33_B3ProbeFault,
 			  &B3_ProcessTankAirPressureQueue);
@@ -2363,7 +2365,7 @@ void StartB4_AcquisiTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  CheckConditionToInsertValueIntoQueue(
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.B4_OutputAirPressure_2,
 			  &PSA.Alarm.AL34_B4ProbeFault,
 			  &B4_OutputAirPressure_2Queue);
@@ -2382,10 +2384,15 @@ void StartB4_AcquisiTask(void *argument)
 void StartIFW_AcquisiTask(void *argument)
 {
   /* USER CODE BEGIN StartIFW_AcquisiTask */
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+//	  Acquisition_AnalogInputIntoQueueWithAlarm(
+//			  &PSA.B4_OutputAirPressure_2,
+//			  &PSA.Alarm.AL34_B4ProbeFault,
+//			  &B4_OutputAirPressure_2Queue);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartIFW_AcquisiTask */
 }
@@ -2400,10 +2407,15 @@ void StartIFW_AcquisiTask(void *argument)
 void StartDW_AcquisiTask(void *argument)
 {
   /* USER CODE BEGIN StartDW_AcquisiTask */
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+//	  Acquisition_AnalogInputIntoQueueWithAlarm(
+//			  &PSA.B4_OutputAirPressure_2,
+//			  &PSA.Alarm.AL34_B4ProbeFault,
+//			  &B4_OutputAirPressure_2Queue);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartDW_AcquisiTask */
 }
@@ -2418,10 +2430,15 @@ void StartDW_AcquisiTask(void *argument)
 void StartO2_AcquisiTask(void *argument)
 {
   /* USER CODE BEGIN StartO2_AcquisiTask */
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+//	  Acquisition_AnalogInputIntoQueueWithAlarm(
+//			  &PSA.B4_OutputAirPressure_2,
+//			  &PSA.Alarm.AL34_B4ProbeFault,
+//			  &B4_OutputAirPressure_2Queue);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartO2_AcquisiTask */
 }
