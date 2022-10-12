@@ -202,17 +202,17 @@ const osThreadAttr_t IFW_AcquisiTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for DW_AcquisiTask */
-osThreadId_t DW_AcquisiTaskHandle;
-const osThreadAttr_t DW_AcquisiTask_attributes = {
-  .name = "DW_AcquisiTask",
+/* Definitions for DEW_AcquisiTask */
+osThreadId_t DEW_AcquisiTaskHandle;
+const osThreadAttr_t DEW_AcquisiTask_attributes = {
+  .name = "DEW_AcquisiTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for O2_AcquisiTask */
-osThreadId_t O2_AcquisiTaskHandle;
-const osThreadAttr_t O2_AcquisiTask_attributes = {
-  .name = "O2_AcquisiTask",
+/* Definitions for KE25_AcquisiTas */
+osThreadId_t KE25_AcquisiTasHandle;
+const osThreadAttr_t KE25_AcquisiTas_attributes = {
+  .name = "KE25_AcquisiTas",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
@@ -232,7 +232,7 @@ MyQueue B3_ProcessTankAirPressureQueue;
 MyQueue B4_OutputAirPressure_2Queue;
 MyQueue IFM_AirFlowmeterQueue;
 MyQueue KE25_PercentualOxygenInTheAirQueue;
-MyQueue DW_DewpointAirTemperatureQueue;
+MyQueue DEW_DewpointAirTemperatureQueue;
 
 /* TimeCounter ---------------------------------------------------------------*/
 TimeCounter PulldownWorking;
@@ -289,8 +289,8 @@ void StartB2_AcquisiTask(void *argument);
 void StartB3_AcquisiTask(void *argument);
 void StartB4_AcquisiTask(void *argument);
 void StartIFW_AcquisiTask(void *argument);
-void StartDW_AcquisiTask(void *argument);
-void StartO2_AcquisiTask(void *argument);
+void StartDEW_AcquisiTask(void *argument);
+void StartKE25_AcquisiTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 int __io_putchar(int character);
@@ -439,11 +439,11 @@ int main(void)
   /* creation of IFW_AcquisiTask */
   IFW_AcquisiTaskHandle = osThreadNew(StartIFW_AcquisiTask, NULL, &IFW_AcquisiTask_attributes);
 
-  /* creation of DW_AcquisiTask */
-  DW_AcquisiTaskHandle = osThreadNew(StartDW_AcquisiTask, NULL, &DW_AcquisiTask_attributes);
+  /* creation of DEW_AcquisiTask */
+  DEW_AcquisiTaskHandle = osThreadNew(StartDEW_AcquisiTask, NULL, &DEW_AcquisiTask_attributes);
 
-  /* creation of O2_AcquisiTask */
-  O2_AcquisiTaskHandle = osThreadNew(StartO2_AcquisiTask, NULL, &O2_AcquisiTask_attributes);
+  /* creation of KE25_AcquisiTas */
+  KE25_AcquisiTasHandle = osThreadNew(StartKE25_AcquisiTask, NULL, &KE25_AcquisiTas_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1481,14 +1481,14 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 
 		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 3) && (RxData[0] == 0x05))
 		{
-			PSA.DP_InputAirDewpoint.Value = (RxData[1] << 8) + (RxData[2] << 0);
-			PSA.DP_InputAirDewpoint.Acquisition = 1;
+			PSA.DEW_InputAirDewpoint.Value = (RxData[1] << 8) + (RxData[2] << 0);
+			PSA.DEW_InputAirDewpoint.Acquisition = 1;
 		}
 
 		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 3) && (RxData[0] == 0x06))
 		{
-			PSA.FM_NitrogenFlowmeter.Value = (RxData[1] << 8) + (RxData[2] << 0);
-			PSA.FM_NitrogenFlowmeter.Acquisition = 1;
+			PSA.IFM_AirFlowmeter.Value = (RxData[1] << 8) + (RxData[2] << 0);
+			PSA.IFM_AirFlowmeter.Acquisition = 1;
 		}
 
 		if((RxHeader.StdId == 0x701) && (RxHeader.DLC == 3) && (RxData[0] == 0x07))
@@ -2298,8 +2298,8 @@ void StartB1_AcquisiTask(void *argument)
   {
 	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.B1_InputAirPressure,
-			  &PSA.Alarm.AL31_B1ProbeFault,
-			  &B1_InputAirPressureQueue);
+			  &B1_InputAirPressureQueue,
+			  &PSA.Alarm.AL31_B1ProbeFault);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartB1_AcquisiTask */
@@ -2321,8 +2321,8 @@ void StartB2_AcquisiTask(void *argument)
   {
 	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.B2_OutputAirPressure_1,
-			  &PSA.Alarm.AL32_B2ProbeFault,
-			  &B2_OutputAirPressure_1Queue);
+			  &B2_OutputAirPressure_1Queue,
+			  &PSA.Alarm.AL32_B2ProbeFault);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartB2_AcquisiTask */
@@ -2344,8 +2344,8 @@ void StartB3_AcquisiTask(void *argument)
   {
 	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.B3_ProcessTankAirPressure,
-			  &PSA.Alarm.AL33_B3ProbeFault,
-			  &B3_ProcessTankAirPressureQueue);
+			  &B3_ProcessTankAirPressureQueue,
+			  &PSA.Alarm.AL33_B3ProbeFault);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartB3_AcquisiTask */
@@ -2367,8 +2367,8 @@ void StartB4_AcquisiTask(void *argument)
   {
 	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.B4_OutputAirPressure_2,
-			  &PSA.Alarm.AL34_B4ProbeFault,
-			  &B4_OutputAirPressure_2Queue);
+			  &B4_OutputAirPressure_2Queue,
+			  &PSA.Alarm.AL34_B4ProbeFault);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartB4_AcquisiTask */
@@ -2388,59 +2388,56 @@ void StartIFW_AcquisiTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-//	  Acquisition_AnalogInputIntoQueueWithAlarm(
-//			  &PSA.B4_OutputAirPressure_2,
-//			  &PSA.Alarm.AL34_B4ProbeFault,
-//			  &B4_OutputAirPressure_2Queue);
+	  Acquisition_AnalogInputIntoQueue(
+			  &PSA.IFM_AirFlowmeter,
+			  &IFM_AirFlowmeterQueue);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartIFW_AcquisiTask */
 }
 
-/* USER CODE BEGIN Header_StartDW_AcquisiTask */
+/* USER CODE BEGIN Header_StartDEW_AcquisiTask */
 /**
-* @brief Function implementing the DW_AcquisiTask thread.
+* @brief Function implementing the DEW_AcquisiTask thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartDW_AcquisiTask */
-void StartDW_AcquisiTask(void *argument)
+/* USER CODE END Header_StartDEW_AcquisiTask */
+void StartDEW_AcquisiTask(void *argument)
 {
-  /* USER CODE BEGIN StartDW_AcquisiTask */
+  /* USER CODE BEGIN StartDEW_AcquisiTask */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
-//	  Acquisition_AnalogInputIntoQueueWithAlarm(
-//			  &PSA.B4_OutputAirPressure_2,
-//			  &PSA.Alarm.AL34_B4ProbeFault,
-//			  &B4_OutputAirPressure_2Queue);
+	  Acquisition_AnalogInputIntoQueue(
+			  &PSA.DEW_InputAirDewpoint,
+			  &DEW_DewpointAirTemperatureQueue);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
-  /* USER CODE END StartDW_AcquisiTask */
+  /* USER CODE END StartDEW_AcquisiTask */
 }
 
-/* USER CODE BEGIN Header_StartO2_AcquisiTask */
+/* USER CODE BEGIN Header_StartKE25_AcquisiTask */
 /**
-* @brief Function implementing the O2_AcquisiTask thread.
+* @brief Function implementing the KE25_AcquisiTas thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_StartO2_AcquisiTask */
-void StartO2_AcquisiTask(void *argument)
+/* USER CODE END Header_StartKE25_AcquisiTask */
+void StartKE25_AcquisiTask(void *argument)
 {
-  /* USER CODE BEGIN StartO2_AcquisiTask */
+  /* USER CODE BEGIN StartKE25_AcquisiTask */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
-//	  Acquisition_AnalogInputIntoQueueWithAlarm(
-//			  &PSA.B4_OutputAirPressure_2,
-//			  &PSA.Alarm.AL34_B4ProbeFault,
-//			  &B4_OutputAirPressure_2Queue);
+	  Acquisition_AnalogInputIntoQueue(
+			  &PSA.KE25_OxygenSensor_1,
+			  &KE25_PercentualOxygenInTheAirQueue);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
-  /* USER CODE END StartO2_AcquisiTask */
+  /* USER CODE END StartKE25_AcquisiTask */
 }
 
 /**

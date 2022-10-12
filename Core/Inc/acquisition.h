@@ -1,9 +1,9 @@
 /**
   ******************************************************************************
-  * @file
-  * @author
-  * @date
-  * @brief
+  * @file	acquisition.h
+  * @author	William.Favaro
+  * @date	2022/10/12
+  * @brief	define acquisition function
   *
   ******************************************************************************
   * @note
