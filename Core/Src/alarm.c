@@ -22,7 +22,7 @@
 #endif /* DEBUG */
 /* Variables -----------------------------------------------------------------*/
 #ifdef ALARM_AUTEST
-	Alarm test;
+	Alarm myqtest;
 #endif /* ALARM_AUTEST */
 /* Private Function definition -----------------------------------------------*/
 /* Public Function -----------------------------------------------------------*/

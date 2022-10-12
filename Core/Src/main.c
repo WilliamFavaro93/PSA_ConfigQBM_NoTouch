@@ -195,6 +195,27 @@ const osThreadAttr_t B4_AcquisiTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal2,
 };
+/* Definitions for IFW_AcquisiTask */
+osThreadId_t IFW_AcquisiTaskHandle;
+const osThreadAttr_t IFW_AcquisiTask_attributes = {
+  .name = "IFW_AcquisiTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for DW_AcquisiTask */
+osThreadId_t DW_AcquisiTaskHandle;
+const osThreadAttr_t DW_AcquisiTask_attributes = {
+  .name = "DW_AcquisiTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for O2_AcquisiTask */
+osThreadId_t O2_AcquisiTaskHandle;
+const osThreadAttr_t O2_AcquisiTask_attributes = {
+  .name = "O2_AcquisiTask",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
 /* Definitions for BinarySemCAN */
 osSemaphoreId_t BinarySemCANHandle;
 const osSemaphoreAttr_t BinarySemCAN_attributes = {
@@ -267,6 +288,9 @@ void StartB1_AcquisiTask(void *argument);
 void StartB2_AcquisiTask(void *argument);
 void StartB3_AcquisiTask(void *argument);
 void StartB4_AcquisiTask(void *argument);
+void StartIFW_AcquisiTask(void *argument);
+void StartDW_AcquisiTask(void *argument);
+void StartO2_AcquisiTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 int __io_putchar(int character);
@@ -411,6 +435,15 @@ int main(void)
 
   /* creation of B4_AcquisiTask */
   B4_AcquisiTaskHandle = osThreadNew(StartB4_AcquisiTask, NULL, &B4_AcquisiTask_attributes);
+
+  /* creation of IFW_AcquisiTask */
+  IFW_AcquisiTaskHandle = osThreadNew(StartIFW_AcquisiTask, NULL, &IFW_AcquisiTask_attributes);
+
+  /* creation of DW_AcquisiTask */
+  DW_AcquisiTaskHandle = osThreadNew(StartDW_AcquisiTask, NULL, &DW_AcquisiTask_attributes);
+
+  /* creation of O2_AcquisiTask */
+  O2_AcquisiTaskHandle = osThreadNew(StartO2_AcquisiTask, NULL, &O2_AcquisiTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -2337,6 +2370,60 @@ void StartB4_AcquisiTask(void *argument)
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartB4_AcquisiTask */
+}
+
+/* USER CODE BEGIN Header_StartIFW_AcquisiTask */
+/**
+* @brief Function implementing the IFW_AcquisiTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartIFW_AcquisiTask */
+void StartIFW_AcquisiTask(void *argument)
+{
+  /* USER CODE BEGIN StartIFW_AcquisiTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartIFW_AcquisiTask */
+}
+
+/* USER CODE BEGIN Header_StartDW_AcquisiTask */
+/**
+* @brief Function implementing the DW_AcquisiTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartDW_AcquisiTask */
+void StartDW_AcquisiTask(void *argument)
+{
+  /* USER CODE BEGIN StartDW_AcquisiTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartDW_AcquisiTask */
+}
+
+/* USER CODE BEGIN Header_StartO2_AcquisiTask */
+/**
+* @brief Function implementing the O2_AcquisiTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartO2_AcquisiTask */
+void StartO2_AcquisiTask(void *argument)
+{
+  /* USER CODE BEGIN StartO2_AcquisiTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartO2_AcquisiTask */
 }
 
 /**

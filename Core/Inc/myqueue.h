@@ -24,12 +24,14 @@
 #define MYQUEUE_N_MAX_ELEMENT 30
 
 /* Typedef struct definition -------------------------------------------------*/
-typedef struct{
+typedef struct
+{
 	uint16_t Element[MYQUEUE_N_MAX_ELEMENT];
 	uint16_t AverageValue;
 	uint8_t NextElementPositionPointer;
 	uint8_t Size;
 	uint8_t MaxSize;
+	uint8_t Enable;
 	uint32_t Sum;
 }MyQueue;
 

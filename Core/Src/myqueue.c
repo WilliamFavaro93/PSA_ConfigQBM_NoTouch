@@ -28,6 +28,10 @@ void MyQueue_Init(MyQueue *Queue, uint8_t MaxSize)
 	Queue->NextElementPositionPointer = 0;
 	Queue->AverageValue = 0;
 	Queue->Size = 0;
+	Queue->Sum = 0;
+
+	Queue->Enable = 1;
+
 	if(MaxSize > MYQUEUE_N_MAX_ELEMENT)
 		Queue->MaxSize = MYQUEUE_N_MAX_ELEMENT;
 	else
@@ -36,21 +40,20 @@ void MyQueue_Init(MyQueue *Queue, uint8_t MaxSize)
 
 void MyQueue_InsertElement(MyQueue *Queue, int16_t ElementToInsert)
 {
+	if(!(Queue->Enable))
+		return;
 	/* Setup: This piece of code is useless without Update AverageValue works together */
-	int16_t ElementToEliminate = 0;
-	if(Queue->Size == Queue->MaxSize)
-		ElementToEliminate = Queue->Element[Queue->NextElementPositionPointer];
+	Queue->Sum -= Queue->Element[Queue->NextElementPositionPointer];
 	/* Insert the element */
-	Queue->Element[Queue->NextElementPositionPointer]=ElementToInsert;
-	/* Update Queue */
+	Queue->Element[Queue->NextElementPositionPointer] = ElementToInsert;
+	Queue->Sum += ElementToInsert;
 	Queue->NextElementPositionPointer++;
-	if(Queue->NextElementPositionPointer == Queue->MaxSize)
-		Queue->NextElementPositionPointer = 0;
+	Queue->NextElementPositionPointer %= Queue->MaxSize;
+
 	if(Queue->Size != Queue->MaxSize)
 		Queue->Size++;
 	/* Update AverageValue */
-	Queue->Sum = Queue->Sum + ElementToInsert - ElementToEliminate;
-	Queue->AverageValue = Queue->Sum / Queue->Size;
+	Queue->AverageValue = (Queue->Sum / Queue->Size);
 }
 
 uint16_t MyQueue_GetAverageValue(MyQueue Queue)
@@ -63,15 +66,10 @@ uint16_t MyQueue_GetAverageValue(MyQueue Queue)
  */
 uint16_t MyQueue_GetLastValue(MyQueue Queue)
 {
-	if(Queue.Size)
-	{
-		if(Queue.NextElementPositionPointer)
-			return Queue.Element[Queue.NextElementPositionPointer-1];
-		else
-			return Queue.Element[Queue.Size];
-	}
-
-	return 0;
+	if(Queue.NextElementPositionPointer)
+		return Queue.Element[Queue.NextElementPositionPointer - 1];
+	else
+		return Queue.Element[Queue.MaxSize - 1];
 }
 /* Private Function ----------------------------------------------------------*/
 /* End of the file -----------------------------------------------------------*/
