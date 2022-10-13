@@ -130,14 +130,14 @@ osThreadId_t SDTaskHandle;
 const osThreadAttr_t SDTask_attributes = {
   .name = "SDTask",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal1,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for CAN1RxTxTask */
 osThreadId_t CAN1RxTxTaskHandle;
 const osThreadAttr_t CAN1RxTxTask_attributes = {
   .name = "CAN1RxTxTask",
   .stack_size = 256 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityNormal1,
 };
 /* Definitions for AlarmTask */
 osThreadId_t AlarmTaskHandle;
@@ -145,20 +145,6 @@ const osThreadAttr_t AlarmTask_attributes = {
   .name = "AlarmTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal6,
-};
-/* Definitions for FaultTask */
-osThreadId_t FaultTaskHandle;
-const osThreadAttr_t FaultTask_attributes = {
-  .name = "FaultTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
-};
-/* Definitions for ValveTask */
-osThreadId_t ValveTaskHandle;
-const osThreadAttr_t ValveTask_attributes = {
-  .name = "ValveTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
 };
 /* Definitions for RequestTask */
 osThreadId_t RequestTaskHandle;
@@ -200,19 +186,33 @@ osThreadId_t IFW_AcquisiTaskHandle;
 const osThreadAttr_t IFW_AcquisiTask_attributes = {
   .name = "IFW_AcquisiTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityBelowNormal2,
 };
 /* Definitions for DEW_AcquisiTask */
 osThreadId_t DEW_AcquisiTaskHandle;
 const osThreadAttr_t DEW_AcquisiTask_attributes = {
   .name = "DEW_AcquisiTask",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityBelowNormal2,
 };
 /* Definitions for KE25_AcquisiTas */
 osThreadId_t KE25_AcquisiTasHandle;
 const osThreadAttr_t KE25_AcquisiTas_attributes = {
   .name = "KE25_AcquisiTas",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal2,
+};
+/* Definitions for CAN1_ReceiveTas */
+osThreadId_t CAN1_ReceiveTasHandle;
+const osThreadAttr_t CAN1_ReceiveTas_attributes = {
+  .name = "CAN1_ReceiveTas",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityLow,
+};
+/* Definitions for CAN1_TransmitTa */
+osThreadId_t CAN1_TransmitTaHandle;
+const osThreadAttr_t CAN1_TransmitTa_attributes = {
+  .name = "CAN1_TransmitTa",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
@@ -281,8 +281,6 @@ void StartCAN2TxTask(void *argument);
 void StartSDTask(void *argument);
 void StartCAN1RxTxTask(void *argument);
 void StartAlarmTask(void *argument);
-void StartFaultTask(void *argument);
-void StartValveTask(void *argument);
 void StartRequestTask(void *argument);
 void StartB1_AcquisiTask(void *argument);
 void StartB2_AcquisiTask(void *argument);
@@ -291,6 +289,8 @@ void StartB4_AcquisiTask(void *argument);
 void StartIFW_AcquisiTask(void *argument);
 void StartDEW_AcquisiTask(void *argument);
 void StartKE25_AcquisiTask(void *argument);
+void StartCAN1_ReceiveTask(void *argument);
+void StartCAN1_TransmitTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 int __io_putchar(int character);
@@ -415,12 +415,6 @@ int main(void)
   /* creation of AlarmTask */
   AlarmTaskHandle = osThreadNew(StartAlarmTask, NULL, &AlarmTask_attributes);
 
-  /* creation of FaultTask */
-  FaultTaskHandle = osThreadNew(StartFaultTask, NULL, &FaultTask_attributes);
-
-  /* creation of ValveTask */
-  ValveTaskHandle = osThreadNew(StartValveTask, NULL, &ValveTask_attributes);
-
   /* creation of RequestTask */
   RequestTaskHandle = osThreadNew(StartRequestTask, NULL, &RequestTask_attributes);
 
@@ -444,6 +438,12 @@ int main(void)
 
   /* creation of KE25_AcquisiTas */
   KE25_AcquisiTasHandle = osThreadNew(StartKE25_AcquisiTask, NULL, &KE25_AcquisiTas_attributes);
+
+  /* creation of CAN1_ReceiveTas */
+  CAN1_ReceiveTasHandle = osThreadNew(StartCAN1_ReceiveTask, NULL, &CAN1_ReceiveTas_attributes);
+
+  /* creation of CAN1_TransmitTa */
+  CAN1_TransmitTaHandle = osThreadNew(StartCAN1_TransmitTask, NULL, &CAN1_TransmitTa_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1404,9 +1404,9 @@ void AssignDefaultValue()
 	PSA.Mode.Ready = 0x01;								/* Altrimenti non parte */
 
 	PSA.B1_InputAirPressure.LowerLimit = 0;
-	PSA.B1_InputAirPressure.LowerThreshold = 500; 	//SB1L
-	PSA.B1_InputAirPressure.Value = 710;				/* Altrimenti non parte */
-	PSA.B1_InputAirPressure.UpperThreshold = 700; 	//SB1H
+	PSA.B1_InputAirPressure.LowerThreshold = 500; 			//SB1L
+	PSA.B1_InputAirPressure.Value = 710;					/* Altrimenti non parte */
+	PSA.B1_InputAirPressure.UpperThreshold = 700; 			//SB1H
 	PSA.B1_InputAirPressure.UpperLimit = 10000;
 
 	PSA.B3_ProcessTankAirPressure.LowerLimit = 0;
@@ -1427,11 +1427,36 @@ void AssignDefaultValue()
 	PSA.B4_OutputAirPressure_2.UpperThreshold = 700; 		//SB4H
 	PSA.B4_OutputAirPressure_2.UpperLimit = 10000;
 
+	PSA.IFM_AirFlowmeter.LowerLimit = 0;
+	PSA.IFM_AirFlowmeter.LowerThreshold = 500;
+	PSA.IFM_AirFlowmeter.Value = 600;
+	PSA.IFM_AirFlowmeter.UpperThreshold = 700;
+	PSA.IFM_AirFlowmeter.UpperLimit = 10000;
+
+	PSA.DEW_InputAirDewpoint.LowerLimit = 0;
+	PSA.DEW_InputAirDewpoint.LowerThreshold = 500;
+	PSA.DEW_InputAirDewpoint.Value = 600;
+	PSA.DEW_InputAirDewpoint.UpperThreshold = 700;
+	PSA.DEW_InputAirDewpoint.UpperLimit = 10000;
+
+	PSA.KE25_OxygenSensor_1.LowerLimit = 0;
+	PSA.KE25_OxygenSensor_1.LowerThreshold = 500;
+	PSA.KE25_OxygenSensor_1.Value = 600;
+	PSA.KE25_OxygenSensor_1.UpperThreshold = 700;
+	PSA.KE25_OxygenSensor_1.UpperLimit = 10000;
+
+	PSA.KE25_OxygenSensor_1.LowerLimit = 0;
+	PSA.KE25_OxygenSensor_1.LowerThreshold = 500;
+	PSA.KE25_OxygenSensor_1.Value = 600;
+	PSA.KE25_OxygenSensor_1.UpperThreshold = 700;
+	PSA.KE25_OxygenSensor_1.UpperLimit = 10000;
+
+
 	PSA.OutPriority = 1;								//PR_OUT
 
-	PSA.KE25_OxygenSensor_1.LowerThreshold = 4; 			//SO2-1
+//	PSA.KE25_OxygenSensor_1.LowerThreshold = 4; 			//SO2-1
 	PSA.Out1.Enable = 1;
-	PSA.KE25_OxygenSensor_2.LowerThreshold = 2; 			//SO2-2
+//	PSA.KE25_OxygenSensor_2.LowerThreshold = 2; 			//SO2-2
 	PSA.Out2.Enable = 1;
 }
 
@@ -1495,7 +1520,8 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 		{
 			PSA.KE25_OxygenSensor_1.Value = (RxData[1] << 8) + (RxData[2] << 0);
 			PSA.KE25_OxygenSensor_2.Value = (RxData[1] << 8) + (RxData[2] << 0);
-			PSA.B4_OutputAirPressure_2.Acquisition = 1;
+			PSA.KE25_OxygenSensor_1.Acquisition = 1;
+			PSA.KE25_OxygenSensor_2.Acquisition = 1;
 		}
 	}
 }
@@ -1566,13 +1592,13 @@ void StartStateTask(void *argument)
 		  if((PSA.Mode.Run) && (PSA.State < 1))
 		  {
 			  PSA.State = 1;
-			  PSA_UpdateState();
+			  PSA_State_UpdateValveMessage();
 		  }
 
 		  if((PSA.Mode.Standby) && (PSA.State > 0))
 		  {
 			  PSA.State = -2;
-			  PSA_UpdateState();
+			  PSA_State_UpdateValveMessage();
 		  }
 
 		  if(!PSA.Time.StateTimer)
@@ -1587,7 +1613,7 @@ void StartStateTask(void *argument)
 				  PSA.State = 1;
 			  }
 
-			  PSA_UpdateState();
+			  PSA_State_UpdateValveMessage();
 		  }
 	  }
 	  vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
@@ -1630,33 +1656,23 @@ void StartOutTask(void *argument)
 		  /* Managing Command ------------------------------------------------*/
 		  if(PSA.Command.EnableOut1_DisableOut2)
 		  {
-			  PSA.Out1.Enable = 1;
-			  PSA.Out2.Enable = 0;
-			  PSA.Out2.Ready = 0;
-			  PSA.Out2.Working = 0;
-			  PSA.Command.EnableOut1_DisableOut2 = 0;
+			  PSA_Command_EnableOut1_DisableOut2();
 		  }
 		  if(PSA.Command.EnableOut2_DisableOut1)
 		  {
-			  PSA.Out2.Enable = 1;
-			  PSA.Out1.Enable = 0;
-			  PSA.Out1.Ready = 0;
-			  PSA.Out1.Working = 0;
-			  PSA.Command.EnableOut2_DisableOut1 = 0;
+			  PSA_Command_EnableOut2_DisableOut1();
 		  }
 		  if(PSA.Command.EnableOut1_EnableOut2)
 		  {
-			  PSA.Out2.Enable = 1;
-			  PSA.Out1.Enable = 1;
-			  PSA.Command.EnableOut1_EnableOut2 = 0;
+			  PSA_Command_EnableOut1_EnableOut2();
 		  }
 		  if(PSA.Command.SetPriorityOut1)
 		  {
-			  PSA.OutPriority = 1;
+			  PSA_Command_SetPriorityOut1();
 		  }
 		  if(PSA.Command.SetPriorityOut2)
 		  {
-			  PSA.OutPriority = 2;
+			  PSA_Command_SetPriorityOut2();
 		  }
 
 		  /* Starting Condition ----------------------------------------------*/
@@ -1828,6 +1844,9 @@ void StartTimeTask(void *argument)
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL32_B2ProbeFault.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL33_B3ProbeFault.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL34_B4ProbeFault.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL35_IFWProbeFault.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL36_DEWProbeFault.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL37_KE25ProbeFault.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.MissingSDCard.Timer);
 	  /*** WATCHDOG ***/
 	  /* New day */
@@ -2009,8 +2028,7 @@ void StartCAN1RxTxTask(void *argument)
   /* USER CODE BEGIN StartCAN1RxTxTask */
 		PSA.CANSPI.State = CANSPI_Initialize();
 
-		TickType_t TaskDelayTimer;
-	//	uCAN_MSG rxMessage;
+		TickType_t TaskDelayTimer = xTaskGetTickCount();
 
 
 
@@ -2175,9 +2193,12 @@ void StartAlarmTask(void *argument)
 //	Alarm_Init(&PSA.Alarm.AL18_HighDewpoint, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL19_HighOut1Pressure, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL31_B1ProbeFault, 5, 5);
-//	Alarm_Init(&PSA.Alarm.AL32_B2ProbeFault, 5, 5);
-//	Alarm_Init(&PSA.Alarm.AL33_B3ProbeFault, 5, 5);
-//	Alarm_Init(&PSA.Alarm.AL34_B4ProbeFault, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL32_B2ProbeFault, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL33_B3ProbeFault, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL34_B4ProbeFault, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL35_IFWProbeFault, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL36_DEWProbeFault, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL37_KE25ProbeFault, 5, 5);
 //	Alarm_Init(&PSA.Alarm.AL40_PsaDischanging, 5, 5);
 	Alarm_Init(&PSA.Alarm.MissingSDCard, 5, 5);
 
@@ -2226,42 +2247,6 @@ void StartAlarmTask(void *argument)
 	  vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartAlarmTask */
-}
-
-/* USER CODE BEGIN Header_StartFaultTask */
-/**
-* @brief Function implementing the FaultTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartFaultTask */
-void StartFaultTask(void *argument)
-{
-  /* USER CODE BEGIN StartFaultTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartFaultTask */
-}
-
-/* USER CODE BEGIN Header_StartValveTask */
-/**
-* @brief Function implementing the ValveTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartValveTask */
-void StartValveTask(void *argument)
-{
-  /* USER CODE BEGIN StartValveTask */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END StartValveTask */
 }
 
 /* USER CODE BEGIN Header_StartRequestTask */
@@ -2388,9 +2373,10 @@ void StartIFW_AcquisiTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  Acquisition_AnalogInputIntoQueue(
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.IFM_AirFlowmeter,
-			  &IFM_AirFlowmeterQueue);
+			  &IFM_AirFlowmeterQueue,
+			  &PSA.Alarm.AL35_IFWProbeFault);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartIFW_AcquisiTask */
@@ -2410,9 +2396,10 @@ void StartDEW_AcquisiTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  Acquisition_AnalogInputIntoQueue(
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.DEW_InputAirDewpoint,
-			  &DEW_DewpointAirTemperatureQueue);
+			  &DEW_DewpointAirTemperatureQueue,
+			  &PSA.Alarm.AL36_DEWProbeFault);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartDEW_AcquisiTask */
@@ -2432,12 +2419,49 @@ void StartKE25_AcquisiTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  Acquisition_AnalogInputIntoQueue(
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.KE25_OxygenSensor_1,
-			  &KE25_PercentualOxygenInTheAirQueue);
+			  &KE25_PercentualOxygenInTheAirQueue,
+			  &PSA.Alarm.AL37_KE25ProbeFault);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartKE25_AcquisiTask */
+}
+
+/* USER CODE BEGIN Header_StartCAN1_ReceiveTask */
+/**
+* @brief Function implementing the CAN1_ReceiveTas thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartCAN1_ReceiveTask */
+void StartCAN1_ReceiveTask(void *argument)
+{
+  /* USER CODE BEGIN StartCAN1_ReceiveTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartCAN1_ReceiveTask */
+}
+
+/* USER CODE BEGIN Header_StartCAN1_TransmitTask */
+/**
+* @brief Function implementing the CAN1_TransmitTa thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartCAN1_TransmitTask */
+void StartCAN1_TransmitTask(void *argument)
+{
+  /* USER CODE BEGIN StartCAN1_TransmitTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END StartCAN1_TransmitTask */
 }
 
 /**

@@ -22,6 +22,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stdint.h"
 #include "alarm.h"
+#include "canspi.h"
 
 /* Time structure ------------------------------------------------------------*/
 typedef struct
@@ -138,6 +139,9 @@ typedef struct
 	Alarm AL34_B4ProbeFault;			/**< define if AL34 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL34 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL34 is triggered				*/
+	Alarm AL35_IFWProbeFault;
+	Alarm AL36_DEWProbeFault;
+	Alarm AL37_KE25ProbeFault;
 	Alarm AL40_PsaDischanging;		/**< define if AL40 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL40 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL40 is triggered				*/
@@ -167,9 +171,6 @@ typedef struct
 /* Command structure ---------------------------------------------------------*/
 typedef struct
 {
-	uint32_t State;
-	uint8_t ArrayID[4];
-
 	uint8_t EnableOutGoingNitrogen;		/**< define if the command EnableOutGoingNitrogen must be managed:
 	 	 	 	 	 	 	 	 	 	 0: EnableOutGoingNitrogen must not be managed
 	 	 	 	 	 	 	 	 	 	 1: EnableOutGoingNitrogen must be managed		*/
@@ -202,8 +203,22 @@ typedef struct
 /* Request structure ---------------------------------------------------------*/
 typedef struct
 {
-	uint32_t State;
-	uint16_t ID[20];
+	uint8_t State;
+	uint8_t Alarm;
+	uint8_t OxygenPercentual;
+	uint8_t InputAirDewpoint;
+	uint8_t OutputAirPressure_1;
+	uint8_t ProcessTankAirPressure;
+	uint8_t OutputAirPressure_2;
+	uint8_t AirFlowmeter;
+	uint8_t AverageAirFlowmeter;
+	uint8_t Out2ValvePosition;
+	uint8_t DischangeValvePosition;
+	uint8_t Out1ValvePosition;
+	uint8_t Out1WorkingHour;
+	uint8_t Out2WorkingHour;
+	uint8_t TotalWorkingHour;
+	uint8_t ActualWorkingHour;
 } SetOfRequests;
 
 /* Controller Area Network 2 structure ---------------------------------------*/
@@ -224,6 +239,8 @@ typedef struct
 	uint32_t Ide;
 	uint8_t State;
 
+	uCAN_MSG ReceiveMessage;
+	uCAN_MSG RequestMessage;
 } ManageCANSPI;
 
 /* Pressure Swing Adsorption structure ---------------------------------------*/
@@ -247,7 +264,7 @@ typedef struct{
 	uint8_t Valve[8];
 
 	/* Command */
-//	SetOfRequests Request;
+	SetOfRequests Request;
 	SetOfCommands Command;
 	/* Analog Input */
 	uint16_AnalogInput B1_InputAirPressure;			/* B1: 0 - 16 bar */
@@ -275,9 +292,35 @@ typedef struct{
 
 void PSA_Mode_Run();
 void PSA_Mode_Standby();
-void PSA_UpdateState();
+
+void PSA_State_UpdateValveMessage();
+
 uint8_t PSA_Alarm_NumberOfAlarmsTriggered();
 uint8_t PSA_Alarm_NumberOfBlockingAlarmsTriggered();
+
+void PSA_Command_EnableOut1_DisableOut2();
+void PSA_Command_EnableOut2_DisableOut1();
+void PSA_Command_EnableOut1_EnableOut2();
+void PSA_Command_SetPriorityOut1();
+void PSA_Command_SetPriorityOut2();
+
+void PSA_Request_State();
+void PSA_Request_Alarm();
+void PSA_Request_OxygenPercentual();
+void PSA_Request_InputAirDewpoint();
+void PSA_Request_OutputAirPressure_1();
+void PSA_Request_ProcessTankAirPressure();
+void PSA_Request_OutputAirPressure_2();
+void PSA_Request_AirFlowmeter();
+void PSA_Request_AverageAirFlowmeter();
+void PSA_Request_Out2ValvePosition();
+void PSA_Request_DischangeValvePosition();
+void PSA_Request_Out1ValvePosition();
+void PSA_Request_Out1WorkingHour();
+void PSA_Request_Out2WorkingHour();
+void PSA_Request_TotalWorkingHour();
+void PSA_Request_ActualWorkingHour();
+
 void PSA_Relay_RunningAndOutNotUsed();
 void PSA_Relay_RunningAndOutUsed();
 void PSA_Relay_GoingStandby();

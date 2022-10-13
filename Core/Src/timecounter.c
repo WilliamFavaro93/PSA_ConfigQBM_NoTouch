@@ -36,5 +36,5 @@ void TimeCounter_AddDecisecond(TimeCounter *TimeCounter)
 /*** TIME READER ***/
 uint32_t TimeCounter_GetTotalHours(TimeCounter *TimeCounter)
 {
-	return TimeCounter->Hours + (TimeCounter->Days*24);
+	return TimeCounter->Hours + (TimeCounter->Days * 24);
 }

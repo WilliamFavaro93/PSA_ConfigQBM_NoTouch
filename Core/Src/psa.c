@@ -140,49 +140,12 @@ void PSA_Standby(uint8_t Module)
 		PSA.Valve[Module] = 0x00;
 }
 
-
-
-
 /*
  * @brief This method select the method to update psa structure
  * @author William Favaro
  * @date 21/09/2022
  */
-//void PSA_UpdateState()
-//{
-//	/* Standby ---------------------------------------------------------------*/
-//	if(PSA.State == -2)
-//		PSA_PreStandby1();
-//	if(PSA.State == -1)
-//		PSA_PreStandby2();
-//	if(PSA.State == 0)
-//		PSA_Standby();
-//
-//	/* Run -------------------------------------------------------------------*/
-//	if(PSA.State == 1)
-//		PSA_Adsorption1();
-//	if(PSA.State == 2)
-//		PSA_Compensation0();
-//	if(PSA.State == 3)
-//		PSA_Compensation1();
-//	if(PSA.State == 4)
-//		PSA_Compensation2();
-//	if(PSA.State == 5)
-//		PSA_Adsorption2();
-//	if(PSA.State == 6)
-//		PSA_Compensation0();
-//	if(PSA.State == 7)
-//		PSA_Compensation1();
-//	if(PSA.State == 8)
-//		PSA_Compensation2();
-//
-//	if(PSA.State > 0)
-//		PSA_OutValve();
-//
-//	PSA.StateUpdated = 1;
-//}
-
-void PSA_UpdateState()
+void PSA_State_UpdateValveMessage()
 {
 	/* Reset -----------------------------------------------------------------*/
 	PSA.Valve[0] = 0x00;
@@ -356,6 +319,12 @@ uint8_t PSA_Alarm_NumberOfAlarmsTriggered()
 		alarm_count++;
 	if(PSA.Alarm.AL34_B4ProbeFault.Trigger)
 		alarm_count++;
+	if(PSA.Alarm.AL35_IFWProbeFault.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL36_DEWProbeFault.Trigger)
+		alarm_count++;
+	if(PSA.Alarm.AL37_KE25ProbeFault.Trigger)
+		alarm_count++;
 	if(PSA.Alarm.AL40_PsaDischanging.Trigger)
 		alarm_count++;
 
@@ -372,6 +341,130 @@ uint8_t PSA_Alarm_NumberOfBlockingAlarmsTriggered()
 		alarm_count++;
 
 	return alarm_count;
+}
+
+void PSA_Command_EnableOut1_DisableOut2()
+{
+	  PSA.Out1.Enable = 1;
+
+	  PSA.Out2.Enable = 0;
+	  PSA.Out2.Ready = 0;
+	  PSA.Out2.Working = 0;
+
+	  PSA.Command.EnableOut1_DisableOut2 = 0;
+}
+
+void PSA_Command_EnableOut2_DisableOut1()
+{
+	  PSA.Out2.Enable = 1;
+
+	  PSA.Out1.Enable = 0;
+	  PSA.Out1.Ready = 0;
+	  PSA.Out1.Working = 0;
+
+	  PSA.Command.EnableOut2_DisableOut1 = 0;
+}
+
+void PSA_Command_EnableOut1_EnableOut2()
+{
+	  PSA.Out2.Enable = 1;
+	  PSA.Out1.Enable = 1;
+
+	  PSA.Command.EnableOut1_EnableOut2 = 0;
+}
+
+void PSA_Command_SetPriorityOut1()
+{
+	  PSA.OutPriority = 1;
+
+	  PSA.Command.SetPriorityOut1 = 0;
+}
+
+void PSA_Command_SetPriorityOut2()
+{
+	  PSA.OutPriority = 2;
+
+	  PSA.Command.SetPriorityOut2 = 0;
+}
+
+void PSA_Request_State()
+{
+
+}
+
+void PSA_Request_Alarm()
+{
+
+}
+
+void PSA_Request_OxygenPercentual()
+{
+
+}
+
+void PSA_Request_InputAirDewpoint()
+{
+
+}
+
+void PSA_Request_OutputAirPressure_1()
+{
+
+}
+
+void PSA_Request_ProcessTankAirPressure()
+{
+
+}
+
+void PSA_Request_OutputAirPressure_2()
+{
+
+}
+
+void PSA_Request_AirFlowmeter()
+{
+
+}
+
+void PSA_Request_AverageAirFlowmeter()
+{
+
+}
+
+void PSA_Request_Out2ValvePosition()
+{
+
+}
+
+void PSA_Request_DischangeValvePosition()
+{
+
+}
+
+void PSA_Request_Out1ValvePosition()
+{
+
+}
+
+void PSA_Request_Out1WorkingHour()
+{
+
+}
+
+void PSA_Request_Out2WorkingHour()
+{
+
+}
+
+void PSA_Request_TotalWorkingHour()
+{
+
+}
+
+void PSA_Request_ActualWorkingHour()
+{
+
 }
 
 void PSA_Relay_RunningAndOutNotUsed()
