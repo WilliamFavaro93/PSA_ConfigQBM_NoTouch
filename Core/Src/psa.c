@@ -289,6 +289,12 @@ void PSA_Mode_Standby()
 	PSA.Mode.Standby = 0x01;
 }
 
+void PSA_AnalogInput_Acquisition(uint16_AnalogInput *AnalogInput, uint16_t AnalogInputValue)
+{
+	AnalogInput->Value = AnalogInputValue;
+	AnalogInput->Acquisition = 1;
+}
+
 uint8_t PSA_Alarm_NumberOfAlarmsTriggered()
 {
 	uint8_t alarm_count = 0;

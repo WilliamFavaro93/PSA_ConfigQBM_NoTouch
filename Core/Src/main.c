@@ -2006,10 +2006,18 @@ void StartSDTask(void *argument)
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL34_B4ProbeFault,
 	  			  	  	  	  	  "AL34 Guasto Sonda B4",
 								  sizeof("AL34 Guasto Sonda B4"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL35_IFWProbeFault,
+	  			  	  	  	  	  "AL35 Guasto Sonda IFM",
+								  sizeof("AL35 Guasto Sonda IFM"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL36_DEWProbeFault,
+	  			  	  	  	  	  "AL36 Guasto Sonda DEW",
+								  sizeof("AL36 Guasto Sonda DEW"));
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL37_KE25ProbeFault,
+	  			  	  	  	  	  "AL37 Guasto Sonda KE25",
+								  sizeof("AL37 Guasto Sonda KE25"));
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.MissingSDCard,
 	  			  	  	  	  	  "MicroSD Assente",
 								  sizeof("MicroSD Assente"));
-
 
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
@@ -2438,10 +2446,130 @@ void StartKE25_AcquisiTask(void *argument)
 void StartCAN1_ReceiveTask(void *argument)
 {
   /* USER CODE BEGIN StartCAN1_ReceiveTask */
+//	PSA.CANSPI.State = CANSPI_Initialize();
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  if(CANSPI_messagesInBuffer() && PSA.CANSPI.State)
+	  {
+		  PSA.CANSPI.State = CANSPI_Receive(&PSA.CANSPI.ReceiveMessage);
+		  /* Acquisition Message ---*/
+		  if(PSA.CANSPI.ReceiveMessage.frame.dlc == 3)
+		  {
+			  uint8_t AnalogInputIdentifier = PSA.CANSPI.ReceiveMessage.frame.data0;
+			  uint16_t AnalogInputValue = (PSA.CANSPI.ReceiveMessage.frame.data1 << 8)
+					  + (PSA.CANSPI.ReceiveMessage.frame.data2 << 0);
+
+			  if(AnalogInputIdentifier == 0x01)
+				  PSA_AnalogInput_Acquisition(&PSA.B1_InputAirPressure, AnalogInputValue);
+			  if(AnalogInputIdentifier == 0x02)
+				  PSA_AnalogInput_Acquisition(&PSA.B2_OutputAirPressure_1, AnalogInputValue);
+			  if(AnalogInputIdentifier == 0x03)
+				  PSA_AnalogInput_Acquisition(&PSA.B3_ProcessTankAirPressure, AnalogInputValue);
+			  if(AnalogInputIdentifier == 0x04)
+				  PSA_AnalogInput_Acquisition(&PSA.B4_OutputAirPressure_2, AnalogInputValue);
+			  if(AnalogInputIdentifier == 0x05)
+				  PSA_AnalogInput_Acquisition(&PSA.IFM_AirFlowmeter, AnalogInputValue);
+			  if(AnalogInputIdentifier == 0x06)
+				  PSA_AnalogInput_Acquisition(&PSA.DEW_InputAirDewpoint, AnalogInputValue);
+			  if(AnalogInputIdentifier == 0x07)
+			  {
+				  PSA_AnalogInput_Acquisition(&PSA.KE25_OxygenSensor_1, AnalogInputValue);
+				  PSA_AnalogInput_Acquisition(&PSA.KE25_OxygenSensor_2, AnalogInputValue);
+			  }
+
+		  }
+		  /* Command and Request ---*/
+		  if(PSA.CANSPI.ReceiveMessage.frame.dlc == 8)
+		  {
+			  uint32_t RequestIdentifier_1 =
+						(PSA.CANSPI.ReceiveMessage.frame.data0 << 16)
+					  | (PSA.CANSPI.ReceiveMessage.frame.data1 << 8)
+					  |	(PSA.CANSPI.ReceiveMessage.frame.data2 << 0);
+			  uint32_t RequestIdentifier_2 =
+						(PSA.CANSPI.ReceiveMessage.frame.data4 << 16)
+					  | (PSA.CANSPI.ReceiveMessage.frame.data5 << 8)
+					  |	(PSA.CANSPI.ReceiveMessage.frame.data6 << 0);
+
+			  if((RequestIdentifier_2 == 0x010000)
+					  && (PSA.CANSPI.ReceiveMessage.frame.id == (0x600 + PSA.CANSPI.Ide)))
+			  {
+				  /* Acquisition Message ---*/
+				  /* Command ---*/
+				  if(RequestIdentifier_1 == 0x230065)
+				  {
+					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
+						  PSA.Command.EnableOutGoingNitrogen = 1;
+					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
+						  PSA.Command.DisableOutGoingNitrogen = 1;
+				  }
+				  if(RequestIdentifier_1 == 0x23006E)
+				  {
+					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x02)
+						  PSA.Command.EnableOut1_EnableOut2 = 1;
+					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
+						  PSA.Command.EnableOut2_DisableOut1 = 1;
+					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
+						  PSA.Command.EnableOut1_DisableOut2 = 1;
+				  }
+				  if(RequestIdentifier_1 == 0x23006F)
+				  {
+					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
+						  PSA.Command.SetPriorityOut1 = 1;
+					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
+						  PSA.Command.SetPriorityOut2 = 1;
+				  }
+				  if(RequestIdentifier_1 == 0x230074)
+				  {
+					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
+						  PSA.Command.PulldownOn = 1;
+					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
+						  PSA.Command.PulldownOn = 0;
+				  }
+
+				  /* Request ---*/
+				  if(RequestIdentifier_1 == 0x400014)
+					  PSA.Request.State = 1;
+				  if(RequestIdentifier_1 == 0x400032)
+					  PSA.Request.Alarm = 1;
+				  if(RequestIdentifier_1 == 0x40000A)
+					  PSA.Request.OxygenPercentual = 1;
+				  if(RequestIdentifier_1 == 0x400002)
+					  PSA.Request.InputAirDewpoint = 1;
+				  if(RequestIdentifier_1 == 0x400003)
+					  PSA.Request.InputAirPressure = 1;
+				  if(RequestIdentifier_1 == 0x400004)
+					  PSA.Request.OutputAirPressure_1 = 1;
+				  if(RequestIdentifier_1 == 0x400005)
+					  PSA.Request.ProcessTankAirPressure = 1;
+				  if(RequestIdentifier_1 == 0x400006)
+					  PSA.Request.OutputAirPressure_2 = 1;
+				  if(RequestIdentifier_1 == 0x400001)
+					  PSA.Request.AirFlowmeter = 1;
+				  if(RequestIdentifier_1 == 0x40001D)
+					  PSA.Request.AverageAirFlowmeter = 1;
+				  if(RequestIdentifier_1 == 0x40000D)
+					  PSA.Request.Out2ValvePosition = 1;
+				  if(RequestIdentifier_1 == 0x40001C)
+					  PSA.Request.DischangeValvePosition = 1;
+				  if(RequestIdentifier_1 == 0x40000F)
+					  PSA.Request.Out1ValvePosition = 1;
+				  if(RequestIdentifier_1 == 0x40001B)
+					  PSA.Request.DeliveryValvePosition = 1;
+				  if(RequestIdentifier_1 == 0x40000B)
+					  PSA.Request.Out1WorkingHour = 1;
+				  if(RequestIdentifier_1 == 0x40000C)
+					  PSA.Request.Out2WorkingHour = 1;
+				  if(RequestIdentifier_1 == 0x40000B)
+					  PSA.Request.Out1WorkingHour = 1;
+				  if(RequestIdentifier_1 == 0x400028)
+					  PSA.Request.TotalWorkingHour = 1;
+			  }
+		  }
+	  }
+
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartCAN1_ReceiveTask */
 }
