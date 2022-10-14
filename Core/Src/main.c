@@ -232,17 +232,21 @@ MyQueue B3_ProcessTankAirPressureQueue;
 MyQueue B4_OutputAirPressure_2Queue;
 MyQueue IFM_AirFlowmeterQueue;
 MyQueue KE25_PercentualOxygenInTheAirQueue;
-MyQueue DEW_DewpointAirTemperatureQueue;
+MyQueue DEW_InputAirDewpointQueue;
 
 /* TimeCounter ---------------------------------------------------------------*/
 TimeCounter PulldownWorking;
 TimeCounter MaintenanceWorking;
 TimeCounter TotalWorking;
 
-/*** PSA ***/
+/* Pressure Swing Adsorption Structure ---------------------------------------*/
 extern PSAStruct PSA;
+
+/* DateTime Structure --------------------------------------------------------*/
 extern DateTime today;
+
 uCAN_MSG rxMessage;
+/* ManageSD Structure fatman -------------------------------------------------*/
 extern ManageSD fatman;
 
 /* Time Constant -------------------------------------------------------------*/
@@ -2171,7 +2175,7 @@ void StartCAN1RxTxTask(void *argument)
 			  }
 		  }
 
-		  else if(!PSA.CANSPI.State)
+		  if(!PSA.CANSPI.State)
 		  {
 			  MX_SPI2_Init();
 			  PSA.CANSPI.State = CANSPI_Initialize();
@@ -2406,7 +2410,7 @@ void StartDEW_AcquisiTask(void *argument)
   {
 	  Acquisition_AnalogInputIntoQueueWithAlarm(
 			  &PSA.DEW_InputAirDewpoint,
-			  &DEW_DewpointAirTemperatureQueue,
+			  &DEW_InputAirDewpointQueue,
 			  &PSA.Alarm.AL36_DEWProbeFault);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
@@ -2495,7 +2499,6 @@ void StartCAN1_ReceiveTask(void *argument)
 			  if((RequestIdentifier_2 == 0x010000)
 					  && (PSA.CANSPI.ReceiveMessage.frame.id == (0x600 + PSA.CANSPI.Ide)))
 			  {
-				  /* Acquisition Message ---*/
 				  /* Command ---*/
 				  if(RequestIdentifier_1 == 0x230065)
 				  {
@@ -2561,15 +2564,13 @@ void StartCAN1_ReceiveTask(void *argument)
 					  PSA.Request.Out1WorkingHour = 1;
 				  if(RequestIdentifier_1 == 0x40000C)
 					  PSA.Request.Out2WorkingHour = 1;
-				  if(RequestIdentifier_1 == 0x40000B)
-					  PSA.Request.Out1WorkingHour = 1;
 				  if(RequestIdentifier_1 == 0x400028)
 					  PSA.Request.TotalWorkingHour = 1;
 			  }
 		  }
 	  }
 
-	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
   }
   /* USER CODE END StartCAN1_ReceiveTask */
 }
@@ -2584,10 +2585,122 @@ void StartCAN1_ReceiveTask(void *argument)
 void StartCAN1_TransmitTask(void *argument)
 {
   /* USER CODE BEGIN StartCAN1_TransmitTask */
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
+
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  if(PSA.CANSPI.State)
+	  {
+		  if((PSA.Request.State) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_State();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+			  PSA.Request.State = 0;
+		  }
+		  if((PSA.Request.Alarm) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_Alarm();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.OxygenPercentual) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_OxygenPercentual();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.InputAirDewpoint) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_InputAirDewpoint();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.InputAirPressure) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_InputAirPressure();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.OutputAirPressure_1) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_OutputAirPressure_1();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.ProcessTankAirPressure) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_ProcessTankAirPressure();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.OutputAirPressure_1) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_OutputAirPressure_2();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.AirFlowmeter) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_AirFlowmeter();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.Out2ValvePosition) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_Out2ValvePosition();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.DischangeValvePosition) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_DischangeValvePosition();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.Out1ValvePosition) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_Out1ValvePosition();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.DeliveryValvePosition) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_DeliveryValvePosition();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.Out1WorkingHour) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_Out1WorkingHour();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.Out2WorkingHour) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_Out2WorkingHour();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+		  if((PSA.Request.TotalWorkingHour) && (PSA.CANSPI.State))
+		  {
+			  PSA_Request_TotalWorkingHour();
+			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
+		  }
+
+	  }
+
+	  if(!PSA.CANSPI.State)
+	  {
+		  MX_SPI2_Init();
+		  PSA.CANSPI.State = CANSPI_Initialize();
+	  }
+
+
+	  void PSA_Request_InputAirPressure();
+	  void PSA_Request_OutputAirPressure_1();
+	  void PSA_Request_ProcessTankAirPressure();
+	  void PSA_Request_OutputAirPressure_2();
+	  void PSA_Request_AirFlowmeter();
+	  void PSA_Request_AverageAirFlowmeter();
+	  void PSA_Request_Out2ValvePosition();
+	  void PSA_Request_DischangeValvePosition();
+	  void PSA_Request_Out1ValvePosition();
+	  void PSA_Request_DeliveryValvePosition();
+	  void PSA_Request_Out1WorkingHour();
+	  void PSA_Request_Out2WorkingHour();
+	  void PSA_Request_TotalWorkingHour();
+	  void PSA_Request_ActualWorkingHour();
+
+
+
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartCAN1_TransmitTask */
 }

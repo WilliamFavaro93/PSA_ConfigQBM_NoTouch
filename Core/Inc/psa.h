@@ -84,10 +84,12 @@ typedef struct
 /* Analog Input structure ----------------------------------------------------*/
 typedef struct{
 	uint16_t Value;				/**< value of the analog input */
+	uint16_t Average;
+	uint16_t Acquisition;		/**< define if last acquisition value is already saved in queue */
+
 	uint16_t UpperThreshold;	/**< upper threshold of the analog input */
 	uint16_t LowerThreshold;	/**< lower threshold of the analog input */
 
-	uint16_t Acquisition;		/**< define if last acquisition value is alreaady saved in queue */
 	uint16_t UpperLimit;		/**< upper limit of the analog input */
 	uint16_t LowerLimit;		/**< lower limit of the analog input */
 }uint16_AnalogInput;

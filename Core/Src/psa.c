@@ -393,6 +393,18 @@ void PSA_Command_SetPriorityOut2()
 	  PSA.Command.SetPriorityOut2 = 0;
 }
 
+void PSA_CANSPI_RequestMessage_ResetData()
+{
+	PSA.CANSPI.RequestMessage.frame.data0 = 0;
+	PSA.CANSPI.RequestMessage.frame.data1 = 0;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0;
+	PSA.CANSPI.RequestMessage.frame.data3 = 0;
+	PSA.CANSPI.RequestMessage.frame.data4 = 0;
+	PSA.CANSPI.RequestMessage.frame.data5 = 0;
+	PSA.CANSPI.RequestMessage.frame.data6 = 0;
+	PSA.CANSPI.RequestMessage.frame.data7 = 0;
+}
+
 void PSA_Request_State()
 {
 
@@ -405,42 +417,116 @@ void PSA_Request_Alarm()
 
 void PSA_Request_OxygenPercentual()
 {
+	PSA_CANSPI_RequestMessage_ResetData();
 
+	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0x0A;
+
+	PSA.CANSPI.RequestMessage.frame.data4 =
+			(PSA.KE25_OxygenSensor_1.Value >> 8);
+	PSA.CANSPI.RequestMessage.frame.data5 =
+			(PSA.KE25_OxygenSensor_1.Value >> 0);
 }
 
 void PSA_Request_InputAirDewpoint()
 {
+	PSA_CANSPI_RequestMessage_ResetData();
 
+	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0x02;
+
+	PSA.CANSPI.RequestMessage.frame.data4 =
+			(PSA.DEW_InputAirDewpoint.Value >> 8);
+	PSA.CANSPI.RequestMessage.frame.data5 =
+			(PSA.DEW_InputAirDewpoint.Value >> 0);
+}
+
+void PSA_Request_InputAirPressure()
+{
+	PSA_CANSPI_RequestMessage_ResetData();
+
+	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0x03;
+
+	PSA.CANSPI.RequestMessage.frame.data4 =
+			(PSA.B1_InputAirPressure.Value >> 8);
+	PSA.CANSPI.RequestMessage.frame.data5 =
+			(PSA.B1_InputAirPressure.Value >> 0);
 }
 
 void PSA_Request_OutputAirPressure_1()
 {
+	PSA_CANSPI_RequestMessage_ResetData();
 
+	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0x04;
+
+	PSA.CANSPI.RequestMessage.frame.data4 =
+			(PSA.B2_OutputAirPressure_1.Value >> 8);
+	PSA.CANSPI.RequestMessage.frame.data5 =
+			(PSA.B2_OutputAirPressure_1.Value >> 0);
 }
 
 void PSA_Request_ProcessTankAirPressure()
 {
+	PSA_CANSPI_RequestMessage_ResetData();
 
+	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0x05;
+
+	PSA.CANSPI.RequestMessage.frame.data4 =
+			(PSA.B3_ProcessTankAirPressure.Value >> 8);
+	PSA.CANSPI.RequestMessage.frame.data5 =
+			(PSA.B3_ProcessTankAirPressure.Value >> 0);
 }
 
 void PSA_Request_OutputAirPressure_2()
 {
+	PSA_CANSPI_RequestMessage_ResetData();
 
+	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0x06;
+
+	PSA.CANSPI.RequestMessage.frame.data4 =
+			(PSA.B4_OutputAirPressure_2.Value >> 8);
+	PSA.CANSPI.RequestMessage.frame.data5 =
+			(PSA.B4_OutputAirPressure_2.Value >> 0);
 }
 
 void PSA_Request_AirFlowmeter()
 {
+	PSA_CANSPI_RequestMessage_ResetData();
 
+	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0x01;
+
+	PSA.CANSPI.RequestMessage.frame.data4 =
+			(PSA.B3_ProcessTankAirPressure.Value >> 8);
+	PSA.CANSPI.RequestMessage.frame.data5 =
+			(PSA.B3_ProcessTankAirPressure.Value >> 0);
 }
 
 void PSA_Request_AverageAirFlowmeter()
 {
+	PSA_CANSPI_RequestMessage_ResetData();
 
+	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0x1D;
+
+	PSA.CANSPI.RequestMessage.frame.data4 =
+			(PSA.IFM_AirFlowmeter.Value >> 8);
+	PSA.CANSPI.RequestMessage.frame.data5 =
+			(PSA.IFM_AirFlowmeter.Value >> 0);
 }
 
 void PSA_Request_Out2ValvePosition()
 {
+	PSA_CANSPI_RequestMessage_ResetData();
 
+	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0x1D;
+
+	PSA.CANSPI.RequestMessage.frame.data4 = PSA.Out2.Working;
 }
 
 void PSA_Request_DischangeValvePosition()
@@ -449,6 +535,16 @@ void PSA_Request_DischangeValvePosition()
 }
 
 void PSA_Request_Out1ValvePosition()
+{
+	PSA_CANSPI_RequestMessage_ResetData();
+
+	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
+	PSA.CANSPI.RequestMessage.frame.data2 = 0x1D;
+
+	PSA.CANSPI.RequestMessage.frame.data4 = PSA.Out1.Working;
+}
+
+void PSA_Request_DeliveryValvePosition()
 {
 
 }
