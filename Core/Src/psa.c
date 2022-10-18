@@ -176,8 +176,7 @@ void PSA_State_UpdateValveMessage()
 	{
 		PSA_Adsorption1(0);
 		PSA_Adsorption1(1);
-		PSA.Time.StateTimer = (PSA.Time.Adsorption - (PSA.Time.Compensation_0
-				+ PSA.Time.Compensation_1 + PSA.Time.Compensation_2))/2;
+		PSA.Time.StateTimer = (PSA.Time.Adsorption - PSA.Time.TotalCompensation) / 2;
 	}
 	if(PSA.State == 2)
 	{
@@ -201,8 +200,7 @@ void PSA_State_UpdateValveMessage()
 	{
 		PSA_Adsorption1(0);
 		PSA_Adsorption2(1);
-		PSA.Time.StateTimer = (PSA.Time.Adsorption + 1 - (PSA.Time.Compensation_0
-				+ PSA.Time.Compensation_1 + PSA.Time.Compensation_2))/2;
+		PSA.Time.StateTimer = (PSA.Time.Adsorption + 1 - PSA.Time.TotalCompensation) / 2;
 	}
 	if(PSA.State == 6)
 	{
@@ -226,8 +224,7 @@ void PSA_State_UpdateValveMessage()
 	{
 		PSA_Adsorption2(0);
 		PSA_Adsorption2(1);
-		PSA.Time.StateTimer = (PSA.Time.Adsorption - (PSA.Time.Compensation_0
-				+ PSA.Time.Compensation_1 + PSA.Time.Compensation_2))/2;
+		PSA.Time.StateTimer = (PSA.Time.Adsorption + 1 - PSA.Time.TotalCompensation) / 2;
 	}
 	if(PSA.State == 10)
 	{
@@ -251,8 +248,7 @@ void PSA_State_UpdateValveMessage()
 	{
 		PSA_Adsorption2(0);
 		PSA_Adsorption1(1);
-		PSA.Time.StateTimer = (PSA.Time.Adsorption + 1 - (PSA.Time.Compensation_0
-				+ PSA.Time.Compensation_1 + PSA.Time.Compensation_2))/2;
+		PSA.Time.StateTimer = (PSA.Time.Adsorption - PSA.Time.TotalCompensation) / 2;
 	}
 	if(PSA.State == 14)
 	{
@@ -301,7 +297,7 @@ uint8_t PSA_Alarm_NumberOfAlarmsTriggered()
 
 	if(PSA.Alarm.AL01_CANbusError.Trigger)
 		alarm_count++;
-	if(PSA.Alarm.AL02_LowAirPressure.Trigger)
+	if(PSA.Alarm.AL02_LowInputAirPressure.Trigger)
 		alarm_count++;
 	if(PSA.Alarm.AL05_LowProcessTankPressure.Trigger)
 		alarm_count++;

@@ -207,14 +207,14 @@ osThreadId_t CAN1_ReceiveTasHandle;
 const osThreadAttr_t CAN1_ReceiveTas_attributes = {
   .name = "CAN1_ReceiveTas",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal2,
 };
 /* Definitions for CAN1_TransmitTa */
 osThreadId_t CAN1_TransmitTaHandle;
 const osThreadAttr_t CAN1_TransmitTa_attributes = {
   .name = "CAN1_TransmitTa",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal2,
 };
 /* Definitions for BinarySemCAN */
 osSemaphoreId_t BinarySemCANHandle;
@@ -1397,8 +1397,13 @@ void AssignDefaultValue()
 
 	PSA.Module = 2;
 
+	PSA.Time.SendAliveMessageToValve_Refresh = 1;
+	PSA.Time.SendStateMessageToValve_Refresh = 1;
+
+	PSA.CANSPI.Ide = 0x701;
+
 	/* Inizializza i valori dei timer per il debug */
-	PSA.Time.Adsorption = 27;
+	PSA.Time.Adsorption = 54;
 	PSA.Time.Compensation_0 = 1;
 	PSA.Time.Compensation_1 = 1;
 	PSA.Time.Compensation_2 = 1;
@@ -1591,6 +1596,9 @@ void StartStateTask(void *argument)
   for(;;)
   {
 
+	  PSA.Time.TotalCompensationTime = PSA.Time.Compensation_0 +
+			  PSA.Time.Compensation_1 + PSA.Time.Compensation_2;
+
 	  if(PSA.Mode.Ready)
 	  {
 		  PSA.StateUpdated = 0;
@@ -1767,11 +1775,11 @@ void StartModeTask(void *argument)
   for(;;)
   {
 	  /* When Ready button is Off -> PSA goes in standby */
-	  if((!PSA.Mode.Ready) && (!PSA.Mode.Run))
+	  if((!PSA.Mode.Ready) && (PSA.Mode.Run))
 	  {
 		  PSA_Mode_Standby();
 	  }
-	  /* Ready + not Run + not Standby -> Run */
+	  /* Ready + not Run + not Standby -> Run (Starting condition) */
 	  if(((PSA.Mode.Ready) && (!PSA.Mode.Run) && (!PSA.Mode.Standby)) && ((PSA.B1_InputAirPressure.Value > PSA.B1_InputAirPressure.UpperThreshold) && ((PSA.Out1.Enable)||(PSA.Out2.Enable))))
 	  {/* (Ready + NotRun + NotStb) && (B1 > SB1H) && ((SO2-1 != OFF)||(SO2-2 != OFF)): starting condition */
 		  PSA_Mode_Run();
@@ -1818,29 +1826,28 @@ void StartTimeTask(void *argument)
 {
   /* USER CODE BEGIN StartTimeTask */
 	/* Init Refresher */
-	PSA.Time.ValveAlive_ReceiveMessageRefresh = 100;
-	PSA.Time.ValveAlive_SendMessageRefresh = 10;
+//	PSA.Time.SendStateMessageToValve_Refresh = 1;
+//	PSA.Time.SendAliveMessageToValve_Refresh = 1;
 	/* Init Timer */
-	MyTimer_Refresh(&PSA.Time.ValveAlive_ReceiveMessageTimer, PSA.Time.ValveAlive_ReceiveMessageRefresh);
-	MyTimer_Refresh(&PSA.Time.ValveAlive_ReceiveMessageTimer, PSA.Time.ValveAlive_SendMessageRefresh);
+	MyTimer_Refresh(&PSA.Time.SendStateMessageToValve_Timer, PSA.Time.SendStateMessageToValve_Refresh);
+	MyTimer_Refresh(&PSA.Time.SendStateMessageToValve_Timer, PSA.Time.SendAliveMessageToValve_Refresh);
   /* Infinite loop */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
   for(;;)
   {
-	  /*** DATETIME ***/
+	  /* DateTime ------------------------------------------------------------*/
 	  DateTime_AddDeciSecond();
-	  /*** TIME COUNTER ***/
+	  /* Time Counter --------------------------------------------------------*/
 	  if(PSA.Out1.Ready)
 		  TimeCounter_AddDecisecond(&PulldownWorking);
 	  if(PSA.Out2.Ready)
 		  TimeCounter_AddDecisecond(&MaintenanceWorking);
 	  TimeCounter_AddDecisecond(&TotalWorking);
-	  /*** TIMER ***/
-	  /* When a timer reach 0, something happens and it refresh */
+	  /* Timer ---------------------------------------------------------------*/
 	  MyTimer_SubtractDeciSecond(&PSA.Time.StateTimer);
-	  MyTimer_SubtractDeciSecond(&PSA.Time.ValveAlive_ReceiveMessageTimer);
-	  MyTimer_SubtractDeciSecond(&PSA.Time.ValveAlive_SendMessageTimer);
-	  /*** ALARM TIMER ***/
+	  MyTimer_SubtractDeciSecond(&PSA.Time.SendStateMessageToValve_Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Time.SendAliveMessageToValve_Timer);
+	  /* Alarm Timer ---------------------------------------------------------*/
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL01_CANbusError.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL02_LowInputAirPressure.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL05_LowProcessTankPressure.Timer);
@@ -1858,13 +1865,15 @@ void StartTimeTask(void *argument)
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL36_DEWProbeFault.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL37_KE25ProbeFault.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.MissingSDCard.Timer);
-	  /*** WATCHDOG ***/
-	  /* New day */
+	  /* Message Timer -------------------------------------------------------*/
+	  MyTimer_SubtractDeciSecond(&PSA.Time.SendAliveMessageToValve_Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Time.SendStateMessageToValve_Timer);
+	  /* Watchdog ------------------------------------------------------------*/
+	  /* New day -------------------------------------------------------------*/
 	  if((today.hours + today.minutes + today.seconds + today.deciseconds) == 0)
 	  {
 		  fatman.Directory[1].FileIsCreated = 0;
 	  }
-	  /* If there's no problem, it refresh before reaching 0 */
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartTimeTask */
@@ -1918,22 +1927,24 @@ void StartCAN2TxTask(void *argument)
 
 	  if(PSA.CAN_2.State == HAL_OK)
 	  {
-		  if(1)
+		  if(!PSA.Time.SendStateMessageToValve_Timer)
 		  {
 			  PSA.CAN_2.State = HAL_CAN_AddTxMessage(&hcan2, &TxValveMxHeader, PSA.Valve, &TxMailbox);
 			  PSA.CAN_2.TransmitValveMessage = 0x00;
+			  PSA.Time.SendStateMessageToValve_Timer = PSA.Time.SendStateMessageToValve_Refresh;
 		  }
 
-		  if(1)
+		  if(!PSA.Time.SendAliveMessageToValve_Timer)
 		  {
 			  PSA.CAN_2.State = HAL_CAN_AddTxMessage(&hcan2, &TxAliveMxHeader, AliveMessage, &TxMailbox);
-			  PSA.Time.ValveAlive_SendMessageTimer = PSA.Time.ValveAlive_SendMessageRefresh;
+			  PSA.Time.SendAliveMessageToValve_Timer = PSA.Time.SendAliveMessageToValve_Refresh;
 		  }
 	  }
 	  else if(PSA.CAN_2.State == HAL_ERROR)
 	  {
 		  MX_CAN1_Init();
 		  MX_CAN2_Init();
+		  PSA.CAN_2.State = HAL_CAN_AddTxMessage(&hcan2, &TxInitMxHeader, InitMx, &TxMailbox);
 	  }
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
@@ -2053,139 +2064,139 @@ void StartCAN1RxTxTask(void *argument)
 	  /* Infinite loop */
 	  for(;;)
 	  {
-		  if(CANSPI_messagesInBuffer() && PSA.CANSPI.State)
-		  {
-			  PSA.CANSPI.State = CANSPI_Receive(&rxMessage);
-			  if((((rxMessage.frame.data4 << 16) | (rxMessage.frame.data5 << 8) | (rxMessage.frame.data6)) == 0x10000) && (rxMessage.frame.id == (0x600 + PSA.CANSPI.Ide)))
-			  {
-				  rxMessage.frame.id -= 0x80;
-
-				  switch((rxMessage.frame.data0 << 16) | (rxMessage.frame.data1 << 8) | (rxMessage.frame.data2))
-				  {
-	//			  /*** COMMAND ***/
-	//			  case 0x230065:
-	//				  break;
-				  case 0x23006E:
-					  if(rxMessage.frame.data7 == 0x02)
-					  {
-						  PSA.Command.EnableOut1_EnableOut2 = 1;
-					  }
-					  else if(rxMessage.frame.data7 == 0x01)
-					  {
-						  PSA.Command.EnableOut2_DisableOut1 = 1;
-					  }
-					  else if(rxMessage.frame.data7 == 0x00)
-					  {
-						  PSA.Command.EnableOut1_DisableOut2 = 1;
-					  }
-					  break;
-				  case 0x23006F:
-					  if(rxMessage.frame.data7 == 0x00)
-						  PSA.Command.SetPriorityOut1 = 1;
-					  else if(rxMessage.frame.data7 == 0x01)
-						  PSA.Command.SetPriorityOut2 = 1;
-					  break;
-	//			  case 0x230074:
-	//
-	//				  break;
-	//
-	//			  /*** REQUEST ***/
-	//			  case 0x400014:
-	//				  rxMessage.frame.data0 = 0x4B;
-	//				  break;
-	//			  case 0x400032:
-	//				  PSA.Request.State |= (1U << 1);
-	//				  break;
-//				  case 0x40000A:
-//					  rxMessage.frame.data0 = 0x4B;
-//					  uint16_t Oxygen_LastValue = MyQueue_GetLastValue(KE25_PercentualOxygenInTheAir);
-//					  rxMessage.frame.data4 = Oxygen_LastValue >> 8;
-//					  rxMessage.frame.data5 = Oxygen_LastValue;
+//		  if(CANSPI_messagesInBuffer() && PSA.CANSPI.State)
+//		  {
+//			  PSA.CANSPI.State = CANSPI_Receive(&rxMessage);
+//			  if((((rxMessage.frame.data4 << 16) | (rxMessage.frame.data5 << 8) | (rxMessage.frame.data6)) == 0x10000) && (rxMessage.frame.id == (0x600 + PSA.CANSPI.Ide)))
+//			  {
+//				  rxMessage.frame.id -= 0x80;
+//
+//				  switch((rxMessage.frame.data0 << 16) | (rxMessage.frame.data1 << 8) | (rxMessage.frame.data2))
+//				  {
+//	//			  /*** COMMAND ***/
+//	//			  case 0x230065:
+//	//				  break;
+//				  case 0x23006E:
+//					  if(rxMessage.frame.data7 == 0x02)
+//					  {
+//						  PSA.Command.EnableOut1_EnableOut2 = 1;
+//					  }
+//					  else if(rxMessage.frame.data7 == 0x01)
+//					  {
+//						  PSA.Command.EnableOut2_DisableOut1 = 1;
+//					  }
+//					  else if(rxMessage.frame.data7 == 0x00)
+//					  {
+//						  PSA.Command.EnableOut1_DisableOut2 = 1;
+//					  }
 //					  break;
-//				  case 0x400002:
-//					  rxMessage.frame.data0 = 0x4B;
-//					  uint16_t Dewpoint = PSA.DP_IncomingAirDewpoint.Value;
-//					  rxMessage.frame.data4 = Dewpoint >> 8;
-//					  rxMessage.frame.data5 = Dewpoint;
+//				  case 0x23006F:
+//					  if(rxMessage.frame.data7 == 0x00)
+//						  PSA.Command.SetPriorityOut1 = 1;
+//					  else if(rxMessage.frame.data7 == 0x01)
+//						  PSA.Command.SetPriorityOut2 = 1;
 //					  break;
-//				  case 0x400003:
+//	//			  case 0x230074:
+//	//
+//	//				  break;
+//	//
+//	//			  /*** REQUEST ***/
+//	//			  case 0x400014:
+//	//				  rxMessage.frame.data0 = 0x4B;
+//	//				  break;
+//	//			  case 0x400032:
+//	//				  PSA.Request.State |= (1U << 1);
+//	//				  break;
+////				  case 0x40000A:
+////					  rxMessage.frame.data0 = 0x4B;
+////					  uint16_t Oxygen_LastValue = MyQueue_GetLastValue(KE25_PercentualOxygenInTheAir);
+////					  rxMessage.frame.data4 = Oxygen_LastValue >> 8;
+////					  rxMessage.frame.data5 = Oxygen_LastValue;
+////					  break;
+////				  case 0x400002:
+////					  rxMessage.frame.data0 = 0x4B;
+////					  uint16_t Dewpoint = PSA.DP_IncomingAirDewpoint.Value;
+////					  rxMessage.frame.data4 = Dewpoint >> 8;
+////					  rxMessage.frame.data5 = Dewpoint;
+////					  break;
+////				  case 0x400003:
+////					  rxMessage.frame.data0 = 0x4B;
+////					  rxMessage.frame.data4 = PSA.B1_InputAirPressure.Value >> 8;
+////					  rxMessage.frame.data5 = PSA.B1_InputAirPressure.Value;
+////					  break;
+////				  case 0x400004:
+////					  rxMessage.frame.data0 = 0x4B;
+////					  rxMessage.frame.data4 = PSA.B2_OutputAirPressure_1.Value >> 8;
+////					  rxMessage.frame.data5 = PSA.B2_OutputAirPressure_1.Value;
+////					  break;
+////				  case 0x400005:
+////					  rxMessage.frame.data0 = 0x4B;
+////					  rxMessage.frame.data4 = PSA.B3_ProcessTankAirPressure.Value >> 8;
+////					  rxMessage.frame.data5 = PSA.B3_ProcessTankAirPressure.Value;
+////					  break;
+////				  case 0x400006:
+////					  rxMessage.frame.data0 = 0x4B;
+////					  rxMessage.frame.data4 = PSA.B4_OutputAirPressure_2.Value >> 8;
+////					  rxMessage.frame.data5 = PSA.B4_OutputAirPressure_2.Value;
+////					  break;
+////				  case 0x400001:
+////					  rxMessage.frame.data0 = 0x4B;
+////					  uint16_t AirFlux_LastValue = MyQueue_GetLastValue(IFM_AirFlowmeter);
+////					  rxMessage.frame.data4 = AirFlux_LastValue >> 8;
+////					  rxMessage.frame.data5 = AirFlux_LastValue;
+////					  break;
+////				  case 0x40001D:
+////					  rxMessage.frame.data0 = 0x4B;
+////					  uint16_t AirFlux_AverageValue = MyQueue_GetAverageValue(B1_InputAirPressureQueue);
+////					  rxMessage.frame.data4 = AirFlux_AverageValue >> 8;
+////					  rxMessage.frame.data5 = AirFlux_AverageValue;
+////					  break;
+//	//			  case 0x40000D:
+//	//				  PSA.Request.State |= (1U << 10);
+//	//				  break;
+//	//			  case 0x40001C:
+//	//				  PSA.Request.State |= (1U << 12);
+//	//				  break;
+//	//			  case 0x40000F:
+//	////				  PSA.Request.State |= (1U << 13);
+//	//				  break;
+//	//			  case 0x40001B:
+//	////				  PSA.Request.State |= (1U << 14);
+//	//				  break;
+//				  case 0x40000B:
 //					  rxMessage.frame.data0 = 0x4B;
-//					  rxMessage.frame.data4 = PSA.B1_InputAirPressure.Value >> 8;
-//					  rxMessage.frame.data5 = PSA.B1_InputAirPressure.Value;
+//					  uint16_t PulldownWorking_TotalHours = TimeCounter_GetTotalHours(&PulldownWorking);
+//					  rxMessage.frame.data4 = PulldownWorking_TotalHours >> 8;
+//					  rxMessage.frame.data5 = PulldownWorking_TotalHours;
 //					  break;
-//				  case 0x400004:
+//				  case 0x40000C:
 //					  rxMessage.frame.data0 = 0x4B;
-//					  rxMessage.frame.data4 = PSA.B2_OutputAirPressure_1.Value >> 8;
-//					  rxMessage.frame.data5 = PSA.B2_OutputAirPressure_1.Value;
+//					  uint16_t MaintenanceWorking_TotalHours = TimeCounter_GetTotalHours(&MaintenanceWorking);
+//					  rxMessage.frame.data4 = MaintenanceWorking_TotalHours >> 8;
+//					  rxMessage.frame.data5 = MaintenanceWorking_TotalHours;
 //					  break;
-//				  case 0x400005:
+//				  case 0x400028:
 //					  rxMessage.frame.data0 = 0x4B;
-//					  rxMessage.frame.data4 = PSA.B3_ProcessTankAirPressure.Value >> 8;
-//					  rxMessage.frame.data5 = PSA.B3_ProcessTankAirPressure.Value;
+//					  uint16_t TotalWorking_TotalHours = TimeCounter_GetTotalHours(&TotalWorking);
+//					  rxMessage.frame.data4 = TotalWorking_TotalHours >> 8;
+//					  rxMessage.frame.data5 = TotalWorking_TotalHours;
 //					  break;
-//				  case 0x400006:
-//					  rxMessage.frame.data0 = 0x4B;
-//					  rxMessage.frame.data4 = PSA.B4_OutputAirPressure_2.Value >> 8;
-//					  rxMessage.frame.data5 = PSA.B4_OutputAirPressure_2.Value;
+//	//			  case 0x400012:
+//	////				  PSA.Request.State |= (1U << 18);
+//	//				  break;
+//	//
+//				  default:
 //					  break;
-//				  case 0x400001:
-//					  rxMessage.frame.data0 = 0x4B;
-//					  uint16_t AirFlux_LastValue = MyQueue_GetLastValue(IFM_AirFlowmeter);
-//					  rxMessage.frame.data4 = AirFlux_LastValue >> 8;
-//					  rxMessage.frame.data5 = AirFlux_LastValue;
-//					  break;
-//				  case 0x40001D:
-//					  rxMessage.frame.data0 = 0x4B;
-//					  uint16_t AirFlux_AverageValue = MyQueue_GetAverageValue(B1_InputAirPressureQueue);
-//					  rxMessage.frame.data4 = AirFlux_AverageValue >> 8;
-//					  rxMessage.frame.data5 = AirFlux_AverageValue;
-//					  break;
-	//			  case 0x40000D:
-	//				  PSA.Request.State |= (1U << 10);
-	//				  break;
-	//			  case 0x40001C:
-	//				  PSA.Request.State |= (1U << 12);
-	//				  break;
-	//			  case 0x40000F:
-	////				  PSA.Request.State |= (1U << 13);
-	//				  break;
-	//			  case 0x40001B:
-	////				  PSA.Request.State |= (1U << 14);
-	//				  break;
-				  case 0x40000B:
-					  rxMessage.frame.data0 = 0x4B;
-					  uint16_t PulldownWorking_TotalHours = TimeCounter_GetTotalHours(&PulldownWorking);
-					  rxMessage.frame.data4 = PulldownWorking_TotalHours >> 8;
-					  rxMessage.frame.data5 = PulldownWorking_TotalHours;
-					  break;
-				  case 0x40000C:
-					  rxMessage.frame.data0 = 0x4B;
-					  uint16_t MaintenanceWorking_TotalHours = TimeCounter_GetTotalHours(&MaintenanceWorking);
-					  rxMessage.frame.data4 = MaintenanceWorking_TotalHours >> 8;
-					  rxMessage.frame.data5 = MaintenanceWorking_TotalHours;
-					  break;
-				  case 0x400028:
-					  rxMessage.frame.data0 = 0x4B;
-					  uint16_t TotalWorking_TotalHours = TimeCounter_GetTotalHours(&TotalWorking);
-					  rxMessage.frame.data4 = TotalWorking_TotalHours >> 8;
-					  rxMessage.frame.data5 = TotalWorking_TotalHours;
-					  break;
-	//			  case 0x400012:
-	////				  PSA.Request.State |= (1U << 18);
-	//				  break;
-	//
-				  default:
-					  break;
-				  }
-				  PSA.CANSPI.State = CANSPI_Transmit(&rxMessage);
-			  }
-		  }
-
-		  if(!PSA.CANSPI.State)
-		  {
-			  MX_SPI2_Init();
-			  PSA.CANSPI.State = CANSPI_Initialize();
-		  }
+//				  }
+//				  PSA.CANSPI.State = CANSPI_Transmit(&rxMessage);
+//			  }
+//		  }
+//
+//		  if(!PSA.CANSPI.State)
+//		  {
+//			  MX_SPI2_Init();
+//			  PSA.CANSPI.State = CANSPI_Initialize();
+//		  }
 
 		  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
 	  }
@@ -2456,122 +2467,127 @@ void StartKE25_AcquisiTask(void *argument)
 void StartCAN1_ReceiveTask(void *argument)
 {
   /* USER CODE BEGIN StartCAN1_ReceiveTask */
-//	PSA.CANSPI.State = CANSPI_Initialize();
+	PSA.CANSPI.State = CANSPI_Initialize();
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
+
+//	PSA.CANSPI.RequestMessage.frame.dlc = 8;
+//	PSA.CANSPI.RequestMessage.frame.id = 0x581;
   /* Infinite loop */
   for(;;)
   {
 	  if(CANSPI_messagesInBuffer() && PSA.CANSPI.State)
 	  {
 		  PSA.CANSPI.State = CANSPI_Receive(&PSA.CANSPI.ReceiveMessage);
-		  /* Acquisition Message ---*/
-		  if(PSA.CANSPI.ReceiveMessage.frame.dlc == 3)
+		  if(PSA.CANSPI.ReceiveMessage.frame.id == PSA.CANSPI.Ide)
 		  {
-			  uint8_t AnalogInputIdentifier = PSA.CANSPI.ReceiveMessage.frame.data0;
-			  uint16_t AnalogInputValue = (PSA.CANSPI.ReceiveMessage.frame.data1 << 8)
-					  + (PSA.CANSPI.ReceiveMessage.frame.data2 << 0);
-
-			  if(AnalogInputIdentifier == 0x01)
-				  PSA_AnalogInput_Acquisition(&PSA.B1_InputAirPressure, AnalogInputValue);
-			  if(AnalogInputIdentifier == 0x02)
-				  PSA_AnalogInput_Acquisition(&PSA.B2_OutputAirPressure_1, AnalogInputValue);
-			  if(AnalogInputIdentifier == 0x03)
-				  PSA_AnalogInput_Acquisition(&PSA.B3_ProcessTankAirPressure, AnalogInputValue);
-			  if(AnalogInputIdentifier == 0x04)
-				  PSA_AnalogInput_Acquisition(&PSA.B4_OutputAirPressure_2, AnalogInputValue);
-			  if(AnalogInputIdentifier == 0x05)
-				  PSA_AnalogInput_Acquisition(&PSA.IFM_AirFlowmeter, AnalogInputValue);
-			  if(AnalogInputIdentifier == 0x06)
-				  PSA_AnalogInput_Acquisition(&PSA.DEW_InputAirDewpoint, AnalogInputValue);
-			  if(AnalogInputIdentifier == 0x07)
+			  /* Acquisition Message ---*/
+			  if(PSA.CANSPI.ReceiveMessage.frame.dlc == 3)
 			  {
-				  PSA_AnalogInput_Acquisition(&PSA.KE25_OxygenSensor_1, AnalogInputValue);
-				  PSA_AnalogInput_Acquisition(&PSA.KE25_OxygenSensor_2, AnalogInputValue);
+				  uint8_t AnalogInputIdentifier = PSA.CANSPI.ReceiveMessage.frame.data0;
+				  uint16_t AnalogInputValue = (PSA.CANSPI.ReceiveMessage.frame.data1 << 8)
+						  + (PSA.CANSPI.ReceiveMessage.frame.data2 << 0);
+
+				  if(AnalogInputIdentifier == 0x01)
+					  PSA_AnalogInput_Acquisition(&PSA.B1_InputAirPressure, AnalogInputValue);
+				  if(AnalogInputIdentifier == 0x02)
+					  PSA_AnalogInput_Acquisition(&PSA.B2_OutputAirPressure_1, AnalogInputValue);
+				  if(AnalogInputIdentifier == 0x03)
+					  PSA_AnalogInput_Acquisition(&PSA.B3_ProcessTankAirPressure, AnalogInputValue);
+				  if(AnalogInputIdentifier == 0x04)
+					  PSA_AnalogInput_Acquisition(&PSA.B4_OutputAirPressure_2, AnalogInputValue);
+				  if(AnalogInputIdentifier == 0x05)
+					  PSA_AnalogInput_Acquisition(&PSA.IFM_AirFlowmeter, AnalogInputValue);
+				  if(AnalogInputIdentifier == 0x06)
+					  PSA_AnalogInput_Acquisition(&PSA.DEW_InputAirDewpoint, AnalogInputValue);
+				  if(AnalogInputIdentifier == 0x07)
+				  {
+					  PSA_AnalogInput_Acquisition(&PSA.KE25_OxygenSensor_1, AnalogInputValue);
+					  PSA_AnalogInput_Acquisition(&PSA.KE25_OxygenSensor_2, AnalogInputValue);
+				  }
+
 			  }
-
-		  }
-		  /* Command and Request ---*/
-		  if(PSA.CANSPI.ReceiveMessage.frame.dlc == 8)
-		  {
-			  uint32_t RequestIdentifier_1 =
-						(PSA.CANSPI.ReceiveMessage.frame.data0 << 16)
-					  | (PSA.CANSPI.ReceiveMessage.frame.data1 << 8)
-					  |	(PSA.CANSPI.ReceiveMessage.frame.data2 << 0);
-			  uint32_t RequestIdentifier_2 =
-						(PSA.CANSPI.ReceiveMessage.frame.data4 << 16)
-					  | (PSA.CANSPI.ReceiveMessage.frame.data5 << 8)
-					  |	(PSA.CANSPI.ReceiveMessage.frame.data6 << 0);
-
-			  if((RequestIdentifier_2 == 0x010000)
-					  && (PSA.CANSPI.ReceiveMessage.frame.id == (0x600 + PSA.CANSPI.Ide)))
+			  /* Command and Request ---*/
+			  if(PSA.CANSPI.ReceiveMessage.frame.dlc == 8)
 			  {
-				  /* Command ---*/
-				  if(RequestIdentifier_1 == 0x230065)
-				  {
-					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
-						  PSA.Command.EnableOutGoingNitrogen = 1;
-					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
-						  PSA.Command.DisableOutGoingNitrogen = 1;
-				  }
-				  if(RequestIdentifier_1 == 0x23006E)
-				  {
-					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x02)
-						  PSA.Command.EnableOut1_EnableOut2 = 1;
-					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
-						  PSA.Command.EnableOut2_DisableOut1 = 1;
-					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
-						  PSA.Command.EnableOut1_DisableOut2 = 1;
-				  }
-				  if(RequestIdentifier_1 == 0x23006F)
-				  {
-					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
-						  PSA.Command.SetPriorityOut1 = 1;
-					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
-						  PSA.Command.SetPriorityOut2 = 1;
-				  }
-				  if(RequestIdentifier_1 == 0x230074)
-				  {
-					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
-						  PSA.Command.PulldownOn = 1;
-					  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
-						  PSA.Command.PulldownOn = 0;
-				  }
+				  uint32_t RequestIdentifier_1 =
+							(PSA.CANSPI.ReceiveMessage.frame.data0 << 16)
+						  | (PSA.CANSPI.ReceiveMessage.frame.data1 << 8)
+						  |	(PSA.CANSPI.ReceiveMessage.frame.data2 << 0);
+				  uint32_t RequestIdentifier_2 =
+							(PSA.CANSPI.ReceiveMessage.frame.data4 << 16)
+						  | (PSA.CANSPI.ReceiveMessage.frame.data5 << 8)
+						  |	(PSA.CANSPI.ReceiveMessage.frame.data6 << 0);
 
-				  /* Request ---*/
-				  if(RequestIdentifier_1 == 0x400014)
-					  PSA.Request.State = 1;
-				  if(RequestIdentifier_1 == 0x400032)
-					  PSA.Request.Alarm = 1;
-				  if(RequestIdentifier_1 == 0x40000A)
-					  PSA.Request.OxygenPercentual = 1;
-				  if(RequestIdentifier_1 == 0x400002)
-					  PSA.Request.InputAirDewpoint = 1;
-				  if(RequestIdentifier_1 == 0x400003)
-					  PSA.Request.InputAirPressure = 1;
-				  if(RequestIdentifier_1 == 0x400004)
-					  PSA.Request.OutputAirPressure_1 = 1;
-				  if(RequestIdentifier_1 == 0x400005)
-					  PSA.Request.ProcessTankAirPressure = 1;
-				  if(RequestIdentifier_1 == 0x400006)
-					  PSA.Request.OutputAirPressure_2 = 1;
-				  if(RequestIdentifier_1 == 0x400001)
-					  PSA.Request.AirFlowmeter = 1;
-				  if(RequestIdentifier_1 == 0x40001D)
-					  PSA.Request.AverageAirFlowmeter = 1;
-				  if(RequestIdentifier_1 == 0x40000D)
-					  PSA.Request.Out2ValvePosition = 1;
-				  if(RequestIdentifier_1 == 0x40001C)
-					  PSA.Request.DischangeValvePosition = 1;
-				  if(RequestIdentifier_1 == 0x40000F)
-					  PSA.Request.Out1ValvePosition = 1;
-				  if(RequestIdentifier_1 == 0x40001B)
-					  PSA.Request.DeliveryValvePosition = 1;
-				  if(RequestIdentifier_1 == 0x40000B)
-					  PSA.Request.Out1WorkingHour = 1;
-				  if(RequestIdentifier_1 == 0x40000C)
-					  PSA.Request.Out2WorkingHour = 1;
-				  if(RequestIdentifier_1 == 0x400028)
-					  PSA.Request.TotalWorkingHour = 1;
+				  if((RequestIdentifier_2 == 0x010000))
+				  {
+					  /* Command ---*/
+					  if(RequestIdentifier_1 == 0x230065)
+					  {
+						  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
+							  PSA.Command.EnableOutGoingNitrogen = 1;
+						  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
+							  PSA.Command.DisableOutGoingNitrogen = 1;
+					  }
+					  if(RequestIdentifier_1 == 0x23006E)
+					  {
+						  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x02)
+							  PSA.Command.EnableOut1_EnableOut2 = 1;
+						  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
+							  PSA.Command.EnableOut2_DisableOut1 = 1;
+						  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
+							  PSA.Command.EnableOut1_DisableOut2 = 1;
+					  }
+					  if(RequestIdentifier_1 == 0x23006F)
+					  {
+						  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
+							  PSA.Command.SetPriorityOut1 = 1;
+						  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
+							  PSA.Command.SetPriorityOut2 = 1;
+					  }
+					  if(RequestIdentifier_1 == 0x230074)
+					  {
+						  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x01)
+							  PSA.Command.PulldownOn = 1;
+						  if(PSA.CANSPI.ReceiveMessage.frame.data7 == 0x00)
+							  PSA.Command.PulldownOn = 0;
+					  }
+
+					  /* Request ---*/
+					  if(RequestIdentifier_1 == 0x400014)
+						  PSA.Request.State = 1;
+					  if(RequestIdentifier_1 == 0x400032)
+						  PSA.Request.Alarm = 1;
+					  if(RequestIdentifier_1 == 0x40000A)
+						  PSA.Request.OxygenPercentual = 1;
+					  if(RequestIdentifier_1 == 0x400002)
+						  PSA.Request.InputAirDewpoint = 1;
+					  if(RequestIdentifier_1 == 0x400003)
+						  PSA.Request.InputAirPressure = 1;
+					  if(RequestIdentifier_1 == 0x400004)
+						  PSA.Request.OutputAirPressure_1 = 1;
+					  if(RequestIdentifier_1 == 0x400005)
+						  PSA.Request.ProcessTankAirPressure = 1;
+					  if(RequestIdentifier_1 == 0x400006)
+						  PSA.Request.OutputAirPressure_2 = 1;
+					  if(RequestIdentifier_1 == 0x400001)
+						  PSA.Request.AirFlowmeter = 1;
+					  if(RequestIdentifier_1 == 0x40001D)
+						  PSA.Request.AverageAirFlowmeter = 1;
+					  if(RequestIdentifier_1 == 0x40000D)
+						  PSA.Request.Out2ValvePosition = 1;
+					  if(RequestIdentifier_1 == 0x40001C)
+						  PSA.Request.DischangeValvePosition = 1;
+					  if(RequestIdentifier_1 == 0x40000F)
+						  PSA.Request.Out1ValvePosition = 1;
+					  if(RequestIdentifier_1 == 0x40001B)
+						  PSA.Request.DeliveryValvePosition = 1;
+					  if(RequestIdentifier_1 == 0x40000B)
+						  PSA.Request.Out1WorkingHour = 1;
+					  if(RequestIdentifier_1 == 0x40000C)
+						  PSA.Request.Out2WorkingHour = 1;
+					  if(RequestIdentifier_1 == 0x400028)
+						  PSA.Request.TotalWorkingHour = 1;
+				  }
 			  }
 		  }
 	  }
@@ -2591,8 +2607,11 @@ void StartCAN1_ReceiveTask(void *argument)
 void StartCAN1_TransmitTask(void *argument)
 {
   /* USER CODE BEGIN StartCAN1_TransmitTask */
+	PSA.CANSPI.State = CANSPI_Initialize();
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
 
+	PSA.CANSPI.RequestMessage.frame.dlc = 8;
+	PSA.CANSPI.RequestMessage.frame.id = 0x581;
   /* Infinite loop */
   for(;;)
   {
@@ -2620,7 +2639,7 @@ void StartCAN1_TransmitTask(void *argument)
 		  {
 			  PSA_Request_InputAirDewpoint();
 			  PSA.CANSPI.State = CANSPI_Transmit(&PSA.CANSPI.RequestMessage);
-			  PSA.Request.InputAirPressure = 0;
+			  PSA.Request.InputAirDewpoint = 0;
 		  }
 		  if((PSA.Request.InputAirPressure) && (PSA.CANSPI.State))
 		  {

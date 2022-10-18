@@ -29,22 +29,22 @@ typedef struct
 {
 	uint16_t StateTimer;
 
-	uint16_t FullAdsorption;
 	uint16_t Adsorption;
+	uint16_t TotalCompensation;
 	uint16_t Compensation_0;
 	uint16_t Compensation_1;
 	uint16_t Compensation_2;
 	uint16_t PreStandby_1;
 	uint16_t PreStandby_2;
 
-	uint16_t ValveAlive_SendMessageTimer;
-	uint16_t ValveAlive_SendMessageRefresh;
+	uint16_t SendAliveMessageToValve_Timer;
+	uint16_t SendAliveMessageToValve_Refresh;
 
-	uint16_t ValveAlive_ReceiveMessageTimer;
-	uint16_t ValveAlive_ReceiveMessageRefresh;
+	uint16_t SendStateMessageToValve_Timer;
+	uint16_t SendStateMessageToValve_Refresh;
 
-	uint16_t LowAirPressureTimer;
-	uint16_t LowAirPressureRefresh;
+	uint16_t LowInputAirPressure_Timer;
+	uint16_t LowInputAirPressure_Refresh;
 } uint16_Time;
 
 /* Mode structure ------------------------------------------------------------*/
