@@ -1409,49 +1409,49 @@ void AssignDefaultValue()
 
 	PSA.B1_InputAirPressure.LowerLimit = 0;
 	PSA.B1_InputAirPressure.LowerThreshold = 500; 			//SB1L
-	PSA.B1_InputAirPressure.Value = 710;					/* Altrimenti non parte */
+//	PSA.B1_InputAirPressure.Value = 710;					/* Altrimenti non parte */
 	PSA.B1_InputAirPressure.UpperThreshold = 700; 			//SB1H
 	PSA.B1_InputAirPressure.UpperLimit = 10000;
 
 	PSA.B3_ProcessTankAirPressure.LowerLimit = 0;
 	PSA.B3_ProcessTankAirPressure.LowerThreshold = 500; 	//SB3L
-	PSA.B3_ProcessTankAirPressure.Value = 600;
+//	PSA.B3_ProcessTankAirPressure.Value = 600;
 	PSA.B3_ProcessTankAirPressure.UpperThreshold = 700; 	//SB3H
 	PSA.B3_ProcessTankAirPressure.UpperLimit = 10000;
 
 	PSA.B2_OutputAirPressure_1.LowerLimit = 0;
 	PSA.B2_OutputAirPressure_1.LowerThreshold = 500; 		//SB2L
-	PSA.B2_OutputAirPressure_1.Value = 600;
+//	PSA.B2_OutputAirPressure_1.Value = 600;
 	PSA.B2_OutputAirPressure_1.UpperThreshold = 700; 		//SB2H
 	PSA.B2_OutputAirPressure_1.UpperLimit = 10000;
 
 	PSA.B4_OutputAirPressure_2.LowerLimit = 0;
 	PSA.B4_OutputAirPressure_2.LowerThreshold = 500; 		//SB4L
-	PSA.B4_OutputAirPressure_2.Value = 600;
+//	PSA.B4_OutputAirPressure_2.Value = 600;
 	PSA.B4_OutputAirPressure_2.UpperThreshold = 700; 		//SB4H
 	PSA.B4_OutputAirPressure_2.UpperLimit = 10000;
 
 	PSA.IFM_AirFlowmeter.LowerLimit = 0;
 	PSA.IFM_AirFlowmeter.LowerThreshold = 500;
-	PSA.IFM_AirFlowmeter.Value = 600;
+//	PSA.IFM_AirFlowmeter.Value = 600;
 	PSA.IFM_AirFlowmeter.UpperThreshold = 700;
 	PSA.IFM_AirFlowmeter.UpperLimit = 10000;
 
 	PSA.DEW_InputAirDewpoint.LowerLimit = 0;
 	PSA.DEW_InputAirDewpoint.LowerThreshold = 500;
-	PSA.DEW_InputAirDewpoint.Value = 600;
+//	PSA.DEW_InputAirDewpoint.Value = 600;
 	PSA.DEW_InputAirDewpoint.UpperThreshold = 700;
 	PSA.DEW_InputAirDewpoint.UpperLimit = 10000;
 
 	PSA.KE25_OxygenSensor_1.LowerLimit = 0;
 	PSA.KE25_OxygenSensor_1.LowerThreshold = 500;
-	PSA.KE25_OxygenSensor_1.Value = 600;
+//	PSA.KE25_OxygenSensor_1.Value = 600;
 	PSA.KE25_OxygenSensor_1.UpperThreshold = 700;
 	PSA.KE25_OxygenSensor_1.UpperLimit = 10000;
 
 	PSA.KE25_OxygenSensor_1.LowerLimit = 0;
 	PSA.KE25_OxygenSensor_1.LowerThreshold = 500;
-	PSA.KE25_OxygenSensor_1.Value = 600;
+//	PSA.KE25_OxygenSensor_1.Value = 600;
 	PSA.KE25_OxygenSensor_1.UpperThreshold = 700;
 	PSA.KE25_OxygenSensor_1.UpperLimit = 10000;
 
@@ -1766,33 +1766,38 @@ void StartModeTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	  /* When Ready button is Off -> PSA goes in standby */
+	  if((!PSA.Mode.Ready) && (!PSA.Mode.Run))
+	  {
+		  PSA_Mode_Standby();
+	  }
 	  /* Ready + not Run + not Standby -> Run */
 	  if(((PSA.Mode.Ready) && (!PSA.Mode.Run) && (!PSA.Mode.Standby)) && ((PSA.B1_InputAirPressure.Value > PSA.B1_InputAirPressure.UpperThreshold) && ((PSA.Out1.Enable)||(PSA.Out2.Enable))))
 	  {/* (Ready + NotRun + NotStb) && (B1 > SB1H) && ((SO2-1 != OFF)||(SO2-2 != OFF)): starting condition */
 		  PSA_Mode_Run();
 	  }
 	  /* Run + BlockingAlarm -> Standby */
-	  if(((PSA.Mode.Run) && (PSA.Out1.Ready||PSA.Out2.Ready)) && (PSA.Alarm.BlockingAlarmsTriggered))
+	  if(((PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out1.Ready||PSA.Out2.Ready)) && (PSA.Alarm.BlockingAlarmsTriggered))
 	  {
 		  PSA_Mode_Standby();
 	  }
 	  /* Run + OUT1 + cannot go in OUT2 -> Standby */
-	  if((PSA.Mode.Run) && (PSA.Out1.Working) && (PSA.Alarm.AL19_HighOut1Pressure.Trigger) && ((!PSA.Out2.Enable) || (PSA.Alarm.AL16_HighOut2Pressure.Trigger)))
+	  if((PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out1.Working) && (PSA.Alarm.AL19_HighOut1Pressure.Trigger) && ((!PSA.Out2.Enable) || (PSA.Alarm.AL16_HighOut2Pressure.Trigger)))
 	  {/* Run + OUT1 + B2 > SB2H -> Standby */
 		  PSA_Mode_Standby();
 	  }
 	  /* Run + OUT2 -> Standby */
-	  if((PSA.Mode.Run) && (PSA.Out2.Working) && (PSA.Alarm.AL16_HighOut2Pressure.Trigger) && (!PSA.Out1.Enable))
+	  if((PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out2.Working) && (PSA.Alarm.AL16_HighOut2Pressure.Trigger) && (!PSA.Out1.Enable))
 	  {/* Run + OUT2 + B4 > SB4H -> Standby */
 		  PSA_Mode_Standby();
 	  }
 	  /* Standby + OUT1 -> Run */
-	  if((!PSA.State && PSA.Out1.Ready) && (!PSA.Alarm.AL19_HighOut1Pressure.Trigger))
+	  if((PSA.Mode.Ready) && (!PSA.State && PSA.Out1.Ready) && (!PSA.Alarm.AL19_HighOut1Pressure.Trigger))
 	  {/* Standby & B2 < SB2L & No Alarm -> Run*/
 		  PSA_Mode_Run();
 	  }
 	  /* Standby + OUT2 -> Run */
-	  if((!PSA.State && PSA.Out2.Ready) && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger))
+	  if((PSA.Mode.Ready) && (!PSA.State && PSA.Out2.Ready) && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger))
 	  {/* Standby & B2 > SB2L & No Alarm -> Run*/
 		  PSA_Mode_Run();
 	  }
@@ -1837,7 +1842,7 @@ void StartTimeTask(void *argument)
 	  MyTimer_SubtractDeciSecond(&PSA.Time.ValveAlive_SendMessageTimer);
 	  /*** ALARM TIMER ***/
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL01_CANbusError.Timer);
-	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL02_LowAirPressure.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL02_LowInputAirPressure.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL05_LowProcessTankPressure.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL11_External.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL16_HighOut2Pressure.Timer);
@@ -1978,7 +1983,7 @@ void StartSDTask(void *argument)
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL01_CANbusError,
 			  	  	  	  	  	  "AL01 Errore CAN Bus",
 								  sizeof("AL01 Errore CAN Bus"));
-	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL02_LowAirPressure,
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL02_LowInputAirPressure,
 			  	  	  	  	  	  "AL02 Bassa Pressione Aria in Ingresso",
 								  sizeof("AL02 Bassa Pressione Aria in Ingresso"));
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL05_LowProcessTankPressure,
@@ -2198,7 +2203,7 @@ void StartAlarmTask(void *argument)
 {
   /* USER CODE BEGIN StartAlarmTask */
 	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL02_LowAirPressure, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL02_LowInputAirPressure, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
 //	Alarm_Init(&PSA.Alarm.AL11_External, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
@@ -2223,11 +2228,11 @@ void StartAlarmTask(void *argument)
 	  if(!PSA.Alarm.AL01_CANbusError.Timer)
 		  Alarm_CheckCondition(&PSA.Alarm.AL01_CANbusError, (0));
 
-	  if(!PSA.Alarm.AL02_LowAirPressure.Trigger)
-		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
+	  if(!PSA.Alarm.AL02_LowInputAirPressure.Trigger)
+		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowInputAirPressure,
 			  	  	  	  	  (PSA.B1_InputAirPressure.Value < PSA.B1_InputAirPressure.LowerThreshold));
 	  else
-		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowAirPressure,
+		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowInputAirPressure,
 		 			  	  	  (PSA.B1_InputAirPressure.Value < PSA.B1_InputAirPressure.UpperThreshold));
 
 	  if(!PSA.Alarm.AL05_LowProcessTankPressure.Trigger)

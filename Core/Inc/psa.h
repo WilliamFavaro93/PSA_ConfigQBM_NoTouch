@@ -29,7 +29,7 @@ typedef struct
 {
 	uint16_t StateTimer;
 
-	uint16_t Period;
+	uint16_t FullAdsorption;
 	uint16_t Adsorption;
 	uint16_t Compensation_0;
 	uint16_t Compensation_1;
@@ -101,16 +101,16 @@ typedef struct{
 /* Alarm and Fault structure -------------------------------------------------*/
 typedef struct
 {
-	uint8_t AlarmsTriggered;		/**< number of alarms triggered */
-	uint8_t BlockingAlarmsTriggered;/**< number of blocking alarms triggered */
+	uint8_t AlarmsTriggered;			/**< number of alarms triggered */
+	uint8_t BlockingAlarmsTriggered;	/**< number of blocking alarms triggered */
 
-	Alarm AL01_CANbusError;			/**< define if AL01 is triggered:
+	Alarm AL01_CANbusError;				/**< define if AL01 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL01 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL01 is triggered				*/
-	Alarm AL02_LowAirPressure;		/**< define if AL02 is triggered:
+	Alarm AL02_LowInputAirPressure;		/**< define if AL02 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL02 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL02 is triggered				*/
-	Alarm AL05_LowProcessTankPressure;/**< define if AL05 is triggered:
+	Alarm AL05_LowProcessTankPressure;	/**< define if AL05 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL05 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL05 is triggered				*/
 	Alarm AL11_External;				/**< define if AL11 is triggered:
@@ -126,7 +126,7 @@ typedef struct
 	 	 	 	 	 	 	 	 	 	 0: AL18 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL18 is triggered				*/
 	Alarm AL19_HighOut1Pressure;		/**< not anymore used				*/
-	Alarm AL20_PCComunicationFault;	/**< define if AL20 is triggered:
+	Alarm AL20_PCComunicationFault;		/**< define if AL20 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL20 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL20 is triggered				*/
 	Alarm AL31_B1ProbeFault;			/**< define if AL31 is triggered:
@@ -144,7 +144,7 @@ typedef struct
 	Alarm AL35_IFWProbeFault;
 	Alarm AL36_DEWProbeFault;
 	Alarm AL37_KE25ProbeFault;
-	Alarm AL40_PsaDischanging;		/**< define if AL40 is triggered:
+	Alarm AL40_PsaDischanging;			/**< define if AL40 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL40 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL40 is triggered				*/
 	Alarm MissingSDCard;				/**< define if MissingSDCard is triggered:

@@ -17,7 +17,7 @@
 #include "alarm.h"
 /* Defines -------------------------------------------------------------------*/
 /* Variables -----------------------------------------------------------------*/
-static Alarm alatest;
+Alarm alatest;
 
 /* Private Function definition -----------------------------------------------*/
 void Alarm_test_Triggered();
