@@ -36,6 +36,7 @@
 #include "alarm.h"
 #include "stdio.h"
 #include "alarm_datetime_fatman.h"
+#include "cjson.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -304,6 +305,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage);
 void DirectoryInit(uint8_t ID, char * nameDir, uint8_t nameDir_length);
+void json_init();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -363,6 +365,7 @@ int main(void)
 
 
   AssignDefaultValue();
+  json_init();
 
   HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING);
@@ -1389,6 +1392,74 @@ uint16_t Convert_Command_Value(uint8_t * Command, uint8_t Command_Size, uint8_t 
 	return Value;
 }
 
+void json_init(){
+
+	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+
+	memcpy(fatman.Directory[0].FilePath, "json_init.JSON", sizeof("json_init.JSON"));
+	fatman_read();
+
+//	cJSON *value;
+	cJSON *json = cJSON_ParseWithLength((char *)fatman.Buffer, fatman.Buffer_size);
+
+	PSA.Module = cJSON_GetObjectItemCaseSensitive(json, "PSA.Module")->valueint;
+
+	PSA.Time.SendAliveMessageToValve_Refresh = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.SendAliveMessageToValve_Refresh")->valueint;
+	PSA.Time.SendStateMessageToValve_Refresh = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.SendStateMessageToValve_Refresh")->valueint;
+
+	PSA.CANSPI.Ide = cJSON_GetObjectItemCaseSensitive(json, "PSA.CANSPI.Ide")->valueint;
+
+	PSA.Time.Adsorption = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.Adsorption")->valueint;
+	PSA.Time.Compensation_0 = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.Compensation_0")->valueint;
+	PSA.Time.Compensation_1 = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.Compensation_1")->valueint;
+	PSA.Time.Compensation_2 = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.Compensation_2")->valueint;
+	PSA.Time.PreStandby_1 = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.PreStandby_1")->valueint;
+	PSA.Time.PreStandby_2 = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.PreStandby_2")->valueint;
+
+	PSA.B1_InputAirPressure.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B1_InputAirPressure.LowerLimit")->valueint;
+	PSA.B1_InputAirPressure.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B1_InputAirPressure.LowerThreshold")->valueint;
+	PSA.B1_InputAirPressure.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B1_InputAirPressure.UpperThreshold")->valueint;
+	PSA.B1_InputAirPressure.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B1_InputAirPressure.UpperLimit")->valueint;
+
+	PSA.B2_OutputAirPressure_1.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B2_OutputAirPressure_1.LowerLimit")->valueint;
+	PSA.B2_OutputAirPressure_1.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B2_OutputAirPressure_1.LowerThreshold")->valueint;
+	PSA.B2_OutputAirPressure_1.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B2_OutputAirPressure_1.UpperThreshold")->valueint;
+	PSA.B2_OutputAirPressure_1.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B2_OutputAirPressure_1.UpperLimit")->valueint;
+
+	PSA.B3_ProcessTankAirPressure.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B3_ProcessTankAirPressure.LowerLimit")->valueint;
+	PSA.B3_ProcessTankAirPressure.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B3_ProcessTankAirPressure.LowerThreshold")->valueint;
+	PSA.B3_ProcessTankAirPressure.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B3_ProcessTankAirPressure.UpperThreshold")->valueint;
+	PSA.B3_ProcessTankAirPressure.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B3_ProcessTankAirPressure")->valueint;
+
+	PSA.B4_OutputAirPressure_2.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B4_OutputAirPressure_2.LowerLimit")->valueint;
+	PSA.B4_OutputAirPressure_2.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B4_OutputAirPressure_2.LowerThreshold")->valueint;
+	PSA.B4_OutputAirPressure_2.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B4_OutputAirPressure_2.UpperThreshold")->valueint;
+	PSA.B4_OutputAirPressure_2.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B4_OutputAirPressure_2.UpperLimit")->valueint;
+
+	PSA.IFM_AirFlowmeter.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.IFM_AirFlowmeter.LowerLimit")->valueint;
+	PSA.IFM_AirFlowmeter.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.IFM_AirFlowmeter.LowerThreshold")->valueint;
+	PSA.IFM_AirFlowmeter.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.IFM_AirFlowmeter.UpperThreshold")->valueint;
+	PSA.IFM_AirFlowmeter.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.IFM_AirFlowmeter.UpperLimit")->valueint;
+
+	PSA.DEW_InputAirDewpoint.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.DEW_InputAirDewpoint.LowerLimit")->valueint;
+	PSA.DEW_InputAirDewpoint.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.DEW_InputAirDewpoint.LowerThreshold")->valueint;
+	PSA.DEW_InputAirDewpoint.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.DEW_InputAirDewpoint.UpperThreshold")->valueint;
+	PSA.DEW_InputAirDewpoint.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.DEW_InputAirDewpoint.UpperLimit")->valueint;
+
+	PSA.KE25_OxygenSensor_1.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_1.LowerLimit")->valueint;
+	PSA.KE25_OxygenSensor_1.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_1.LowerThreshold")->valueint;
+	PSA.KE25_OxygenSensor_1.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_1.UpperThreshold")->valueint;
+	PSA.KE25_OxygenSensor_1.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_1.UpperLimit")->valueint;
+
+	PSA.KE25_OxygenSensor_2.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_2.LowerLimit")->valueint;
+	PSA.KE25_OxygenSensor_2.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_2.LowerThreshold")->valueint;
+	PSA.KE25_OxygenSensor_2.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_2.UpperThreshold")->valueint;
+	PSA.KE25_OxygenSensor_2.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_2.UpperLimit")->valueint;
+
+	PSA.OutPriority = cJSON_GetObjectItemCaseSensitive(json, "PSA.OutPriority")->valueint;
+	PSA.Out1.Enable = cJSON_GetObjectItemCaseSensitive(json, "PSA.Out1.Enable")->valueint;
+	PSA.Out2.Enable = cJSON_GetObjectItemCaseSensitive(json, "PSA.Out2.Enable")->valueint;
+}
 
 void AssignDefaultValue()
 {
@@ -1454,11 +1525,11 @@ void AssignDefaultValue()
 	PSA.KE25_OxygenSensor_1.UpperThreshold = 700;
 	PSA.KE25_OxygenSensor_1.UpperLimit = 10000;
 
-	PSA.KE25_OxygenSensor_1.LowerLimit = 0;
-	PSA.KE25_OxygenSensor_1.LowerThreshold = 500;
-//	PSA.KE25_OxygenSensor_1.Value = 600;
-	PSA.KE25_OxygenSensor_1.UpperThreshold = 700;
-	PSA.KE25_OxygenSensor_1.UpperLimit = 10000;
+	PSA.KE25_OxygenSensor_2.LowerLimit = 0;
+	PSA.KE25_OxygenSensor_2.LowerThreshold = 500;
+//	PSA.KE25_OxygenSensor_2.Value = 600;
+	PSA.KE25_OxygenSensor_2.UpperThreshold = 700;
+	PSA.KE25_OxygenSensor_2.UpperLimit = 10000;
 
 
 	PSA.OutPriority = 1;								//PR_OUT
@@ -1596,7 +1667,7 @@ void StartStateTask(void *argument)
   for(;;)
   {
 
-	  PSA.Time.TotalCompensationTime = PSA.Time.Compensation_0 +
+	  PSA.Time.TotalCompensation = PSA.Time.Compensation_0 +
 			  PSA.Time.Compensation_1 + PSA.Time.Compensation_2;
 
 	  if(PSA.Mode.Ready)

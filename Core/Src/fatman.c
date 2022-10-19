@@ -23,7 +23,9 @@ ManageSD fatman;
 /* Private Function definition -----------------------------------------------*/
 /* Public Function -----------------------------------------------------------*/
 /*
- * @brief This method is used to initialize. It creates the directory if it doesn't exists. It creates the file if it doesn't exists.
+ * @brief This method is used to initialize.
+ * It creates the directory if it doesn't exists.
+ * It creates the file if it doesn't exists.
  * @author William Favaro
  * @date 05/08/2022
  * @param ID The number that identifies the directory
@@ -34,10 +36,13 @@ void fatman_init(uint8_t ID)
 	f_mkdir((TCHAR const*)fatman.Directory[ID].DirectoryName);
 
 	/* It creates the file */
-	f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[ID].FilePath, FA_CREATE_ALWAYS|FA_WRITE);
+	f_open(&fatman.OpenFIL,
+			(TCHAR const*)fatman.Directory[ID].FilePath,
+			FA_CREATE_ALWAYS|FA_WRITE);
 
 	/* Save the file and close */
-	memcpy(&fatman.Directory[ID].SaveFIL, &fatman.OpenFIL, sizeof(FIL));
+	memcpy(&fatman.Directory[ID].SaveFIL,
+			&fatman.OpenFIL, sizeof(FIL));
 	f_close(&fatman.OpenFIL);
 
 	/* Update Directory State */
@@ -56,14 +61,17 @@ void fatman_write(uint8_t ID)
 	/* Write the text saved in fm.rwFileBuffer in the file targeted by fm.Directory[ID].FilePath */
 	uint32_t byteswritten;
 
-	memcpy(&fatman.OpenFIL, &fatman.Directory[ID].SaveFIL, sizeof(FIL));
+	memcpy(&fatman.OpenFIL, &fatman.Directory[ID].SaveFIL,
+			sizeof(FIL));
 	fatman.OpenFile_ID = ID;
 
-	f_write(&fatman.OpenFIL, (void *)&fatman.Buffer[0], fatman.Buffer_size, (void *)&byteswritten);
+	f_write(&fatman.OpenFIL, (void *)&fatman.Buffer[0],
+			fatman.Buffer_size, (void *)&byteswritten);
 	f_sync(&fatman.OpenFIL);
 
 	/* Save the FIL */
-	memcpy(&fatman.Directory[ID].SaveFIL, &fatman.OpenFIL, sizeof(FIL));
+	memcpy(&fatman.Directory[ID].SaveFIL, &fatman.OpenFIL,
+			sizeof(FIL));
 	fatman.Directory[ID].AlreadyWrittenOnce = 1;
 
 	/* Clear fm.rwFileBuffer */
@@ -87,7 +95,8 @@ void fatman_read()
 	uint8_t fm_state = 0;
 
 	/* It opens the file, if it exists, in read-only mode */
-	fm_state = f_open(&fatman.OpenFIL, (TCHAR const*)fatman.Directory[0].FilePath, FA_READ);
+	fm_state = f_open(&fatman.OpenFIL,
+			(TCHAR const*)fatman.Directory[0].FilePath, FA_READ);
 
 	if(!fm_state)
 	{
@@ -97,7 +106,8 @@ void fatman_read()
 		fatman.Directory[0].FileIsCreated = 1;
 		fatman.Directory[0].AlreadyWrittenOnce = 0;
 
-		f_read(&fatman.OpenFIL, &fatman.Buffer, BUFFER_SIZE, (void *)&bytesread);
+		f_read(&fatman.OpenFIL, &fatman.Buffer,
+				BUFFER_SIZE, (void *)&bytesread);
 		fatman.Buffer_size = bytesread;
 
 		fatman.Directory[0].AlreadyWrittenOnce = 1;
@@ -122,19 +132,24 @@ void fatman_rename(uint8_t ID, char * NameFile, uint8_t NameFile_length)
 
 	DirectoryName_length = strlen((char *)fatman.Directory[ID].DirectoryName);
 
-	memcpy(&fatman.Directory[ID].FilePath[i], (char *)fatman.Directory[ID].DirectoryName, DirectoryName_length);
+	memcpy(&fatman.Directory[ID].FilePath[i],
+			(char *)fatman.Directory[ID].DirectoryName,
+			DirectoryName_length);
 	i += DirectoryName_length;
 
 	memcpy(&fatman.Directory[ID].FilePath[i], "/", 1);
 	i++;
 
-	memcpy(&fatman.Directory[ID].FilePath[i], (char const*)NameFile, NameFile_length);
+	memcpy(&fatman.Directory[ID].FilePath[i],
+			(char const*)NameFile, NameFile_length);
 	i += NameFile_length;
 
 	memcpy(&fatman.Directory[ID].FilePath[i], "_", 1);
 	i++;
 
-	memcpy(&fatman.Directory[ID].FilePath[i], (char const*)fatman.Directory[ID].DirectoryName, DirectoryName_length);
+	memcpy(&fatman.Directory[ID].FilePath[i],
+			(char const*)fatman.Directory[ID].DirectoryName,
+			DirectoryName_length);
 	i += DirectoryName_length;
 
 	memcpy(&fatman.Directory[ID].FilePath[i], ".TXT", 4);
