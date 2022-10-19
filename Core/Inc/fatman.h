@@ -25,10 +25,10 @@
 #include "stdint.h"
 
 /* Exported macro ------------------------------------------------------------*/
-#define DIRECTORYNAME_LENGTH 	10
-#define FILEPATH_LENGTH 		(2*(DIRECTORYNAME_LENGTH) + 14)
-#define N_DIRECTORY 			8
-#define BUFFER_SIZE 			4096
+#define FATMAN_DIRECTORYNAME_LENGTH 	10
+#define FATMAN_FILEPATH_LENGTH 		(2*(FATMAN_DIRECTORYNAME_LENGTH) + 14)
+#define FATMAN_N_DIRECTORY 			8
+#define FATMAN_BUFFER_SIZE 			4096
 
 #define BYTE_READ_EACH_STEP		32
 
@@ -39,8 +39,8 @@
 typedef struct
 {
 	FRESULT State;
-	char DirectoryName[DIRECTORYNAME_LENGTH];	/**< Directory's Name					*/
-	char FilePath[FILEPATH_LENGTH];				/**< Path of the file					*/
+	char DirectoryName[FATMAN_DIRECTORYNAME_LENGTH];	/**< Directory's Name					*/
+	char FilePath[FATMAN_FILEPATH_LENGTH];				/**< Path of the file					*/
 	FIL SaveFIL;									/**< FIL structure of the file 			*/
 	uint8_t FileIsCreated;							/**< 0: File is not already created
 	 	 	 	 	 	 	 	 	 				1: File is created (DEBUG) 		*/
@@ -57,8 +57,8 @@ typedef struct
 	uint8_t State;								/**< State of the driver 			*/
 	uint8_t OpenFile_ID; 						/**< ID of the open file			*/
 	FIL OpenFIL; 								/**< FIL structure of the open file */
-	ManageDirectory Directory[N_DIRECTORY];		/**< array of ManageDirectory		*/
-	char Buffer[BUFFER_SIZE];					/**< buffer							*/
+	ManageDirectory Directory[FATMAN_N_DIRECTORY];		/**< array of ManageDirectory		*/
+	char Buffer[FATMAN_BUFFER_SIZE];					/**< buffer							*/
 	uint16_t Buffer_size;						/**< size of the buffer 			*/
 } ManageSD;
 

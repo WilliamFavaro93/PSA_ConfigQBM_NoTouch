@@ -76,7 +76,7 @@ void fatman_write(uint8_t ID)
 
 	/* Clear fm.rwFileBuffer */
 	fatman.Buffer_size = 0;
-	memset(&fatman.Buffer, 0, BUFFER_SIZE);
+	memset(&fatman.Buffer, 0, FATMAN_BUFFER_SIZE);
 
 	/* Close fm.OpenFIL */
 	f_close(&fatman.OpenFIL);
@@ -100,14 +100,14 @@ void fatman_read()
 
 	if(!fm_state)
 	{
-		fatman.OpenFile_ID = N_DIRECTORY + 1;
+		fatman.OpenFile_ID = FATMAN_N_DIRECTORY + 1;
 
 		/* Update Directory State */
 		fatman.Directory[0].FileIsCreated = 1;
 		fatman.Directory[0].AlreadyWrittenOnce = 0;
 
 		f_read(&fatman.OpenFIL, &fatman.Buffer,
-				BUFFER_SIZE, (void *)&bytesread);
+				FATMAN_BUFFER_SIZE, (void *)&bytesread);
 		fatman.Buffer_size = bytesread;
 
 		fatman.Directory[0].AlreadyWrittenOnce = 1;

@@ -232,9 +232,7 @@ typedef struct
 	uint8_t State;
 	uint32_t Error;
 
-	uint16_t TransmitAliveMessage;
-	uint8_t TransmitValveMessage;
-	uint8_t ReceiveAliveMessage;
+	uint8_t AliveMessageReceived;
 } ManageCAN2;
 
 /* Controller Area Network 1 structure ---------------------------------------*/

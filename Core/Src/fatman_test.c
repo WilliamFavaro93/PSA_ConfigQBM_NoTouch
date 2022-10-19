@@ -243,7 +243,7 @@ void fm_test_WHItheBufferIsTooBig()
 		fatman.Buffer_size = strlen((char const*)wtext);
 
 		/* Change name of the file if it's becoming to big  */
-		if((fatman.Directory[ID].SaveFIL.fptr + fatman.Buffer_size) > BUFFER_SIZE)
+		if((fatman.Directory[ID].SaveFIL.fptr + fatman.Buffer_size) > FATMAN_BUFFER_SIZE)
 		{
 			fatman.Directory[ID].FilePath[22] += 1;
 			fatman_init(ID);
