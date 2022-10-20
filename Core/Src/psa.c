@@ -31,11 +31,11 @@ PSAStruct PSA;
  */
 void PSA_OutValve()
 {
-	if(PSA.Out1.Working)
+	if(PSA.Out1.Run)
 	{
 		PSA.Valve[0] += 1;
 	}
-	else if(PSA.Out2.Working)
+	else if(PSA.Out2.Run)
 	{
 		PSA.Valve[1] += 1;
 	}
@@ -276,13 +276,11 @@ void PSA_State_UpdateValveMessage()
 void PSA_Mode_Run()
 {
 	PSA.Mode.Run = 0x01;
-	PSA.Mode.Standby = 0x00;
 }
 
 void PSA_Mode_Standby()
 {
 	PSA.Mode.Run = 0x00;
-	PSA.Mode.Standby = 0x01;
 }
 
 void PSA_AnalogInput_Acquisition(uint16_AnalogInput *AnalogInput, uint16_t AnalogInputValue)
@@ -351,7 +349,7 @@ void PSA_Command_EnableOut1_DisableOut2()
 
 	  PSA.Out2.Enable = 0;
 	  PSA.Out2.Ready = 0;
-	  PSA.Out2.Working = 0;
+	  PSA.Out2.Run = 0;
 
 	  PSA.Command.EnableOut1_DisableOut2 = 0;
 }
@@ -362,7 +360,7 @@ void PSA_Command_EnableOut2_DisableOut1()
 
 	  PSA.Out1.Enable = 0;
 	  PSA.Out1.Ready = 0;
-	  PSA.Out1.Working = 0;
+	  PSA.Out1.Run = 0;
 
 	  PSA.Command.EnableOut2_DisableOut1 = 0;
 }
@@ -522,7 +520,7 @@ void PSA_Request_Out2ValvePosition()
 	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
 	PSA.CANSPI.RequestMessage.frame.data2 = 0x1D;
 
-	PSA.CANSPI.RequestMessage.frame.data4 = PSA.Out2.Working;
+	PSA.CANSPI.RequestMessage.frame.data4 = PSA.Out2.Run;
 }
 
 void PSA_Request_DischangeValvePosition()
@@ -537,7 +535,7 @@ void PSA_Request_Out1ValvePosition()
 	PSA.CANSPI.RequestMessage.frame.data0 = 0x4B;
 	PSA.CANSPI.RequestMessage.frame.data2 = 0x1D;
 
-	PSA.CANSPI.RequestMessage.frame.data4 = PSA.Out1.Working;
+	PSA.CANSPI.RequestMessage.frame.data4 = PSA.Out1.Run;
 }
 
 void PSA_Request_DeliveryValvePosition()

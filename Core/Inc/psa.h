@@ -50,15 +50,15 @@ typedef struct
 /* Mode structure ------------------------------------------------------------*/
 typedef struct
 {
+	uint8_t Enable;		/**< define if psa start to work:
+	 	 	 	 	 	 0: psa is not in standby-mode
+	 	 	 	 	 	 1:	psa is in standy-mode			*/
 	uint8_t Ready; 		/**< define if psa is in ready-mode:
 	 	 	 	 	 	 0: psa is not in ready-mode
 	 	 	 	 	 	 1: psa is in ready-mode			*/
 	uint8_t Run;		/**< define if psa is run-mode:
 	 	 	 	 	 	 0: psa is not run-mode
 	 	 	 	 	 	 1:	psa is run-mode					*/
-	uint8_t Standby;	/**< define if psa is standby-mode:
-	 	 	 	 	 	 0: psa is not in standby-mode
-	 	 	 	 	 	 1:	psa is in standy-mode			*/
 } uint8_Mode;
 
 /* Out structure -------------------------------------------------------------*/
@@ -70,7 +70,7 @@ typedef struct
 	uint8_t Ready;		/**< define if the out is ready:
 	 	 	 	 	 	 0: the out is not ready
 	 	 	 	 	 	 1: the out is ready				*/
-	uint8_t Working;	/**< define if the out is working:
+	uint8_t Run;	/**< define if the out is working:
 	 	 	 	 	 	 0: the out is not working
 	 	 	 	 	 	 1: the out is working				*/
 } uint8_Out;

@@ -299,12 +299,11 @@ void StartCAN1_TransmitTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 int __io_putchar(int character);
-uint16_t Convert_Command_Value(uint8_t * Command, uint8_t Command_Size, uint8_t PrefixLength);
 void AssignDefaultValue();
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan);
-void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage);
-void DirectoryInit(uint8_t ID, char * nameDir, uint8_t nameDir_length);
+//void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage);
+//void DirectoryInit(uint8_t ID, char * nameDir, uint8_t nameDir_length);
 void json_init();
 /* USER CODE END PFP */
 
@@ -1376,22 +1375,6 @@ int __io_putchar(int character)
 	return character;
 }
 
-uint16_t Convert_Command_Value(uint8_t * Command, uint8_t Command_Size, uint8_t PrefixLength)
-{
-	uint16_t Value;
-	for(uint8_t i = 0;  i < (Command_Size - PrefixLength); i++)
-	{/* if it's a number */
-		if(Command[PrefixLength + i] >= '0' && Command[PrefixLength + i] <= '9')
-		{
-			Value *= 10;
-			Value += Command[PrefixLength + i] - '0';
-		}
-		else
-			return Value;
-	}
-	return Value;
-}
-
 void json_init(){
 
 	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
@@ -1674,7 +1657,7 @@ void StartStateTask(void *argument)
 	  PSA.Time.TotalCompensation = PSA.Time.Compensation_0 +
 			  PSA.Time.Compensation_1 + PSA.Time.Compensation_2;
 
-	  if(PSA.Mode.Ready)
+	  if(PSA.Mode.Enable)
 	  {
 		  PSA.StateUpdated = 0;
 		  if((PSA.Mode.Run) && (PSA.State < 1))
@@ -1683,7 +1666,7 @@ void StartStateTask(void *argument)
 			  PSA_State_UpdateValveMessage();
 		  }
 
-		  if((PSA.Mode.Standby) && (PSA.State > 0))
+		  if((!PSA.Mode.Run) && (PSA.State > 0))
 		  {
 			  PSA.State = -2;
 			  PSA_State_UpdateValveMessage();
@@ -1727,19 +1710,19 @@ void StartOutTask(void *argument)
 	  for(;;)
 	  {
 
-		  /* Managing Command ------------------------------------------------*/
+		  /* GUI Command ------------------------------------------------*/
 #if 0
 		  if(!PSA.KE25_OxygenSensor_1.LowerThreshold)
 		  {
 			  PSA.Out1.Enable = 0;
 			  PSA.Out1.Ready = 0;
-			  PSA.Out1.Working = 0;
+			  PSA.Out1.Run = 0;
 		  }
 		  if(!PSA.KE25_OxygenSensor_2.LowerThreshold)
 		  {
 			  PSA.Out2.Enable = 0;
 			  PSA.Out2.Ready = 0;
-			  PSA.Out2.Working = 0;
+			  PSA.Out2.Run = 0;
 		  }
 #endif
 
@@ -1778,7 +1761,7 @@ void StartOutTask(void *argument)
 				  PSA.Out2.Ready = 1;
 			  }
 		  }
-		  if ((PSA.Mode.Run) && ((PSA.Out1.Enable) && (!PSA.Out2.Enable)) && ((!PSA.Out1.Ready) && (!PSA.Out2.Ready)))
+		  if((PSA.Mode.Run) && ((PSA.Out1.Enable) && (!PSA.Out2.Enable)) && ((!PSA.Out1.Ready) && (!PSA.Out2.Ready)))
 		  {
 			  PSA.Out1.Ready = 1;
 		  }
@@ -1788,39 +1771,38 @@ void StartOutTask(void *argument)
 		  }
 
 		  /* Out-Working Condition -------------------------------------------*/
-		  if((PSA.Mode.Run) && (PSA.Out1.Ready) && (PSA.KE25_OxygenSensor_1.Value < PSA.KE25_OxygenSensor_1.LowerThreshold))
+		  if(((PSA.Mode.Run) && (PSA.Out1.Ready) && (!PSA.Out1.Run)) && (PSA.KE25_OxygenSensor_1.Value < PSA.KE25_OxygenSensor_1.LowerThreshold))
 		  {
-			  PSA.Out1.Working = 1;
+			  PSA.Out1.Run = 1;
 		  }
-		  if((PSA.Mode.Run) && (PSA.Out2.Ready) && (PSA.KE25_OxygenSensor_2.Value < PSA.KE25_OxygenSensor_2.LowerThreshold))
-		  {/* If KE < SO2-1 -> OUT1 open*/
-			  PSA.Out2.Working = 1;
+		  if(((PSA.Mode.Run) && (PSA.Out2.Ready) && (!PSA.Out2.Run)) && (PSA.KE25_OxygenSensor_2.Value < PSA.KE25_OxygenSensor_2.LowerThreshold))
+		  {
+			  PSA.Out2.Run = 1;
 		  }
 
 		  /* Out-Swapping Condition ------------------------------------------*/
-		  if((PSA.Mode.Run) && (PSA.Out1.Working) && (PSA.Alarm.AL19_HighOut1Pressure.Trigger) && ((PSA.Out2.Enable) && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger)))
-		  {/* (Run + OUT_1 working) + B2 > SB2H + SO2-2!=OFF -> OUT1=OFF + OUT2 = Ready + AL*/
+		  if(((PSA.Mode.Run) && (PSA.Out1.Run)) && (PSA.Alarm.AL19_HighOut1Pressure.Trigger) && ((PSA.Out2.Enable) && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger)))
+		  {
 			  PSA.Out1.Ready = 0;
-			  PSA.Out1.Working = 0;
+			  PSA.Out1.Run = 0;
 			  PSA.Out2.Ready = 1;
 		  }
-		  if((PSA.Mode.Run) && (PSA.Out2.Working) && (PSA.Alarm.AL16_HighOut2Pressure.Trigger) && (PSA.Out1.Enable))
-		  {/* (Run + OUT_2 working) + B4 > SB4H + SO2-1=OFF -> OUT1=Ready + OUT2=OFF + AL */
+		  if(((PSA.Mode.Run) && (PSA.Out2.Run)) && (PSA.Alarm.AL16_HighOut2Pressure.Trigger) && (PSA.Out1.Enable))
+		  {
 			  PSA.Out1.Ready = 1;
 			  PSA.Out2.Ready = 0;
-			  PSA.Out2.Working = 0;
+			  PSA.Out2.Run = 0;
 		  }
 
 		  /* Standby Mode Condition ------------------------------------------*/
-		  if((PSA.Mode.Standby) && (PSA.Out1.Ready))
+		  if((!PSA.Mode.Run) && (PSA.Out1.Ready))
 		  {
-			  PSA.Out1.Working = 0;
+			  PSA.Out1.Run = 0;
 		  }
-		  if((PSA.Mode.Standby) && (PSA.Out2.Ready))
+		  if((!PSA.Mode.Run) && (PSA.Out2.Ready))
 		  {
-			  PSA.Out2.Working = 0;
+			  PSA.Out2.Run = 0;
 		  }
-
 
 	    vTaskDelayUntil(&OutTaskDelayTimer, 1 * deciseconds);
 	  }
@@ -1841,40 +1823,72 @@ void StartModeTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  /* When Ready button is Off -> PSA goes in standby */
-	  if((!PSA.Mode.Ready) && (PSA.Mode.Run))
+	  /* Enabling condition --------------------------------------------------*/
+	  if(((!PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.Mode.Run)) && ((PSA.B1_InputAirPressure.Value > PSA.B1_InputAirPressure.UpperThreshold) && ((PSA.Out1.Enable)||(PSA.Out2.Enable))))
 	  {
-		  PSA_Mode_Standby();
+		  PSA.Mode.Enable = 0x01;
+		  PSA.Mode.Run = 0x01;
 	  }
-	  /* Ready + not Run + not Standby -> Run (Starting condition) */
-	  if(((PSA.Mode.Ready) && (!PSA.Mode.Run) && (!PSA.Mode.Standby)) && ((PSA.B1_InputAirPressure.Value > PSA.B1_InputAirPressure.UpperThreshold) && ((PSA.Out1.Enable)||(PSA.Out2.Enable))))
-	  {/* (Ready + NotRun + NotStb) && (B1 > SB1H) && ((SO2-1 != OFF)||(SO2-2 != OFF)): starting condition */
-		  PSA_Mode_Run();
-	  }
-	  /* Run + BlockingAlarm -> Standby */
-	  if(((PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out1.Ready||PSA.Out2.Ready)) && (PSA.Alarm.BlockingAlarmsTriggered))
+
+	  /* Ready condition -----------------------------------------------------*/
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State) && (PSA.Out1.Ready)) && (!PSA.Alarm.AL19_HighOut1Pressure.Trigger))
 	  {
-		  PSA_Mode_Standby();
+		  PSA.Mode.Run = 0x01;
 	  }
-	  /* Run + OUT1 + cannot go in OUT2 -> Standby */
-	  if((PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out1.Working) && (PSA.Alarm.AL19_HighOut1Pressure.Trigger) && ((!PSA.Out2.Enable) || (PSA.Alarm.AL16_HighOut2Pressure.Trigger)))
-	  {/* Run + OUT1 + B2 > SB2H -> Standby */
-		  PSA_Mode_Standby();
+
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State) && (PSA.Out2.Ready)) && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger))
+	  {
+		  PSA.Mode.Run = 0x01;
 	  }
-	  /* Run + OUT2 -> Standby */
-	  if((PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out2.Working) && (PSA.Alarm.AL16_HighOut2Pressure.Trigger) && (!PSA.Out1.Enable))
-	  {/* Run + OUT2 + B4 > SB4H -> Standby */
-		  PSA_Mode_Standby();
+
+	  /* Not Ready condition -------------------------------------------------*/
+	  if(((PSA.Mode.Enable) && (!PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out1.Ready)) && (PSA.Alarm.AL19_HighOut1Pressure.Trigger))
+	  {
+		  PSA.Mode.Run = 0x00;
 	  }
-	  /* Standby + OUT1 -> Run */
-	  if((PSA.Mode.Ready) && (!PSA.State && PSA.Out1.Ready) && (!PSA.Alarm.AL19_HighOut1Pressure.Trigger))
-	  {/* Standby & B2 < SB2L & No Alarm -> Run*/
-		  PSA_Mode_Run();
+
+	  if(((PSA.Mode.Enable) && (!PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out2.Ready)) && (PSA.Alarm.AL16_HighOut2Pressure.Trigger))
+	  {
+		  PSA.Mode.Run = 0x00;
 	  }
-	  /* Standby + OUT2 -> Run */
-	  if((PSA.Mode.Ready) && (!PSA.State && PSA.Out2.Ready) && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger))
-	  {/* Standby & B2 > SB2L & No Alarm -> Run*/
-		  PSA_Mode_Run();
+
+	  /* Run condition -------------------------------------------------------*/
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State) && (PSA.Out1.Ready))
+			  && (!PSA.Alarm.AL19_HighOut1Pressure.Trigger) && (!PSA.Alarm.BlockingAlarmsTriggered))
+	  {
+		  PSA.Mode.Run = 0x01;
+	  }
+
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State) && (PSA.Out2.Ready))
+			  && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger) && (!PSA.Alarm.BlockingAlarmsTriggered))
+	  {
+		  PSA.Mode.Run = 0x01;
+	  }
+
+	  /* Standby condition ---------------------------------------------------*/
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out1.Run))
+			  && ((PSA.Alarm.AL19_HighOut1Pressure.Trigger) && ((!PSA.Out2.Enable) || (PSA.Alarm.AL16_HighOut2Pressure.Trigger))))
+	  {
+		  PSA.Mode.Run = 0x00;
+	  }
+
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out2.Run))
+			  && ((PSA.Alarm.AL16_HighOut2Pressure.Trigger) && (!PSA.Out1.Enable)))
+	  {
+		  PSA.Mode.Run = 0x00;
+	  }
+
+	  /* Standby condition: Blocking Alarm -----------------------------------*/
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out2.Run))
+			  && (PSA.Alarm.BlockingAlarmsTriggered))
+	  {
+		  PSA.Mode.Run = 0x00;
+	  }
+
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out2.Run))
+			  && (PSA.Alarm.BlockingAlarmsTriggered))
+	  {
+		  PSA.Mode.Run = 0x00;
 	  }
 
 	  vTaskDelayUntil(&ModeTaskDelayTimer, 1 * deciseconds);
