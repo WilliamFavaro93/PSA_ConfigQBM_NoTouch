@@ -33,7 +33,7 @@ void Alarm_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_O
 	Alarm->Trigger = 0;
 	Alarm->RefreshTimer_ON = RefreshTimer_ON;
 	Alarm->RefreshTimer_OFF = RefreshTimer_OFF;
-	Alarm->Timer = Alarm->RefreshTimer_ON;
+	Alarm->Timer = Alarm->RefreshTimer_OFF;
 }
 
 /*

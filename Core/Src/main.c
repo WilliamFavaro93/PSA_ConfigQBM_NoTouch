@@ -154,55 +154,6 @@ const osThreadAttr_t RequestTask_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityLow,
 };
-/* Definitions for B1_AcquisiTask */
-osThreadId_t B1_AcquisiTaskHandle;
-const osThreadAttr_t B1_AcquisiTask_attributes = {
-  .name = "B1_AcquisiTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal2,
-};
-/* Definitions for B2_AcquisiTask */
-osThreadId_t B2_AcquisiTaskHandle;
-const osThreadAttr_t B2_AcquisiTask_attributes = {
-  .name = "B2_AcquisiTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal2,
-};
-/* Definitions for B3_AcquisiTask */
-osThreadId_t B3_AcquisiTaskHandle;
-const osThreadAttr_t B3_AcquisiTask_attributes = {
-  .name = "B3_AcquisiTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal2,
-};
-/* Definitions for B4_AcquisiTask */
-osThreadId_t B4_AcquisiTaskHandle;
-const osThreadAttr_t B4_AcquisiTask_attributes = {
-  .name = "B4_AcquisiTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal2,
-};
-/* Definitions for IFW_AcquisiTask */
-osThreadId_t IFW_AcquisiTaskHandle;
-const osThreadAttr_t IFW_AcquisiTask_attributes = {
-  .name = "IFW_AcquisiTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityBelowNormal2,
-};
-/* Definitions for DEW_AcquisiTask */
-osThreadId_t DEW_AcquisiTaskHandle;
-const osThreadAttr_t DEW_AcquisiTask_attributes = {
-  .name = "DEW_AcquisiTask",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityBelowNormal2,
-};
-/* Definitions for KE25_AcquisiTas */
-osThreadId_t KE25_AcquisiTasHandle;
-const osThreadAttr_t KE25_AcquisiTas_attributes = {
-  .name = "KE25_AcquisiTas",
-  .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal2,
-};
 /* Definitions for CAN1_ReceiveTas */
 osThreadId_t CAN1_ReceiveTasHandle;
 const osThreadAttr_t CAN1_ReceiveTas_attributes = {
@@ -214,6 +165,13 @@ const osThreadAttr_t CAN1_ReceiveTas_attributes = {
 osThreadId_t CAN1_TransmitTaHandle;
 const osThreadAttr_t CAN1_TransmitTa_attributes = {
   .name = "CAN1_TransmitTa",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal2,
+};
+/* Definitions for AcquisitionTask */
+osThreadId_t AcquisitionTaskHandle;
+const osThreadAttr_t AcquisitionTask_attributes = {
+  .name = "AcquisitionTask",
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal2,
 };
@@ -232,7 +190,8 @@ MyQueue B2_OutputAirPressure_1Queue;
 MyQueue B3_ProcessTankAirPressureQueue;
 MyQueue B4_OutputAirPressure_2Queue;
 MyQueue IFM_AirFlowmeterQueue;
-MyQueue KE25_PercentualOxygenInTheAirQueue;
+MyQueue KE25_PercentualOxygenInTheAirQueue_1;
+MyQueue KE25_PercentualOxygenInTheAirQueue_2;
 MyQueue DEW_InputAirDewpointQueue;
 
 /* TimeCounter ---------------------------------------------------------------*/
@@ -287,15 +246,9 @@ void StartSDTask(void *argument);
 void StartCAN1RxTxTask(void *argument);
 void StartAlarmTask(void *argument);
 void StartRequestTask(void *argument);
-void StartB1_AcquisiTask(void *argument);
-void StartB2_AcquisiTask(void *argument);
-void StartB3_AcquisiTask(void *argument);
-void StartB4_AcquisiTask(void *argument);
-void StartIFW_AcquisiTask(void *argument);
-void StartDEW_AcquisiTask(void *argument);
-void StartKE25_AcquisiTask(void *argument);
 void StartCAN1_ReceiveTask(void *argument);
 void StartCAN1_TransmitTask(void *argument);
+void StartAcquisitionTask(void *argument);
 
 /* USER CODE BEGIN PFP */
 int __io_putchar(int character);
@@ -304,6 +257,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan);
 //void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage);
 //void DirectoryInit(uint8_t ID, char * nameDir, uint8_t nameDir_length);
+void TEST_TestAllAndStopIt();
 void json_init();
 /* USER CODE END PFP */
 
@@ -358,10 +312,10 @@ int main(void)
   MX_DMA_Init();
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
-//  MyQueue_test_all();
-//  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-//  while(1){}
-
+#if 0
+	#define TEST
+#endif /* TEST */
+  TEST_TestAllAndStopIt();
 
   AssignDefaultValue();
   json_init();
@@ -424,32 +378,14 @@ int main(void)
   /* creation of RequestTask */
   RequestTaskHandle = osThreadNew(StartRequestTask, NULL, &RequestTask_attributes);
 
-  /* creation of B1_AcquisiTask */
-  B1_AcquisiTaskHandle = osThreadNew(StartB1_AcquisiTask, NULL, &B1_AcquisiTask_attributes);
-
-  /* creation of B2_AcquisiTask */
-  B2_AcquisiTaskHandle = osThreadNew(StartB2_AcquisiTask, NULL, &B2_AcquisiTask_attributes);
-
-  /* creation of B3_AcquisiTask */
-  B3_AcquisiTaskHandle = osThreadNew(StartB3_AcquisiTask, NULL, &B3_AcquisiTask_attributes);
-
-  /* creation of B4_AcquisiTask */
-  B4_AcquisiTaskHandle = osThreadNew(StartB4_AcquisiTask, NULL, &B4_AcquisiTask_attributes);
-
-  /* creation of IFW_AcquisiTask */
-  IFW_AcquisiTaskHandle = osThreadNew(StartIFW_AcquisiTask, NULL, &IFW_AcquisiTask_attributes);
-
-  /* creation of DEW_AcquisiTask */
-  DEW_AcquisiTaskHandle = osThreadNew(StartDEW_AcquisiTask, NULL, &DEW_AcquisiTask_attributes);
-
-  /* creation of KE25_AcquisiTas */
-  KE25_AcquisiTasHandle = osThreadNew(StartKE25_AcquisiTask, NULL, &KE25_AcquisiTas_attributes);
-
   /* creation of CAN1_ReceiveTas */
   CAN1_ReceiveTasHandle = osThreadNew(StartCAN1_ReceiveTask, NULL, &CAN1_ReceiveTas_attributes);
 
   /* creation of CAN1_TransmitTa */
   CAN1_TransmitTaHandle = osThreadNew(StartCAN1_TransmitTask, NULL, &CAN1_TransmitTa_attributes);
+
+  /* creation of AcquisitionTask */
+  AcquisitionTaskHandle = osThreadNew(StartAcquisitionTask, NULL, &AcquisitionTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1367,6 +1303,17 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+void TEST_TestAllAndStopIt()
+{
+	#ifdef TEST
+	Alarm_test_all();
+	DateTime_test_all();
+	fatman_test_all();
+	MyQueue_test_all();
+	HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+	while(1){}
+	#endif /* TEST */
+}
 
 int __io_putchar(int character)
 {
@@ -2376,167 +2323,6 @@ void StartRequestTask(void *argument)
   /* USER CODE END StartRequestTask */
 }
 
-/* USER CODE BEGIN Header_StartB1_AcquisiTask */
-/**
-* @brief Function implementing the B1_AcquisiTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartB1_AcquisiTask */
-void StartB1_AcquisiTask(void *argument)
-{
-  /* USER CODE BEGIN StartB1_AcquisiTask */
-	TickType_t TaskDelayTimer = xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-	  Acquisition_AnalogInputIntoQueueWithAlarm(
-			  &PSA.B1_InputAirPressure,
-			  &B1_InputAirPressureQueue,
-			  &PSA.Alarm.AL31_B1ProbeFault);
-	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
-  }
-  /* USER CODE END StartB1_AcquisiTask */
-}
-
-/* USER CODE BEGIN Header_StartB2_AcquisiTask */
-/**
-* @brief Function implementing the B2_AcquisiTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartB2_AcquisiTask */
-void StartB2_AcquisiTask(void *argument)
-{
-  /* USER CODE BEGIN StartB2_AcquisiTask */
-	TickType_t TaskDelayTimer = xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-	  Acquisition_AnalogInputIntoQueueWithAlarm(
-			  &PSA.B2_OutputAirPressure_1,
-			  &B2_OutputAirPressure_1Queue,
-			  &PSA.Alarm.AL32_B2ProbeFault);
-	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
-  }
-  /* USER CODE END StartB2_AcquisiTask */
-}
-
-/* USER CODE BEGIN Header_StartB3_AcquisiTask */
-/**
-* @brief Function implementing the B3_AcquisiTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartB3_AcquisiTask */
-void StartB3_AcquisiTask(void *argument)
-{
-  /* USER CODE BEGIN StartB3_AcquisiTask */
-	TickType_t TaskDelayTimer = xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-	  Acquisition_AnalogInputIntoQueueWithAlarm(
-			  &PSA.B3_ProcessTankAirPressure,
-			  &B3_ProcessTankAirPressureQueue,
-			  &PSA.Alarm.AL33_B3ProbeFault);
-	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
-  }
-  /* USER CODE END StartB3_AcquisiTask */
-}
-
-/* USER CODE BEGIN Header_StartB4_AcquisiTask */
-/**
-* @brief Function implementing the B4_AcquisiTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartB4_AcquisiTask */
-void StartB4_AcquisiTask(void *argument)
-{
-  /* USER CODE BEGIN StartB4_AcquisiTask */
-	TickType_t TaskDelayTimer = xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-	  Acquisition_AnalogInputIntoQueueWithAlarm(
-			  &PSA.B4_OutputAirPressure_2,
-			  &B4_OutputAirPressure_2Queue,
-			  &PSA.Alarm.AL34_B4ProbeFault);
-	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
-  }
-  /* USER CODE END StartB4_AcquisiTask */
-}
-
-/* USER CODE BEGIN Header_StartIFW_AcquisiTask */
-/**
-* @brief Function implementing the IFW_AcquisiTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartIFW_AcquisiTask */
-void StartIFW_AcquisiTask(void *argument)
-{
-  /* USER CODE BEGIN StartIFW_AcquisiTask */
-	TickType_t TaskDelayTimer = xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-	  Acquisition_AnalogInputIntoQueueWithAlarm(
-			  &PSA.IFM_AirFlowmeter,
-			  &IFM_AirFlowmeterQueue,
-			  &PSA.Alarm.AL35_IFWProbeFault);
-	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
-  }
-  /* USER CODE END StartIFW_AcquisiTask */
-}
-
-/* USER CODE BEGIN Header_StartDEW_AcquisiTask */
-/**
-* @brief Function implementing the DEW_AcquisiTask thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartDEW_AcquisiTask */
-void StartDEW_AcquisiTask(void *argument)
-{
-  /* USER CODE BEGIN StartDEW_AcquisiTask */
-	TickType_t TaskDelayTimer = xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-	  Acquisition_AnalogInputIntoQueueWithAlarm(
-			  &PSA.DEW_InputAirDewpoint,
-			  &DEW_InputAirDewpointQueue,
-			  &PSA.Alarm.AL36_DEWProbeFault);
-	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
-  }
-  /* USER CODE END StartDEW_AcquisiTask */
-}
-
-/* USER CODE BEGIN Header_StartKE25_AcquisiTask */
-/**
-* @brief Function implementing the KE25_AcquisiTas thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_StartKE25_AcquisiTask */
-void StartKE25_AcquisiTask(void *argument)
-{
-  /* USER CODE BEGIN StartKE25_AcquisiTask */
-	TickType_t TaskDelayTimer = xTaskGetTickCount();
-  /* Infinite loop */
-  for(;;)
-  {
-	  Acquisition_AnalogInputIntoQueueWithAlarm(
-			  &PSA.KE25_OxygenSensor_1,
-			  &KE25_PercentualOxygenInTheAirQueue,
-			  &PSA.Alarm.AL37_KE25ProbeFault);
-	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
-  }
-  /* USER CODE END StartKE25_AcquisiTask */
-}
-
 /* USER CODE BEGIN Header_StartCAN1_ReceiveTask */
 /**
 * @brief Function implementing the CAN1_ReceiveTas thread.
@@ -2810,6 +2596,65 @@ void StartCAN1_TransmitTask(void *argument)
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
   /* USER CODE END StartCAN1_TransmitTask */
+}
+
+/* USER CODE BEGIN Header_StartAcquisitionTask */
+/**
+* @brief Function implementing the AcquisitionTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_StartAcquisitionTask */
+void StartAcquisitionTask(void *argument)
+{
+  /* USER CODE BEGIN StartAcquisitionTask */
+	TickType_t TaskDelayTimer = xTaskGetTickCount();
+  /* Infinite loop */
+  for(;;)
+  {
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
+			  &PSA.B1_InputAirPressure,
+			  &B1_InputAirPressureQueue,
+			  &PSA.Alarm.AL31_B1ProbeFault);
+
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
+			  &PSA.B2_OutputAirPressure_1,
+			  &B2_OutputAirPressure_1Queue,
+			  &PSA.Alarm.AL32_B2ProbeFault);
+
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
+			  &PSA.B3_ProcessTankAirPressure,
+			  &B3_ProcessTankAirPressureQueue,
+			  &PSA.Alarm.AL33_B3ProbeFault);
+
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
+			  &PSA.B4_OutputAirPressure_2,
+			  &B4_OutputAirPressure_2Queue,
+			  &PSA.Alarm.AL34_B4ProbeFault);
+
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
+			  &PSA.IFM_AirFlowmeter,
+			  &IFM_AirFlowmeterQueue,
+			  &PSA.Alarm.AL35_IFWProbeFault);
+
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
+			  &PSA.DEW_InputAirDewpoint,
+			  &DEW_InputAirDewpointQueue,
+			  &PSA.Alarm.AL36_DEWProbeFault);
+
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
+			  &PSA.KE25_OxygenSensor_1,
+			  &KE25_PercentualOxygenInTheAirQueue_1,
+			  &PSA.Alarm.AL37_KE25ProbeFault);
+
+	  Acquisition_AnalogInputIntoQueueWithAlarm(
+			  &PSA.KE25_OxygenSensor_2,
+			  &KE25_PercentualOxygenInTheAirQueue_2,
+			  &PSA.Alarm.AL37_KE25ProbeFault);
+
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
+  }
+  /* USER CODE END StartAcquisitionTask */
 }
 
 /**
