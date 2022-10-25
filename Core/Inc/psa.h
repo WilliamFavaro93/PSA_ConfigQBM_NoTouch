@@ -27,7 +27,7 @@
 /* Time structure ------------------------------------------------------------*/
 typedef struct
 {
-	uint16_t StateTimer;
+//	uint16_t StateTimer;
 
 	uint16_t Adsorption;
 	uint16_t TotalCompensation;
@@ -42,9 +42,6 @@ typedef struct
 
 	uint16_t SendStateMessageToValve_Timer;
 	uint16_t SendStateMessageToValve_Refresh;
-
-	uint16_t LowInputAirPressure_Timer;
-	uint16_t LowInputAirPressure_Refresh;
 } uint16_Time;
 
 /* Mode structure ------------------------------------------------------------*/
@@ -74,6 +71,14 @@ typedef struct
 	 	 	 	 	 	 0: the out is not working
 	 	 	 	 	 	 1: the out is working				*/
 } uint8_Out;
+
+/* State structure -------------------------------------------------------------*/
+typedef struct
+{
+	 int8_t Value;
+	uint8_t Timer;
+	uint8_t Update;
+} int_State;
 
 /* Digital Input structure ---------------------------------------------------*/
 typedef struct
@@ -253,16 +258,14 @@ typedef struct{
 	uint8_Mode Mode;		/**< the mode structure managed by ModeTask */
 	/* State -----------------------------------------------------------------*/
 	int State; 		/**< the number that identified thestate, StateTask */
-	uint8_t Module;	/**< the number of modules */
-	uint8_t StateUpdated;
-	uint16_t ReceiveValveMessage;
+	uint8_t State_Update;
+	uint16_t State_Timer;
 	/* Out -------------------------------------------------------------------*/
 	uint8_Out Out1;
 	uint8_Out Out2;
 	uint8_t OutPriority;
-	/* ... */
-	uint8_t CloseDrain;
-
+	/* Valve -----------------------------------------------------------------*/
+	uint8_t Module;	/**< the number of modules */
 	uint8_t Valve[8];
 
 	/* Command */

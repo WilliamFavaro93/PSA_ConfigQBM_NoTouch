@@ -313,9 +313,10 @@ int main(void)
   MX_TIM7_Init();
   /* USER CODE BEGIN 2 */
 #if 0
-	#define TEST
-#endif /* TEST */
   TEST_TestAllAndStopIt();
+  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+  while(1){}
+#endif /* TEST */
 
   AssignDefaultValue();
   json_init();
@@ -1305,14 +1306,10 @@ static void MX_GPIO_Init(void)
 
 void TEST_TestAllAndStopIt()
 {
-	#ifdef TEST
 	Alarm_test_all();
 	DateTime_test_all();
 	fatman_test_all();
 	MyQueue_test_all();
-	HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-	while(1){}
-	#endif /* TEST */
 }
 
 int __io_putchar(int character)
@@ -1606,7 +1603,7 @@ void StartStateTask(void *argument)
 
 	  if(PSA.Mode.Enable)
 	  {
-		  PSA.StateUpdated = 0;
+		  PSA.State_Update = 0;
 		  if((PSA.Mode.Run) && (PSA.State < 1))
 		  {
 			  PSA.State = 1;
@@ -1619,7 +1616,7 @@ void StartStateTask(void *argument)
 			  PSA_State_UpdateValveMessage();
 		  }
 
-		  if(!PSA.Time.StateTimer)
+		  if(!PSA.State_Timer)
 		  {
 			  if(PSA.State)
 			  {
@@ -1872,7 +1869,7 @@ void StartTimeTask(void *argument)
 		  TimeCounter_AddDecisecond(&MaintenanceWorking);
 	  TimeCounter_AddDecisecond(&TotalWorking);
 	  /* Timer ---------------------------------------------------------------*/
-	  MyTimer_SubtractDeciSecond(&PSA.Time.StateTimer);
+	  MyTimer_SubtractDeciSecond(&PSA.State_Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Time.SendStateMessageToValve_Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Time.SendAliveMessageToValve_Timer);
 	  /* Alarm Timer ---------------------------------------------------------*/
