@@ -54,8 +54,7 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
-ADC_HandleTypeDef hadc2;
-ADC_HandleTypeDef hadc3;
+ADC_HandleTypeDef hadc1;
 
 CAN_HandleTypeDef hcan1;
 CAN_HandleTypeDef hcan2;
@@ -237,8 +236,7 @@ static void MX_USART6_UART_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_DMA_Init(void);
 static void MX_TIM7_Init(void);
-static void MX_ADC2_Init(void);
-static void MX_ADC3_Init(void);
+static void MX_ADC1_Init(void);
 void StartDefaultTask(void *argument);
 void StartStateTask(void *argument);
 void StartOutTask(void *argument);
@@ -313,8 +311,7 @@ int main(void)
   MX_FATFS_Init();
   MX_DMA_Init();
   MX_TIM7_Init();
-  MX_ADC2_Init();
-  MX_ADC3_Init();
+  MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
 #if 0
   TEST_TestAllAndStopIt();
@@ -324,21 +321,21 @@ int main(void)
 
   HAL_I2C_Init(&hi2c1);
   //write
-  uint16_t blink = 4000;
-  uint16_t read = 0;
-//  HAL_I2C_Mem_Write(&hi2c1, (84<<1), 0x03, I2C_MEMADD_SIZE_16BIT, &blink, 2, 1000);
-  EEPROM_Write(0x02, &blink);
-  HAL_Delay(5 * milliseconds);
-
-  //read
-//  HAL_I2C_Mem_Read(&hi2c1, (84<<1), 0x03, I2C_MEMADD_SIZE_16BIT, &read,  1, 1000);
-  EEPROM_Read(0x02, &read);
-  HAL_Delay(5 * milliseconds);
-  if(read == 4000)
-  {
-	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-  }
-  while(1){}
+//  uint16_t blink = 4000;
+//  uint16_t read = 0;
+////  HAL_I2C_Mem_Write(&hi2c1, (84<<1), 0x03, I2C_MEMADD_SIZE_16BIT, &blink, 2, 1000);
+//  EEPROM_Write(0x02, &blink);
+//  HAL_Delay(5 * milliseconds);
+//
+//  //read
+////  HAL_I2C_Mem_Read(&hi2c1, (84<<1), 0x03, I2C_MEMADD_SIZE_16BIT, &read,  1, 1000);
+//  EEPROM_Read(0x02, &read);
+//  HAL_Delay(5 * milliseconds);
+//  if(read == 4000)
+//  {
+//	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+//  }
+//  while(1){}
 
   AssignDefaultValue();
   json_init();
@@ -484,37 +481,37 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief ADC2 Initialization Function
+  * @brief ADC1 Initialization Function
   * @param None
   * @retval None
   */
-static void MX_ADC2_Init(void)
+static void MX_ADC1_Init(void)
 {
 
-  /* USER CODE BEGIN ADC2_Init 0 */
+  /* USER CODE BEGIN ADC1_Init 0 */
 
-  /* USER CODE END ADC2_Init 0 */
+  /* USER CODE END ADC1_Init 0 */
 
   ADC_ChannelConfTypeDef sConfig = {0};
 
-  /* USER CODE BEGIN ADC2_Init 1 */
+  /* USER CODE BEGIN ADC1_Init 1 */
 
-  /* USER CODE END ADC2_Init 1 */
+  /* USER CODE END ADC1_Init 1 */
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
   */
-  hadc2.Instance = ADC2;
-  hadc2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
-  hadc2.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc2.Init.ScanConvMode = DISABLE;
-  hadc2.Init.ContinuousConvMode = DISABLE;
-  hadc2.Init.DiscontinuousConvMode = DISABLE;
-  hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-  hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc2.Init.NbrOfConversion = 1;
-  hadc2.Init.DMAContinuousRequests = DISABLE;
-  hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-  if (HAL_ADC_Init(&hadc2) != HAL_OK)
+  hadc1.Instance = ADC1;
+  hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
+  hadc1.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc1.Init.ScanConvMode = ENABLE;
+  hadc1.Init.ContinuousConvMode = ENABLE;
+  hadc1.Init.DiscontinuousConvMode = DISABLE;
+  hadc1.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc1.Init.NbrOfConversion = 3;
+  hadc1.Init.DMAContinuousRequests = DISABLE;
+  hadc1.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
   }
@@ -522,64 +519,32 @@ static void MX_ADC2_Init(void)
   */
   sConfig.Channel = ADC_CHANNEL_5;
   sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
-  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+  sConfig.SamplingTime = ADC_SAMPLETIME_56CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN ADC2_Init 2 */
-
-  /* USER CODE END ADC2_Init 2 */
-
-}
-
-/**
-  * @brief ADC3 Initialization Function
-  * @param None
-  * @retval None
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
-static void MX_ADC3_Init(void)
-{
-
-  /* USER CODE BEGIN ADC3_Init 0 */
-
-  /* USER CODE END ADC3_Init 0 */
-
-  ADC_ChannelConfTypeDef sConfig = {0};
-
-  /* USER CODE BEGIN ADC3_Init 1 */
-
-  /* USER CODE END ADC3_Init 1 */
-  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-  */
-  hadc3.Instance = ADC3;
-  hadc3.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
-  hadc3.Init.Resolution = ADC_RESOLUTION_12B;
-  hadc3.Init.ScanConvMode = DISABLE;
-  hadc3.Init.ContinuousConvMode = DISABLE;
-  hadc3.Init.DiscontinuousConvMode = DISABLE;
-  hadc3.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
-  hadc3.Init.ExternalTrigConv = ADC_SOFTWARE_START;
-  hadc3.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc3.Init.NbrOfConversion = 1;
-  hadc3.Init.DMAContinuousRequests = DISABLE;
-  hadc3.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
-  if (HAL_ADC_Init(&hadc3) != HAL_OK)
+  sConfig.Channel = ADC_CHANNEL_9;
+  sConfig.Rank = 2;
+  sConfig.SamplingTime = ADC_SAMPLETIME_84CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
   */
   sConfig.Channel = ADC_CHANNEL_11;
-  sConfig.Rank = 1;
-  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
-  if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
+  sConfig.Rank = 3;
+  sConfig.SamplingTime = ADC_SAMPLETIME_112CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  /* USER CODE BEGIN ADC3_Init 2 */
+  /* USER CODE BEGIN ADC1_Init 2 */
 
-  /* USER CODE END ADC3_Init 2 */
+  /* USER CODE END ADC1_Init 2 */
 
 }
 
@@ -1278,8 +1243,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOI_CLK_ENABLE();
+  __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOK_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
@@ -1289,7 +1254,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOD, GPIO_PIN_5|GPIO_PIN_4, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(Blue_LED_GPIO_Port, Blue_LED_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOK, GPIO_PIN_3, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(Green_LED_GPIO_Port, Green_LED_Pin, GPIO_PIN_SET);
@@ -1310,12 +1275,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : Blue_LED_Pin */
-  GPIO_InitStruct.Pin = Blue_LED_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  /*Configure GPIO pin : PK3 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(Blue_LED_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOK, &GPIO_InitStruct);
 
   /*Configure GPIO pin : Green_LED_Pin */
   GPIO_InitStruct.Pin = Green_LED_Pin;
@@ -1363,6 +1328,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.Alternate = GPIO_AF5_SPI1;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
+  GPIO_InitStruct.Mode = GPIO_MODE_ANALOG;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : SPI_CS_Pin */
@@ -1610,6 +1581,31 @@ void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){
 	}
 }
 
+//void ADC_SelectChannel(ADC_HandleTypeDef *hadc, )
+//{
+//	sConfig.Channel = ADC_CHANNEL_11;
+//	sConfig.Rank = 1;
+//	sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+//	if (HAL_ADC_ConfigChannel(&hadc3, &sConfig) != HAL_OK)
+//	{
+//		Error_Handler();
+//	}
+//}
+
+void ADC_SetConfigChannel(ADC_HandleTypeDef *hadc, uint32_t Channel, uint32_t Rank, uint32_t SamplingTime)
+{
+	ADC_ChannelConfTypeDef sConfig = {0};
+
+	sConfig.Channel = Channel;
+	sConfig.Rank = Rank;
+	sConfig.SamplingTime = SamplingTime;
+	if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
+	{
+		Error_Handler();
+	}
+}
+
+uint16_t raw_1;
 uint16_t raw_2;
 uint16_t raw_3;
 /* USER CODE END 4 */
@@ -1627,18 +1623,39 @@ void StartDefaultTask(void *argument)
 	uint8_t read = 0;
   /* Infinite loop */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
+
+//	HAL_ADC_Start(&hadc1);
+//	HAL_ADC_Start(&hadc2);
+//	HAL_ADC_Start(&hadc3);
+
+//	  HAL_ADC_Start(&hadc1);
+	  HAL_ADC_PollForConversion(&hadc1, 1 * centiseconds);
+//	  HAL_ADC_Start(&hadc1);
+
   for(;;)
   {
-	  HAL_ADC_Start(&hadc2);
-	  HAL_ADC_PollForConversion(&hadc2, 1 * deciseconds);
-	  raw_2 = HAL_ADC_GetValue(&hadc2);
+	  ADC_SetConfigChannel(&hadc1, ADC_CHANNEL_5, 1, ADC_SAMPLETIME_56CYCLES);
+	  HAL_ADC_Start(&hadc1);
+	  raw_1 = HAL_ADC_GetValue(&hadc1);
+//	  HAL_ADC_Stop(&hadc1);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
 
-	  HAL_ADC_Start(&hadc3);
-	  HAL_ADC_PollForConversion(&hadc3, 1 * deciseconds);
-	  raw_3 = HAL_ADC_GetValue(&hadc3);
+	  ADC_SetConfigChannel(&hadc1, ADC_CHANNEL_9, 2, ADC_SAMPLETIME_84CYCLES);
+	  HAL_ADC_Start(&hadc1);
+	  raw_2 = HAL_ADC_GetValue(&hadc1);
+//	  HAL_ADC_Stop(&hadc1);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
 
+	  ADC_SetConfigChannel(&hadc1, ADC_CHANNEL_11, 3, ADC_SAMPLETIME_112CYCLES);
+	  HAL_ADC_Start(&hadc1);
+	  raw_3 = HAL_ADC_GetValue(&hadc1);
+//	  HAL_ADC_Stop(&hadc1);
+	  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
 
-	vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
+//	  HAL_ADC_PollForConversion(&hadc3, 1 * deciseconds);
+//	  raw_3 = HAL_ADC_GetValue(&hadc3);
+
+//	  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
   }
   /* USER CODE END 5 */
 }
