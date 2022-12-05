@@ -256,8 +256,6 @@ int __io_putchar(int character);
 void AssignDefaultValue();
 void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan);
-//void CheckAlarmConditionToWriteSD(Alarm * Alarm, char * AlarmMessage, uint8_t sizeofAlarmMessage);
-//void DirectoryInit(uint8_t ID, char * nameDir, uint8_t nameDir_length);
 void TEST_TestAllAndStopIt();
 void json_init();
 /* USER CODE END PFP */
@@ -1513,6 +1511,11 @@ void AssignDefaultValue()
 	PSA.Out1.Enable = 1;
 //	PSA.KE25_OxygenSensor_2.LowerThreshold = 2; 			//SO2-2
 	PSA.Out2.Enable = 1;
+}
+
+void EEPROM_DEFINE_Init()
+{
+
 }
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){

@@ -26,11 +26,11 @@
   */
 typedef struct
 {
-	uint8_t Enable;			/**< define if the alarm is enable */
-	uint8_t Trigger;		/**< define if the alarm is triggered */
-	uint8_t WriteToSD;		/**< define if there is the command to write the alarm into SD */
+	uint8_t Enable;				/**< define if the alarm is enable */
+	uint8_t Trigger;			/**< define if the alarm is triggered */
+	uint8_t WriteToSD;			/**< define if there is the command to write the alarm into SD */
 
-	uint16_t Timer;			/**< the value of the timer of the alarm */
+	uint16_t Timer;				/**< the value of the timer of the alarm */
 	uint16_t RefreshTimer_ON;	/**< the refresh value of the timer when the trigger is ON */
 	uint16_t RefreshTimer_OFF;	/**< the refresh value of the timer when the trigger is OFF */
 } Alarm;
