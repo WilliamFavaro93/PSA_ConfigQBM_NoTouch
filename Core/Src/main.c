@@ -38,6 +38,7 @@
 #include "alarm_datetime_fatman.h"
 #include "cjson.h"
 #include "eeprom.h"
+#include "eeprom_define.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -215,6 +216,11 @@ const TickType_t seconds      = pdMS_TO_TICKS(1000);
 const TickType_t deciseconds  = pdMS_TO_TICKS(100);
 const TickType_t centiseconds = pdMS_TO_TICKS(10);
 const TickType_t milliseconds = pdMS_TO_TICKS(1);
+
+/* To Delete     -------------------------------------------------------------*/
+uint16_t year1;
+uint16_t year2;
+uint16_t year3;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -258,6 +264,9 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void TEST_TestAllAndStopIt();
 void json_init();
+
+HAL_StatusTypeDef Read_From_24LCxx(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t len);
+HAL_StatusTypeDef Write_To_24LCxx(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t len);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -311,32 +320,37 @@ int main(void)
   MX_TIM7_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-#if 0
-  TEST_TestAllAndStopIt();
-  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-  while(1){}
-#endif /* TEST */
+#if 1
+  year1 = 22222;
+  EEPROM_DEFINE_test(&year1, &year2, &year3);
 
+  while(1){
+	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+	  HAL_Delay(100);
+  }
+#endif /* TEST */
+#if 0
   HAL_I2C_Init(&hi2c1);
   //write
-//  uint16_t blink = 4000;
-//  uint16_t read = 0;
-////  HAL_I2C_Mem_Write(&hi2c1, (84<<1), 0x03, I2C_MEMADD_SIZE_16BIT, &blink, 2, 1000);
-//  EEPROM_Write(0x02, &blink);
-//  HAL_Delay(5 * milliseconds);
-//
-//  //read
-////  HAL_I2C_Mem_Read(&hi2c1, (84<<1), 0x03, I2C_MEMADD_SIZE_16BIT, &read,  1, 1000);
-//  EEPROM_Read(0x02, &read);
-//  HAL_Delay(5 * milliseconds);
-//  if(read == 4000)
-//  {
-//	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
-//  }
-//  while(1){}
+  uint16_t blink = 4000;
+  uint16_t read = 0;
+  HAL_I2C_Mem_Write(&hi2c1, (84<<1), 0x03, I2C_MEMADD_SIZE_16BIT, &blink, 2, 1000);
+//  EEPROM_Write(0x02, &blink, 2);
+  HAL_Delay(5 * milliseconds);
+
+  //read
+  HAL_I2C_Mem_Read(&hi2c1, (84<<1), 0x03, I2C_MEMADD_SIZE_16BIT, &read,  1, 1000);
+//  EEPROM_Read(0x02, &read, 2);
+  HAL_Delay(5 * milliseconds);
+  if(read == 4000)
+  {
+	  HAL_GPIO_TogglePin(GPIOK, GPIO_PIN_3);
+  }
+  while(1){}
+#endif
 
   AssignDefaultValue();
-  json_init();
+//  json_init();
 
   HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING);
@@ -1241,8 +1255,8 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
-  __HAL_RCC_GPIOI_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+  __HAL_RCC_GPIOI_CLK_ENABLE();
   __HAL_RCC_GPIOF_CLK_ENABLE();
   __HAL_RCC_GPIOK_CLK_ENABLE();
   __HAL_RCC_GPIOH_CLK_ENABLE();
@@ -1360,78 +1374,70 @@ int __io_putchar(int character)
 	return character;
 }
 
-void json_init(){
+HAL_StatusTypeDef Read_From_24LCxx(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t len)
+{
+	HAL_StatusTypeDef returnValue;
+	uint8_t addr[2];
 
-	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+	/* We compute the MSB and LSB parts of the memory address */
+	addr[0] = (uint8_t) ((MemAddress & 0xFF00) >> 8);
+	addr[1] = (uint8_t) (MemAddress & 0xFF);
 
-	memcpy(fatman.Directory[0].FilePath, "json_init.JSON", sizeof("json_init.JSON"));
-	fatman_read();
+	/* First we send the memory location address where start reading data */
+	returnValue = HAL_I2C_Master_Transmit(hi2c, DevAddress, addr, 2, HAL_MAX_DELAY);
+	if(returnValue != HAL_OK)
+	return returnValue;
 
-	if(fatman.Directory[0].FileIsCreated)
-	{
-		cJSON *json = cJSON_ParseWithLength((char *)fatman.Buffer, fatman.Buffer_size);
+	/* Next we can retrieve the data from EEPROM */
+	returnValue = HAL_I2C_Master_Receive(hi2c, DevAddress, pData, len, HAL_MAX_DELAY);
 
-		PSA.Module = cJSON_GetObjectItemCaseSensitive(json, "PSA.Module")->valueint;
+	return returnValue;
+}
 
-		PSA.Time.SendAliveMessageToValve_Refresh = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.SendAliveMessageToValve_Refresh")->valueint;
-		PSA.Time.SendStateMessageToValve_Refresh = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.SendStateMessageToValve_Refresh")->valueint;
+HAL_StatusTypeDef Write_To_24LCxx(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t len)
+{
+	HAL_StatusTypeDef returnValue;
+	uint8_t *data;
 
-		PSA.CANSPI.Ide = cJSON_GetObjectItemCaseSensitive(json, "PSA.CANSPI.Ide")->valueint;
+	/* First we allocate a temporary buffer to store the destination memory
+	 * address and the data to store */
+	data = (uint8_t*)malloc(sizeof(uint8_t)*(len+2));
 
-		PSA.Time.Adsorption = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.Adsorption")->valueint;
-		PSA.Time.Compensation_0 = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.Compensation_0")->valueint;
-		PSA.Time.Compensation_1 = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.Compensation_1")->valueint;
-		PSA.Time.Compensation_2 = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.Compensation_2")->valueint;
-		PSA.Time.PreStandby_1 = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.PreStandby_1")->valueint;
-		PSA.Time.PreStandby_2 = cJSON_GetObjectItemCaseSensitive(json, "PSA.Time.PreStandby_2")->valueint;
+	/* We compute the MSB and LSB parts of the memory address */
+	data[0] = (uint8_t) ((MemAddress & 0xFF00) >> 8);
+	data[1] = (uint8_t) (MemAddress & 0xFF);
 
-		PSA.B1_InputAirPressure.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B1_InputAirPressure.LowerLimit")->valueint;
-		PSA.B1_InputAirPressure.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B1_InputAirPressure.LowerThreshold")->valueint;
-		PSA.B1_InputAirPressure.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B1_InputAirPressure.UpperThreshold")->valueint;
-		PSA.B1_InputAirPressure.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B1_InputAirPressure.UpperLimit")->valueint;
+	/* And copy the content of the pData array in the temporary buffer */
+	memcpy(data+2, pData, len);
 
-		PSA.B2_OutputAirPressure_1.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B2_OutputAirPressure_1.LowerLimit")->valueint;
-		PSA.B2_OutputAirPressure_1.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B2_OutputAirPressure_1.LowerThreshold")->valueint;
-		PSA.B2_OutputAirPressure_1.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B2_OutputAirPressure_1.UpperThreshold")->valueint;
-		PSA.B2_OutputAirPressure_1.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B2_OutputAirPressure_1.UpperLimit")->valueint;
+	/* We are now ready to transfer the buffer over the I2C bus */
+	returnValue = HAL_I2C_Master_Transmit(hi2c, DevAddress, data, len + 2, HAL_MAX_DELAY);
+	if(returnValue != HAL_OK)
+		return returnValue;
 
-		PSA.B3_ProcessTankAirPressure.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B3_ProcessTankAirPressure.LowerLimit")->valueint;
-		PSA.B3_ProcessTankAirPressure.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B3_ProcessTankAirPressure.LowerThreshold")->valueint;
-		PSA.B3_ProcessTankAirPressure.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B3_ProcessTankAirPressure.UpperThreshold")->valueint;
-		PSA.B3_ProcessTankAirPressure.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B3_ProcessTankAirPressure")->valueint;
+	free(data);
 
-		PSA.B4_OutputAirPressure_2.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B4_OutputAirPressure_2.LowerLimit")->valueint;
-		PSA.B4_OutputAirPressure_2.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B4_OutputAirPressure_2.LowerThreshold")->valueint;
-		PSA.B4_OutputAirPressure_2.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.B4_OutputAirPressure_2.UpperThreshold")->valueint;
-		PSA.B4_OutputAirPressure_2.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.B4_OutputAirPressure_2.UpperLimit")->valueint;
+	/* We wait until the EEPROM effectively stores data in memory */
+	while(HAL_I2C_Master_Transmit(hi2c, DevAddress, 0, 0, HAL_MAX_DELAY) != HAL_OK);
 
-		PSA.IFM_AirFlowmeter.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.IFM_AirFlowmeter.LowerLimit")->valueint;
-		PSA.IFM_AirFlowmeter.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.IFM_AirFlowmeter.LowerThreshold")->valueint;
-		PSA.IFM_AirFlowmeter.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.IFM_AirFlowmeter.UpperThreshold")->valueint;
-		PSA.IFM_AirFlowmeter.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.IFM_AirFlowmeter.UpperLimit")->valueint;
+	return HAL_OK;
+}
 
-		PSA.DEW_InputAirDewpoint.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.DEW_InputAirDewpoint.LowerLimit")->valueint;
-		PSA.DEW_InputAirDewpoint.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.DEW_InputAirDewpoint.LowerThreshold")->valueint;
-		PSA.DEW_InputAirDewpoint.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.DEW_InputAirDewpoint.UpperThreshold")->valueint;
-		PSA.DEW_InputAirDewpoint.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.DEW_InputAirDewpoint.UpperLimit")->valueint;
+void EEPROM_DEFINE_DateTimeInit()
+{
+	uint16_t Date_Year;
+	uint16_t Date_Month;
+	uint16_t Date_Day;
 
-		PSA.KE25_OxygenSensor_1.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_1.LowerLimit")->valueint;
-		PSA.KE25_OxygenSensor_1.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_1.LowerThreshold")->valueint;
-		PSA.KE25_OxygenSensor_1.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_1.UpperThreshold")->valueint;
-		PSA.KE25_OxygenSensor_1.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_1.UpperLimit")->valueint;
+	EEPROM_Read(E2_0__DATE_YEAR,  &Date_Year, 2);
+	EEPROM_Read(E2_0__DATE_MONTH, &Date_Month, 2);
+	EEPROM_Read(E2_0__DATE_DAY,   &Date_Day, 2);
 
-		PSA.KE25_OxygenSensor_2.LowerLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_2.LowerLimit")->valueint;
-		PSA.KE25_OxygenSensor_2.LowerThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_2.LowerThreshold")->valueint;
-		PSA.KE25_OxygenSensor_2.UpperThreshold = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_2.UpperThreshold")->valueint;
-		PSA.KE25_OxygenSensor_2.UpperLimit = cJSON_GetObjectItemCaseSensitive(json, "PSA.KE25_OxygenSensor_2.UpperLimit")->valueint;
-
-		PSA.OutPriority = cJSON_GetObjectItemCaseSensitive(json, "PSA.OutPriority")->valueint;
-		PSA.Out1.Enable = cJSON_GetObjectItemCaseSensitive(json, "PSA.Out1.Enable")->valueint;
-		PSA.Out2.Enable = cJSON_GetObjectItemCaseSensitive(json, "PSA.Out2.Enable")->valueint;
-
-		memset((char *)fatman.Buffer, 0, FATMAN_BUFFER_SIZE);
-		fatman.Buffer_size = 0;
-	}
+	DateTime_Init(
+			Date_Year,
+			Date_Month,
+			Date_Day,
+			0, 0, 0);
 }
 
 void AssignDefaultValue()
@@ -1511,11 +1517,6 @@ void AssignDefaultValue()
 	PSA.Out1.Enable = 1;
 //	PSA.KE25_OxygenSensor_2.LowerThreshold = 2; 			//SO2-2
 	PSA.Out2.Enable = 1;
-}
-
-void EEPROM_DEFINE_Init()
-{
-
 }
 
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan){

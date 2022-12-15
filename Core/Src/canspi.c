@@ -1,17 +1,35 @@
+/**
+  ******************************************************************************
+  * @file
+  * @author
+  * @date
+  * @brief
+  *
+  ******************************************************************************
+  * @note
+  *
+  *
+  *
+  ******************************************************************************
+  */
+
+
+/* Includes ------------------------------------------------------------------*/
 #include <canspi.h>
 #include <mcp2515.h>
 
-/** Local Function Prototypes */  
-static uint32_t convertReg2ExtendedCANid(uint8_t tempRXBn_EIDH, uint8_t tempRXBn_EIDL, uint8_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL);
-static uint32_t convertReg2StandardCANid(uint8_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL) ;
-static void convertCANid2Reg(uint32_t tempPassedInID, uint8_t canIdType, id_reg_t *passedIdReg);
-
-/** Local Variables */ 
+/* Defines -------------------------------------------------------------------*/
+/* Variables -----------------------------------------------------------------*/
 ctrl_status_t ctrlStatus;
 ctrl_error_status_t errorStatus;
 id_reg_t idReg;
 
-/** CAN SPI APIs */ 
+/* Private Function definition -----------------------------------------------*/
+static uint32_t convertReg2ExtendedCANid(uint8_t tempRXBn_EIDH, uint8_t tempRXBn_EIDL, uint8_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL);
+static uint32_t convertReg2StandardCANid(uint8_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL) ;
+static void convertCANid2Reg(uint32_t tempPassedInID, uint8_t canIdType, id_reg_t *passedIdReg);
+
+/* Public Function -----------------------------------------------------------*/
 
 /* Sleep 모드 진입 */
 void CANSPI_Sleep(void)
@@ -288,6 +306,7 @@ uint8_t CANSPI_isTxErrorPassive(void)
   return (returnValue);
 }
 
+/* Private Function ----------------------------------------------------------*/
 /* Register 저장값을 Extended ID 타입으로 변환하기 위한 함수 */
 static uint32_t convertReg2ExtendedCANid(uint8_t tempRXBn_EIDH, uint8_t tempRXBn_EIDL, uint8_t tempRXBn_SIDH, uint8_t tempRXBn_SIDL) 
 {
@@ -359,3 +378,5 @@ static void convertCANid2Reg(uint32_t tempPassedInID, uint8_t canIdType, id_reg_
     passedIdReg->tempSIDH = 0xFF & tempPassedInID;
   }
 }
+
+/* End of the file -----------------------------------------------------------*/

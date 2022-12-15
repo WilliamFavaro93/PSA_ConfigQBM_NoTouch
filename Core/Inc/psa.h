@@ -27,8 +27,6 @@
 /* Time structure ------------------------------------------------------------*/
 typedef struct
 {
-//	uint16_t StateTimer;
-
 	uint16_t Adsorption;
 	uint16_t TotalCompensation;
 	uint16_t Compensation_0;

@@ -23,6 +23,8 @@
 /* Defines -------------------------------------------------------------------*/
 /* Typedef Struct definition -------------------------------------------------*/
 /* Public Function definition ------------------------------------------------*/
-void EEPROM_Write(uint16_t MemoryAddress, void* Value);
-void EEPROM_Read(uint16_t MemoryAddress, void* Value);
+void EEPROM_Read(uint16_t MemoryAddress, void* PointerToValue, uint16_t ValueSizeInByte);
+void EEPROM_Write(uint16_t MemoryAddress, void* PointerToValue, uint16_t ValueSizeInByte);
+void EEPROM_Update(uint16_t MemoryAddress, void* PointerToValue, uint16_t ValueSizeInByte);
+
 #endif /* INC_EEPROM_H_ */
