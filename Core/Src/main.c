@@ -320,7 +320,7 @@ int main(void)
   MX_TIM7_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
-#if 1
+#if 0
   year1 = 22222;
   EEPROM_DEFINE_test(&year1, &year2, &year3);
 
@@ -350,7 +350,6 @@ int main(void)
 #endif
 
   AssignDefaultValue();
-//  json_init();
 
   HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING);

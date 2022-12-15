@@ -30,7 +30,7 @@
 #endif
 
 #define EEPROM_ELEMBASE							(0x0002) /* 2-bytes per element */
-#define EEPROM_NUMBER_USED_PAGES				(0x0010) /* 16 pages */
+#define EEPROM_NUMBER_USED_PAGES				(0x0020) /* 32 pages */
 
 #define EEPROM_ELEM(position)							((EEPROM_ELEMBASE * (position)) % BYTE_PER_PAGE)
 #define EEPROM_PAGE(number)								(number * BYTE_PER_PAGE)
@@ -43,25 +43,27 @@
 
 #define E2_0__FIRMWARE_MAJOR_VERSION			EEPROM_ADDRESS(0x0000, 0x002)
 #define E2_0__FIRMWARE_MINOR_VERSION			EEPROM_ADDRESS(0x0000, 0x003)
+#define E2_0__FIRMWARE_PATCH_VERSION			EEPROM_ADDRESS(0x0000, 0x004)
 
-/*!< Date */
-#define E2_0__DATE_YEAR							EEPROM_ADDRESS(0x0000, 0x004)
-#define E2_0__DATE_MONTH						EEPROM_ADDRESS(0x0000, 0x005)
-#define E2_0__DATE_DAY							EEPROM_ADDRESS(0x0000, 0x006)
+#define E2_0__DATE_YEAR							EEPROM_ADDRESS(0x0000, 0x005)
+#define E2_0__DATE_MONTH						EEPROM_ADDRESS(0x0000, 0x006)
+#define E2_0__DATE_DAY							EEPROM_ADDRESS(0x0000, 0x007)
 
-/*!<  */
-#define E2_0__MACHINE_TYPE						EEPROM_ADDRESS(0x0000, 0x007)
-#define E2_0__NUMBER_MODULE						EEPROM_ADDRESS(0x0000, 0x008)
-#define E2_0__NUMBER_VALVEBLOCK     			EEPROM_ADDRESS(0x0000, 0x009)
+#define E2_0__MACHINE_TYPE						EEPROM_ADDRESS(0x0000, 0x008)
+#define E2_0__NUMBER_MODULE						EEPROM_ADDRESS(0x0000, 0x009)
+#define E2_0__NUMBER_VALVEBLOCK     			EEPROM_ADDRESS(0x0000, 0x00A)
 
 /* Defines: Page 01 ----------------------------------------------------------*/
 /* Tempi di Lavoro dei Stati -------------------------------------------------*/
 #define E2_1__TIME_STARTUP         				EEPROM_ADDRESS(0x0001, 0x000)
+
 #define E2_1__TIME_FIRST_ADSORPTION 			EEPROM_ADDRESS(0x0001, 0x001)
-#define E2_1__TIME_ADSORPTION_TIME      		EEPROM_ADDRESS(0x0001, 0x002)
+#define E2_1__TIME_ADSORPTION		      		EEPROM_ADDRESS(0x0001, 0x002)
+
 #define E2_1__TIME_COMPENSATION_0    			EEPROM_ADDRESS(0x0001, 0x003)
 #define E2_1__TIME_COMPENSATION_1    			EEPROM_ADDRESS(0x0001, 0x004)
 #define E2_1__TIME_COMPENSATION_2     			EEPROM_ADDRESS(0x0001, 0x005)
+
 #define E2_1__TIME_PRESTANDBY_1   				EEPROM_ADDRESS(0x0001, 0x006)
 #define E2_1__TIME_PRESTANDBY_2   				EEPROM_ADDRESS(0x0001, 0x007)
 
