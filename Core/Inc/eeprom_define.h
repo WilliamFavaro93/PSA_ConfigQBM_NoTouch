@@ -19,9 +19,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "eeprom.h"
-/* Defines -------------------------------------------------------------------*/
-#define EEPROM_DEFINE_NUMBER_FIX				1
+#include "psa.h"
+#include "datetime.h"
+#include "version.h"
 
+/* Defines -------------------------------------------------------------------*/
 #define EEPROM_24LC512
 
 #ifdef EEPROM_24LC512
@@ -38,20 +40,17 @@
 
 /* Defines: Page 00 ----------------------------------------------------------*/
 /* Informazioni generali -----------------------------------------------------*/
-#define E2_0__NUMBER_FIX						EEPROM_ADDRESS(0x0000, 0x000)
-#define E2_0__DEVICE_TYPE						EEPROM_ADDRESS(0x0000, 0x001)
+#define E2_0__FIRMWARE_VERSION_MAJOR			EEPROM_ADDRESS(0x0000, 0x001)
+#define E2_0__FIRMWARE_VERSION_MINOR			EEPROM_ADDRESS(0x0000, 0x002)
+#define E2_0__FIRMWARE_VERSION_PATCH			EEPROM_ADDRESS(0x0000, 0x003)
 
-#define E2_0__FIRMWARE_MAJOR_VERSION			EEPROM_ADDRESS(0x0000, 0x002)
-#define E2_0__FIRMWARE_MINOR_VERSION			EEPROM_ADDRESS(0x0000, 0x003)
-#define E2_0__FIRMWARE_PATCH_VERSION			EEPROM_ADDRESS(0x0000, 0x004)
+#define E2_0__DATE_YEAR							EEPROM_ADDRESS(0x0000, 0x004)
+#define E2_0__DATE_MONTH						EEPROM_ADDRESS(0x0000, 0x005)
+#define E2_0__DATE_DAY							EEPROM_ADDRESS(0x0000, 0x006)
 
-#define E2_0__DATE_YEAR							EEPROM_ADDRESS(0x0000, 0x005)
-#define E2_0__DATE_MONTH						EEPROM_ADDRESS(0x0000, 0x006)
-#define E2_0__DATE_DAY							EEPROM_ADDRESS(0x0000, 0x007)
-
-#define E2_0__MACHINE_TYPE						EEPROM_ADDRESS(0x0000, 0x008)
-#define E2_0__NUMBER_MODULE						EEPROM_ADDRESS(0x0000, 0x009)
-#define E2_0__NUMBER_VALVEBLOCK     			EEPROM_ADDRESS(0x0000, 0x00A)
+#define E2_0__NUMBER_MACHINE_TYPE				EEPROM_ADDRESS(0x0000, 0x007)
+#define E2_0__NUMBER_MODULE						EEPROM_ADDRESS(0x0000, 0x008)
+#define E2_0__NUMBER_VALVEBLOCK     			EEPROM_ADDRESS(0x0000, 0x009)
 
 /* Defines: Page 01 ----------------------------------------------------------*/
 /* Tempi di Lavoro dei Stati -------------------------------------------------*/
@@ -169,6 +168,21 @@
 /* Parametri Taratura --------------------------------------------------------*/
 /* Typedef Struct definition -------------------------------------------------*/
 /* Public Function definition ------------------------------------------------*/
+void EEPROM_DEFINE_DateTimeInit();
+void EEPROM_DEFINE_AlarmInit();
+void EEPROM_DEFINE_FaultInit();
+void EEPROM_DEFINE_Alarm_B1Init();
+void EEPROM_DEFINE_Alarm_B2Init();
+void EEPROM_DEFINE_Alarm_B3Init();
+void EEPROM_DEFINE_Alarm_B4Init();
+void EEPROM_DEFINE_Alarm_IFMInit();
+void EEPROM_DEFINE_Alarm_DEWInit();
+void EEPROM_DEFINE_Alarm_KE25_1Init();
+void EEPROM_DEFINE_Alarm_KE25_2Init();
+void EEPROM_DEFINE_CAN_Init();
+void EEPROM_DEFINE_OutInit();
+void EEPROM_DEFINE_TimeInit();
+void EEPROM_DEFINE_UpdateAllWithDefaultValue();
 void EEPROM_DEFINE_test(uint16_t * year1, uint16_t * year2, uint16_t * year3);
 
 #endif /* INC_E2_PSA__H_ */

@@ -264,9 +264,7 @@ void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void HAL_CAN_RxFifo1MsgPendingCallback(CAN_HandleTypeDef *hcan);
 void TEST_TestAllAndStopIt();
 void json_init();
-
-HAL_StatusTypeDef Read_From_24LCxx(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t len);
-HAL_StatusTypeDef Write_To_24LCxx(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t len);
+void EEPROM_DEFINE_Init();
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -348,8 +346,8 @@ int main(void)
   }
   while(1){}
 #endif
-
-  AssignDefaultValue();
+  EEPROM_DEFINE_Init();
+//  AssignDefaultValue();
 
   HAL_CAN_Start(&hcan2);
   HAL_CAN_ActivateNotification(&hcan2, CAN_IT_RX_FIFO1_MSG_PENDING);
@@ -1373,70 +1371,60 @@ int __io_putchar(int character)
 	return character;
 }
 
-HAL_StatusTypeDef Read_From_24LCxx(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t len)
+void EEPROM_DEFINE_Init()
 {
-	HAL_StatusTypeDef returnValue;
-	uint8_t addr[2];
+	uint16_t firmware_version_major;
+	uint16_t firmware_version_minor;
+	uint16_t firmware_version_patch;
 
-	/* We compute the MSB and LSB parts of the memory address */
-	addr[0] = (uint8_t) ((MemAddress & 0xFF00) >> 8);
-	addr[1] = (uint8_t) (MemAddress & 0xFF);
+	EEPROM_Read(E2_0__FIRMWARE_VERSION_MAJOR, &firmware_version_major, 2);
+	EEPROM_Read(E2_0__FIRMWARE_VERSION_MINOR, &firmware_version_minor, 2);
+	EEPROM_Read(E2_0__FIRMWARE_VERSION_PATCH, &firmware_version_patch, 2);
 
-	/* First we send the memory location address where start reading data */
-	returnValue = HAL_I2C_Master_Transmit(hi2c, DevAddress, addr, 2, HAL_MAX_DELAY);
-	if(returnValue != HAL_OK)
-	return returnValue;
+	/* Update EEPROM only if the firmware version is different */
+	if(
+			(!(firmware_version_major == VERSION_MAJOR)) ||
+			(!(firmware_version_minor == VERSION_MINOR)) ||
+			(!(firmware_version_patch == VERSION_PATCH)) ||
+			1)
+	{
+		EEPROM_DEFINE_UpdateAllWithDefaultValue();
+	}
 
-	/* Next we can retrieve the data from EEPROM */
-	returnValue = HAL_I2C_Master_Receive(hi2c, DevAddress, pData, len, HAL_MAX_DELAY);
+	/* Initialize Values from EEPROM */
+	/* Initialize Values from EEPROM: DateTime */
+	EEPROM_DEFINE_DateTimeInit();
 
-	return returnValue;
-}
+	/* Initialize Values from EEPROM: Module */
+	EEPROM_Read(E2_0__NUMBER_MODULE, &PSA.Module, 2);
 
-HAL_StatusTypeDef Write_To_24LCxx(I2C_HandleTypeDef *hi2c, uint16_t DevAddress, uint16_t MemAddress, uint8_t *pData, uint16_t len)
-{
-	HAL_StatusTypeDef returnValue;
-	uint8_t *data;
+	/* Initialize Values from EEPROM: CAN 1 */
+	PSA.Time.SendAliveMessageToValve_Refresh = 1;
+	PSA.Time.SendStateMessageToValve_Refresh = 1;
 
-	/* First we allocate a temporary buffer to store the destination memory
-	 * address and the data to store */
-	data = (uint8_t*)malloc(sizeof(uint8_t)*(len+2));
+	/* Initialize Values from EEPROM: CAN 2 */
+	PSA.CANSPI.Ide = 0x701;
 
-	/* We compute the MSB and LSB parts of the memory address */
-	data[0] = (uint8_t) ((MemAddress & 0xFF00) >> 8);
-	data[1] = (uint8_t) (MemAddress & 0xFF);
-
-	/* And copy the content of the pData array in the temporary buffer */
-	memcpy(data+2, pData, len);
-
-	/* We are now ready to transfer the buffer over the I2C bus */
-	returnValue = HAL_I2C_Master_Transmit(hi2c, DevAddress, data, len + 2, HAL_MAX_DELAY);
-	if(returnValue != HAL_OK)
-		return returnValue;
-
-	free(data);
-
-	/* We wait until the EEPROM effectively stores data in memory */
-	while(HAL_I2C_Master_Transmit(hi2c, DevAddress, 0, 0, HAL_MAX_DELAY) != HAL_OK);
-
-	return HAL_OK;
-}
-
-void EEPROM_DEFINE_DateTimeInit()
-{
-	uint16_t Date_Year;
-	uint16_t Date_Month;
-	uint16_t Date_Day;
-
-	EEPROM_Read(E2_0__DATE_YEAR,  &Date_Year, 2);
-	EEPROM_Read(E2_0__DATE_MONTH, &Date_Month, 2);
-	EEPROM_Read(E2_0__DATE_DAY,   &Date_Day, 2);
-
-	DateTime_Init(
-			Date_Year,
-			Date_Month,
-			Date_Day,
-			0, 0, 0);
+	/* Initialize Values from EEPROM: Time */
+	EEPROM_DEFINE_TimeInit();
+	/* Initialize Values from EEPROM: B1 */
+	EEPROM_DEFINE_Alarm_B1Init();
+	/* Initialize Values from EEPROM: B2 */
+	EEPROM_DEFINE_Alarm_B2Init();
+	/* Initialize Values from EEPROM: B3 */
+	EEPROM_DEFINE_Alarm_B3Init();
+	/* Initialize Values from EEPROM: B4 */
+	EEPROM_DEFINE_Alarm_B4Init();
+	/* Initialize Values from EEPROM: IFM */
+	EEPROM_DEFINE_Alarm_IFMInit();
+	/* Initialize Values from EEPROM: DEW */
+	EEPROM_DEFINE_Alarm_DEWInit();
+	/* Initialize Values from EEPROM: KE25 1 */
+	EEPROM_DEFINE_Alarm_KE25_1Init();
+	/* Initialize Values from EEPROM: KE25 2 */
+	EEPROM_DEFINE_Alarm_KE25_2Init();
+	/* Initialize Values from EEPROM: Out */
+	EEPROM_DEFINE_OutInit();
 }
 
 void AssignDefaultValue()
@@ -2318,14 +2306,17 @@ void StartCAN1RxTxTask(void *argument)
 void StartAlarmTask(void *argument)
 {
   /* USER CODE BEGIN StartAlarmTask */
+
+
 	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 2);
 	Alarm_Init(&PSA.Alarm.AL02_LowInputAirPressure, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
-//	Alarm_Init(&PSA.Alarm.AL11_External, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL11_External, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
-//	Alarm_Init(&PSA.Alarm.AL17_HighDewpoint, 5, 5);
-//	Alarm_Init(&PSA.Alarm.AL18_HighDewpoint, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL17_HighDewpoint, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL18_HighDewpoint, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL19_HighOut1Pressure, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL20_PCComunicationFault, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL31_B1ProbeFault, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL32_B2ProbeFault, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL33_B3ProbeFault, 5, 5);
@@ -2333,7 +2324,7 @@ void StartAlarmTask(void *argument)
 	Alarm_Init(&PSA.Alarm.AL35_IFWProbeFault, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL36_DEWProbeFault, 5, 5);
 	Alarm_Init(&PSA.Alarm.AL37_KE25ProbeFault, 5, 5);
-//	Alarm_Init(&PSA.Alarm.AL40_PsaDischanging, 5, 5);
+	Alarm_Init(&PSA.Alarm.AL40_PsaDischanging, 5, 5);
 	Alarm_Init(&PSA.Alarm.MissingSDCard, 5, 5);
 
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
