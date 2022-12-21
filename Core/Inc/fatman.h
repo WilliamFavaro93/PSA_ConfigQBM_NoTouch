@@ -63,10 +63,16 @@ typedef struct
 } ManageSD;
 
 /* Public Function definition ------------------------------------------------*/
-void fatman_init(uint8_t Directory_ID);
-void fatman_write(uint8_t Directory_ID);
-void fatman_read();
-void fatman_rename(uint8_t Directory_ID, char * NameFile, uint8_t NameFile_length);
+void FATMAN_DirectoryID_MemcpySetDirectoryName(uint8_t ID, char * PointerToStringToCopy, uint16_t StringToCopy_Length);
+void FATMAN_DirectoryID_MemcpySetFilePath(uint8_t ID, char * PointerToStringToCopy, uint16_t StringToCopy_Length);
+void FATMAN_DirectoryID_SetFileIsCreated(uint8_t ID, uint8_t Value);
+uint8_t FATMAN_DirectoryID_GetFileIsCreated(uint8_t ID);
+
+void FATMAN_Init(uint8_t Directory_ID);
+void FATMAN_AddStringOnBuffer(char * PointerToStringToAddOnBuffer, uint8_t StringToAddOnBuffer_length);
+void FATMAN_Write(uint8_t Directory_ID);
+void FATMAN_Read();
+void FATMAN_RenameFilePath(uint8_t Directory_ID, char * NameFile, uint8_t NameFile_length);
 /* Public Automated Testing Function -----------------------------------------*/
 #ifdef DEBUG
 void fatman_test_all();

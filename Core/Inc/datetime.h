@@ -68,10 +68,10 @@ uint8_t DATETIME_GetSeconds();
 uint8_t DATETIME_GetDeciseconds();
 uint8_t DATETIME_GetDailyLight();
 uint8_t DATETIME_GetEnable();
-void DATETIME_MemcpyDateString(char * PointerToStringToCopy, uint16_t StringToCopy_length);
-void DATETIME_MemcpyDateString_withSeparator(char * PointerToStringToCopy, uint16_t StringToCopy_length);
-void DATETIME_MemcpyTimeString(char * PointerToStringToCopy, uint16_t StringToCopy_length);
-void DATETIME_MemcpyTimeString_withSeparator(char * PointerToStringToCopy, uint16_t StringToCopy_length);
+void DATETIME_MemcpyGetDateString(char * PointerToStringToCopy, uint16_t StringToCopy_length);
+void DATETIME_MemcpyGetDateString_withSeparator(char * PointerToStringToCopy, uint16_t StringToCopy_length);
+void DATETIME_MemcpyGetTimeString(char * PointerToStringToCopy, uint16_t StringToCopy_length);
+void DATETIME_MemcpyGetTimeString_withSeparator(char * PointerToStringToCopy, uint16_t StringToCopy_length);
 
 /* Public Automated Testing Function -----------------------------------------*/
 #ifdef DEBUG

@@ -183,8 +183,6 @@ const osSemaphoreAttr_t BinarySemCAN_attributes = {
   .name = "BinarySemCAN"
 };
 /* USER CODE BEGIN PV */
-/* To delete -----------------------------------------------------------------*/
-uint8_t B1_AcquisitionSimulator;
 
 /* Queue ---------------------------------------------------------------------*/
 MyQueue B1_InputAirPressureQueue;
@@ -203,13 +201,6 @@ TimeCounter TotalWorking;
 
 /* Pressure Swing Adsorption Structure ---------------------------------------*/
 extern PSAStruct PSA;
-
-/* DateTime Structure --------------------------------------------------------*/
-//extern DateTime datetime;
-
-//uCAN_MSG rxMessage;
-/* ManageSD Structure fatman -------------------------------------------------*/
-extern ManageSD fatman;
 
 /* Time Constant -------------------------------------------------------------*/
 const TickType_t seconds      = pdMS_TO_TICKS(1000);
@@ -1966,7 +1957,8 @@ void StartTimeTask(void *argument)
 	  /* New day -------------------------------------------------------------*/
 	  if((DATETIME_GetHours() + DATETIME_GetMinutes() + DATETIME_GetSeconds() + DATETIME_GetDeciseconds()) == 0)
 	  {
-		  fatman.Directory[1].FileIsCreated = 0;
+//		  fatman.Directory[1].FileIsCreated = 0;
+		  FATMAN_DirectoryID_SetFileIsCreated(1, 0);
 	  }
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
   }
@@ -2072,13 +2064,13 @@ void StartSDTask(void *argument)
 #endif
 
 	  /* new day, new file */
-	  if(!fatman.Directory[1].FileIsCreated)
+	  if(!(FATMAN_DirectoryID_GetFileIsCreated(1)))
 	  {
 		  uint8_t DateString_length = 9;
 		  char CopyDateString[DateString_length];
-		  DATETIME_MemcpyDateString((char *)CopyDateString, DateString_length);
-		  fatman_rename(1, (char *)CopyDateString, 8);
-		  fatman_init(1);
+		  DATETIME_MemcpyGetDateString((char *)CopyDateString, DateString_length);
+		  FATMAN_RenameFilePath(1, (char *)CopyDateString, DateString_length - 1);
+		  FATMAN_Init(1);
 	  }
 	  /* if there is some problem. Try to re-init SD */
 	  if(hsd.ErrorCode)

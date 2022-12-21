@@ -77,7 +77,7 @@ uint8_t DATETIME_GetEnable()
 	return datetime.Enable;
 }
 
-void DATETIME_MemcpyDateString(char * PointerToStringToCopy, uint16_t StringToCopy_Length)
+void DATETIME_MemcpyGetDateString(char * PointerToStringToCopy, uint16_t StringToCopy_Length)
 {
 	uint8_t CopiedString_Length = 8;
 
@@ -87,7 +87,7 @@ void DATETIME_MemcpyDateString(char * PointerToStringToCopy, uint16_t StringToCo
 		memcpy(PointerToStringToCopy, &datetime.DateString, CopiedString_Length);
 }
 
-void DATETIME_MemcpyDateString_withSeparator(char * PointerToStringToCopy, uint16_t StringToCopy_Length)
+void DATETIME_MemcpyGetDateString_withSeparator(char * PointerToStringToCopy, uint16_t StringToCopy_Length)
 {
 	uint8_t CopiedString_Length = 10;
 
@@ -97,7 +97,7 @@ void DATETIME_MemcpyDateString_withSeparator(char * PointerToStringToCopy, uint1
 		memcpy(PointerToStringToCopy, &datetime.DateString_withSeparator, CopiedString_Length);
 }
 
-void DATETIME_MemcpyTimeString(char * PointerToStringToCopy, uint16_t StringToCopy_Length)
+void DATETIME_MemcpyGetTimeString(char * PointerToStringToCopy, uint16_t StringToCopy_Length)
 {
 	uint8_t CopiedString_Length = 6;
 
@@ -107,7 +107,7 @@ void DATETIME_MemcpyTimeString(char * PointerToStringToCopy, uint16_t StringToCo
 		memcpy(PointerToStringToCopy, &datetime.TimeString, CopiedString_Length);
 }
 
-void DATETIME_MemcpyTimeString_withSeparator(char * PointerToStringToCopy, uint16_t StringToCopy_Length)
+void DATETIME_MemcpyGetTimeString_withSeparator(char * PointerToStringToCopy, uint16_t StringToCopy_Length)
 {
 	uint8_t CopiedString_Length = 8;
 

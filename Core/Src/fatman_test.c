@@ -57,10 +57,10 @@ void fm_test_NormalUse1()
 	/* Fatman */
 	memcpy(&fatman.Directory[1].DirectoryName, "TEST0", sizeof("FIGA"));
 	memcpy(&fatman.Directory[1].FilePath, "TEST0/TEST0.TXT", sizeof("TEST0/TEST0.TXT"));
-	fatman_init(1);
+	FATMAN_Init(1);
 	memcpy(&fatman.Buffer, "Odio tutti\n", sizeof("Odio tutti\n"));
 	fatman.Buffer_size = strlen("Odio tutti\n");
-	fatman_write(1);
+	FATMAN_Write(1);
 }
 
 /*
@@ -85,10 +85,10 @@ void fm_test_NormalUse2()
 	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
 	strcat((char *)fatman.Directory[ID].FilePath, ".TXT");
 	/* Fatman */
-	fatman_init(ID);
+	FATMAN_Init(ID);
 	memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
 	fatman.Buffer_size = strlen((char const*)wtext);
-	fatman_write(ID);
+	FATMAN_Write(ID);
 }
 
 /*
@@ -113,10 +113,10 @@ void fm_test_WHITheFilePathChanges()
 	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
 	strcat((char *)fatman.Directory[ID].FilePath, ".TXT");
 	/* Fatman */
-	fatman_init(ID);
+	FATMAN_Init(ID);
 	memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
 	fatman.Buffer_size = strlen((char const*)wtext);
-	fatman_write(ID);
+	FATMAN_Write(ID);
 }
 
 /*
@@ -144,12 +144,12 @@ void fm_test_WHIitsWritedSeveralConsecutiveTimes()
 	strcat((char *)fatman.Directory[ID].FilePath, ".TXT");
 
 	/* Fatman */
-	fatman_init(ID);
+	FATMAN_Init(ID);
 	for(uint8_t i = 0; i < nTimes; i++)
 	{
 		memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
 		fatman.Buffer_size = strlen((char const*)wtext);
-		fatman_write(ID);
+		FATMAN_Write(ID);
 	}
 }
 
@@ -181,14 +181,14 @@ void fm_test_CheckIf4096IsTheLimit()
 
 	/* create the file to test */
 	uint16_t bw = 0;
-	fatman_init(ID);
+	FATMAN_Init(ID);
 	memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
 	fatman.Buffer_size = strlen((char const*)wtext);
 	for(uint8_t i = 0; i < 129; i++)
 	{
 		memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
 		fatman.Buffer_size = strlen((char const*)wtext);
-		fatman_write(ID);
+		FATMAN_Write(ID);
 		bw += strlen((char const*)wtext);
 	}
 	fatman.State = bw;
@@ -234,7 +234,7 @@ void fm_test_WHItheBufferIsTooBig()
 
 	/* create the file to test */
 	uint16_t bw = 0;
-	fatman_init(ID);
+	FATMAN_Init(ID);
 
 	for(uint16_t i = 0; i < 300; i++)
 	{
@@ -246,11 +246,11 @@ void fm_test_WHItheBufferIsTooBig()
 		if((fatman.Directory[ID].SaveFIL.fptr + fatman.Buffer_size) > FATMAN_BUFFER_SIZE)
 		{
 			fatman.Directory[ID].FilePath[22] += 1;
-			fatman_init(ID);
+			FATMAN_Init(ID);
 		}
 
 		/*  */
-		fatman_write(ID);
+		FATMAN_Write(ID);
 
 		/* Just for help in debugging */
 		bw += strlen((char const*)wtext);
@@ -276,12 +276,12 @@ void fm_test_read()
 	strcat((char *)fatman.Directory[ID].FilePath, (char const*)NameDir);
 	strcat((char *)fatman.Directory[ID].FilePath, ".TXT");
 
-	fatman_init(ID);
+	FATMAN_Init(ID);
 
 	memcpy(fatman.Directory[0].FilePath, "TEST6/20220830_TEST6_01.TXT", sizeof("TEST6/20220830_TEST6_01.TXT"));
-	fatman_read();
+	FATMAN_Read();
 
-	fatman_write(ID);
+	FATMAN_Write(ID);
 }
 
 void fm_test_rename()
@@ -293,12 +293,12 @@ void fm_test_rename()
 	/* fm.Directory[1].DirectoryName = "FILE" */
 	memcpy(&fatman.Directory[ID].DirectoryName, &NameDir, sizeof(NameDir));
 	/* fm.Directory[1].FilePath = "FILE/20220805_FILE" */
-	fatman_rename(ID, (char*)NameFile, 8);
+	FATMAN_RenameFilePath(ID, (char*)NameFile, 8);
 	/* Fatman */
-	fatman_init(ID);
+	FATMAN_Init(ID);
 	memcpy(&fatman.Buffer, wtext, strlen((char const*)wtext));
 	fatman.Buffer_size = strlen((char const*)wtext);
-	fatman_write(ID);
+	FATMAN_Write(ID);
 }
 #endif /* DEBUG */
 /* End of the file -----------------------------------------------------------*/

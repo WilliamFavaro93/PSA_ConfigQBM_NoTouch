@@ -19,9 +19,38 @@
 #include "fatman.h"
 /* Defines -------------------------------------------------------------------*/
 /* Variables -----------------------------------------------------------------*/
-ManageSD fatman;
+static ManageSD fatman;
 /* Private Function definition -----------------------------------------------*/
 /* Public Function -----------------------------------------------------------*/
+void FATMAN_DirectoryID_MemcpySetDirectoryName(uint8_t ID, char * PointerToStringToCopy, uint16_t StringToCopy_Length)
+{
+	uint8_t CopiedString_Length = FATMAN_DIRECTORYNAME_LENGTH;
+
+	if(StringToCopy_Length < CopiedString_Length)
+		memcpy(&fatman.Directory[ID].DirectoryName, PointerToStringToCopy, StringToCopy_Length);
+	else
+		memcpy(&fatman.Directory[ID].DirectoryName, PointerToStringToCopy, CopiedString_Length);
+}
+
+void FATMAN_DirectoryID_MemcpySetFilePath(uint8_t ID, char * PointerToStringToCopy, uint16_t StringToCopy_Length)
+{
+	uint8_t CopiedString_Length = FATMAN_FILEPATH_LENGTH;
+
+	if(StringToCopy_Length < CopiedString_Length)
+		memcpy(&fatman.Directory[ID].DirectoryName, PointerToStringToCopy, StringToCopy_Length);
+	else
+		memcpy(&fatman.Directory[ID].DirectoryName, PointerToStringToCopy, CopiedString_Length);
+}
+
+void FATMAN_DirectoryID_SetFileIsCreated(uint8_t ID, uint8_t Value)
+{
+	fatman.Directory[ID].FileIsCreated = Value;
+}
+
+uint8_t FATMAN_DirectoryID_GetFileIsCreated(uint8_t ID)
+{
+	return fatman.Directory[ID].FileIsCreated;
+}
 /*
  * @brief This method is used to initialize.
  * It creates the directory if it doesn't exists.
@@ -30,7 +59,7 @@ ManageSD fatman;
  * @date 05/08/2022
  * @param ID The number that identifies the directory
  */
-void fatman_init(uint8_t ID)
+void FATMAN_Init(uint8_t ID)
 {
 	/* If the file does not exist, create the directory */
 	f_mkdir((TCHAR const*)fatman.Directory[ID].DirectoryName);
@@ -50,13 +79,21 @@ void fatman_init(uint8_t ID)
 	fatman.Directory[ID].AlreadyWrittenOnce = 0;
 }
 
+void FATMAN_AddStringOnBuffer(char * PointerToStringToAddOnBuffer, uint8_t StringToAddOnBuffer_length)
+{
+	if((fatman.Buffer_size + StringToAddOnBuffer_length) < FATMAN_BUFFER_SIZE){
+		memcpy(&fatman.Buffer[fatman.Buffer_size], PointerToStringToAddOnBuffer, StringToAddOnBuffer_length);
+		fatman.Buffer_size += StringToAddOnBuffer_length;
+	}
+}
+
 /*
  * @brief This method is used to write the text in the buffer on the file
  * @author William Favaro
  * @date 05/08/2022
  * @param ID The number that identifies the directory and the file
  */
-void fatman_write(uint8_t ID)
+void FATMAN_Write(uint8_t ID)
 {
 	/* Write the text saved in fm.rwFileBuffer in the file targeted by fm.Directory[ID].FilePath */
 	uint32_t byteswritten;
@@ -88,7 +125,7 @@ void fatman_write(uint8_t ID)
  * @author William Favaro
  * @date 05/08/2022
  */
-void fatman_read()
+void FATMAN_Read()
 {
 //	uint8_t status;
 	uint32_t bytesread = 0;
@@ -123,7 +160,7 @@ void fatman_read()
  * @author William Favaro
  * @date 05/08/2022
  */
-void fatman_rename(uint8_t ID, char * NameFile, uint8_t NameFile_length)
+void FATMAN_RenameFilePath(uint8_t ID, char * NameFile, uint8_t NameFile_length)
 {
 	uint8_t i = 0;
 	uint8_t DirectoryName_length = 0;
