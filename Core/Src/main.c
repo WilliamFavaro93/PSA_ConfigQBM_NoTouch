@@ -205,9 +205,9 @@ TimeCounter TotalWorking;
 extern PSAStruct PSA;
 
 /* DateTime Structure --------------------------------------------------------*/
-extern DateTime today;
+//extern DateTime datetime;
 
-uCAN_MSG rxMessage;
+//uCAN_MSG rxMessage;
 /* ManageSD Structure fatman -------------------------------------------------*/
 extern ManageSD fatman;
 
@@ -1359,7 +1359,7 @@ static void MX_GPIO_Init(void)
 void TEST_TestAllAndStopIt()
 {
 	Alarm_test_all();
-	DateTime_test_all();
+	DATETIME_test_all();
 	fatman_test_all();
 	MyQueue_test_all();
 }
@@ -1430,7 +1430,7 @@ void EEPROM_DEFINE_Init()
 void AssignDefaultValue()
 {
 	/* DateTime */
-	DateTime_Init(2022, 10, 5, 23, 59, 0);
+	DATETIME_Init(2022, 10, 5, 23, 59, 0);
 
 	PSA.Module = 2;
 
@@ -1930,7 +1930,7 @@ void StartTimeTask(void *argument)
   for(;;)
   {
 	  /* DateTime ------------------------------------------------------------*/
-	  DateTime_AddDeciSecond();
+	  DATETIME_AddDeciSecond();
 	  /* Time Counter --------------------------------------------------------*/
 	  if(PSA.Out1.Ready)
 		  TimeCounter_AddDecisecond(&PulldownWorking);
@@ -1964,7 +1964,7 @@ void StartTimeTask(void *argument)
 	  MyTimer_SubtractDeciSecond(&PSA.Time.SendStateMessageToValve_Timer);
 	  /* Watchdog ------------------------------------------------------------*/
 	  /* New day -------------------------------------------------------------*/
-	  if((today.hours + today.minutes + today.seconds + today.deciseconds) == 0)
+	  if((DATETIME_GetHours() + DATETIME_GetMinutes() + DATETIME_GetSeconds() + DATETIME_GetDeciseconds()) == 0)
 	  {
 		  fatman.Directory[1].FileIsCreated = 0;
 	  }
@@ -2059,7 +2059,7 @@ void StartSDTask(void *argument)
 	/* Initialize the name of directory */
 	f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
 	/* This task do not work until datetime it's initialized */
-	while(!today.Enable){}
+	while(!(DATETIME_GetEnable())){}
 	/* Initialize all the directory and file */
 	DirectoryInit(1, "EVENT", 5);
 	vTaskDelayUntil(&TaskDelayTimer, 1 * deciseconds);
@@ -2074,7 +2074,10 @@ void StartSDTask(void *argument)
 	  /* new day, new file */
 	  if(!fatman.Directory[1].FileIsCreated)
 	  {
-		  fatman_rename(1, (char *)today.DateString, 8);
+		  uint8_t DateString_length = 9;
+		  char CopyDateString[DateString_length];
+		  DATETIME_MemcpyDateString((char *)CopyDateString, DateString_length);
+		  fatman_rename(1, (char *)CopyDateString, 8);
 		  fatman_init(1);
 	  }
 	  /* if there is some problem. Try to re-init SD */

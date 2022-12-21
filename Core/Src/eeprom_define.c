@@ -313,7 +313,7 @@ void EEPROM_DEFINE_DateTimeInit()
 	EEPROM_Read(E2_0__DATE_MONTH, &date_month, 2);
 	EEPROM_Read(E2_0__DATE_DAY,   &date_day,   2);
 
-	DateTime_Init(date_year, date_month, date_day, 0, 0, 0);
+	DATETIME_Init(date_year, date_month, date_day, 0, 0, 0);
 }
 
 void EEPROM_DEFINE_AlarmInit()
