@@ -27,7 +27,7 @@
  * @date 15/09/2022
  * @note This method also enable the alarm
  */
-void Alarm_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+void ALARM_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
 {
 	Alarm->Enable = 1;
 	Alarm->Trigger = 0;
@@ -42,7 +42,7 @@ void Alarm_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_O
  * @date 15/09/2022
  * @note This method also enable the alarm
  */
-void Alarm_CheckCondition(Alarm * Alarm, uint8_t condition)
+void ALARM_CheckCondition(Alarm * Alarm, uint8_t condition)
 {
 	/* Check if Alarm is Enable */
 	if(!(Alarm->Enable))
@@ -83,7 +83,7 @@ void Alarm_CheckCondition(Alarm * Alarm, uint8_t condition)
  * @date 15/09/2022
  * @note This method also enable the alarm
  */
-void Alarm_Disable(Alarm * Alarm)
+void ALARM_Disable(Alarm * Alarm)
 {
 	Alarm->Enable = 0;
 	Alarm->Trigger = 0;
@@ -96,7 +96,7 @@ void Alarm_Disable(Alarm * Alarm)
  * @date 15/09/2022
  * @note This method also enable the alarm
  */
-void Alarm_Enable(Alarm * Alarm)
+void ALARM_Enable(Alarm * Alarm)
 {
 	Alarm->Enable = 1;
 	Alarm->Trigger = 0;

@@ -152,125 +152,125 @@ void PSA_State_UpdateValveMessage()
 	PSA.Valve[1] = 0x00;
 
 	/* Standby ---------------------------------------------------------------*/
-	if(PSA.State == -2)
+	if(PSA.State.Value == -2)
 	{
 		PSA_PreStandby1(0);
 		PSA_PreStandby1(1);
-		PSA.State_Timer = PSA.Time.PreStandby_1;
+		PSA.State.Timer = PSA.Time.PreStandby_1;
 	}
-	if(PSA.State == -1)
+	if(PSA.State.Value == -1)
 	{
 		PSA_PreStandby2(0);
 		PSA_PreStandby2(1);
-		PSA.State_Timer = PSA.Time.PreStandby_2;
+		PSA.State.Timer = PSA.Time.PreStandby_2;
 	}
-	if(PSA.State == 0)
+	if(PSA.State.Value == 0)
 	{
 		PSA_Standby(0);
 		PSA_Standby(1);
-		PSA.State_Timer = 1;
+		PSA.State.Timer = 1;
 	}
 
 	/* Run -------------------------------------------------------------------*/
-	if(PSA.State == 1)
+	if(PSA.State.Value == 1)
 	{
 		PSA_Adsorption1(0);
 		PSA_Adsorption1(1);
-		PSA.State_Timer = (PSA.Time.Adsorption - PSA.Time.TotalCompensation) / 2;
+		PSA.State.Timer = (PSA.Time.Adsorption - PSA.Time.TotalCompensation) / 2;
 	}
-	if(PSA.State == 2)
+	if(PSA.State.Value == 2)
 	{
 		PSA_Adsorption1(0);
 		PSA_Compensation0(1);
-		PSA.State_Timer = PSA.Time.Compensation_0;
+		PSA.State.Timer = PSA.Time.Compensation_0;
 	}
-	if(PSA.State == 3)
+	if(PSA.State.Value == 3)
 	{
 		PSA_Adsorption1(0);
 		PSA_Compensation1_1(1);
-		PSA.State_Timer = PSA.Time.Compensation_1;
+		PSA.State.Timer = PSA.Time.Compensation_1;
 	}
-	if(PSA.State == 4)
+	if(PSA.State.Value == 4)
 	{
 		PSA_Adsorption1(0);
 		PSA_Compensation2(1);
-		PSA.State_Timer = PSA.Time.Compensation_2;
+		PSA.State.Timer = PSA.Time.Compensation_2;
 	}
-	if(PSA.State == 5)
+	if(PSA.State.Value == 5)
 	{
 		PSA_Adsorption1(0);
 		PSA_Adsorption2(1);
-		PSA.State_Timer = (PSA.Time.Adsorption + 1 - PSA.Time.TotalCompensation) / 2;
+		PSA.State.Timer = (PSA.Time.Adsorption + 1 - PSA.Time.TotalCompensation) / 2;
 	}
-	if(PSA.State == 6)
+	if(PSA.State.Value == 6)
 	{
 		PSA_Compensation0(0);
 		PSA_Adsorption2(1);
-		PSA.State_Timer = PSA.Time.Compensation_0;
+		PSA.State.Timer = PSA.Time.Compensation_0;
 	}
-	if(PSA.State == 7)
+	if(PSA.State.Value == 7)
 	{
 		PSA_Compensation1_1(0);
 		PSA_Adsorption2(1);
-		PSA.State_Timer = PSA.Time.Compensation_1;
+		PSA.State.Timer = PSA.Time.Compensation_1;
 	}
-	if(PSA.State == 8)
+	if(PSA.State.Value == 8)
 	{
 		PSA_Compensation2(0);
 		PSA_Adsorption2(1);
-		PSA.State_Timer = PSA.Time.Compensation_2;
+		PSA.State.Timer = PSA.Time.Compensation_2;
 	}
-	if(PSA.State == 9)
+	if(PSA.State.Value == 9)
 	{
 		PSA_Adsorption2(0);
 		PSA_Adsorption2(1);
-		PSA.State_Timer = (PSA.Time.Adsorption + 1 - PSA.Time.TotalCompensation) / 2;
+		PSA.State.Timer = (PSA.Time.Adsorption + 1 - PSA.Time.TotalCompensation) / 2;
 	}
-	if(PSA.State == 10)
+	if(PSA.State.Value == 10)
 	{
 		PSA_Adsorption2(0);
 		PSA_Compensation0(1);
-		PSA.State_Timer = PSA.Time.Compensation_0;
+		PSA.State.Timer = PSA.Time.Compensation_0;
 	}
-	if(PSA.State == 11)
+	if(PSA.State.Value == 11)
 	{
 		PSA_Adsorption2(0);
 		PSA_Compensation1_2(1);
-		PSA.State_Timer = PSA.Time.Compensation_1;
+		PSA.State.Timer = PSA.Time.Compensation_1;
 	}
-	if(PSA.State == 12)
+	if(PSA.State.Value == 12)
 	{
 		PSA_Adsorption2(0);
 		PSA_Compensation2(1);
-		PSA.State_Timer = PSA.Time.Compensation_2;
+		PSA.State.Timer = PSA.Time.Compensation_2;
 	}
-	if(PSA.State == 13)
+	if(PSA.State.Value == 13)
 	{
 		PSA_Adsorption2(0);
 		PSA_Adsorption1(1);
-		PSA.State_Timer = (PSA.Time.Adsorption - PSA.Time.TotalCompensation) / 2;
+		PSA.State.Timer = (PSA.Time.Adsorption - PSA.Time.TotalCompensation) / 2;
 	}
-	if(PSA.State == 14)
+	if(PSA.State.Value == 14)
 	{
 		PSA_Compensation0(0);
 		PSA_Adsorption1(1);
-		PSA.State_Timer = PSA.Time.Compensation_0;
+		PSA.State.Timer = PSA.Time.Compensation_0;
 	}
-	if(PSA.State == 15)
+	if(PSA.State.Value == 15)
 	{
 		PSA_Compensation1_2(0);
 		PSA_Adsorption1(1);
-		PSA.State_Timer = PSA.Time.Compensation_1;
+		PSA.State.Timer = PSA.Time.Compensation_1;
 	}
-	if(PSA.State == 16)
+	if(PSA.State.Value == 16)
 	{
 		PSA_Compensation2(0);
 		PSA_Adsorption1(1);
-		PSA.State_Timer = PSA.Time.Compensation_2;
+		PSA.State.Timer = PSA.Time.Compensation_2;
 	}
 
 	PSA_OutValve();
-	PSA.State_Update = 1;
+	PSA.State.Update = 1;
 }
 
 void PSA_Mode_Run()

@@ -208,10 +208,6 @@ const TickType_t deciseconds  = pdMS_TO_TICKS(100);
 const TickType_t centiseconds = pdMS_TO_TICKS(10);
 const TickType_t milliseconds = pdMS_TO_TICKS(1);
 
-/* To Delete     -------------------------------------------------------------*/
-uint16_t year1;
-uint16_t year2;
-uint16_t year3;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -1349,7 +1345,7 @@ static void MX_GPIO_Init(void)
 
 void TEST_TestAllAndStopIt()
 {
-	Alarm_test_all();
+	ALARM_test_all();
 	DATETIME_test_all();
 	fatman_test_all();
 	MyQueue_test_all();
@@ -1606,38 +1602,24 @@ void StartDefaultTask(void *argument)
   /* Infinite loop */
 	TickType_t TaskDelayTimer = xTaskGetTickCount();
 
-//	HAL_ADC_Start(&hadc1);
-//	HAL_ADC_Start(&hadc2);
-//	HAL_ADC_Start(&hadc3);
-
-//	  HAL_ADC_Start(&hadc1);
-	  HAL_ADC_PollForConversion(&hadc1, 1 * centiseconds);
-//	  HAL_ADC_Start(&hadc1);
+	HAL_ADC_PollForConversion(&hadc1, 1 * centiseconds);
 
   for(;;)
   {
 	  ADC_SetConfigChannel(&hadc1, ADC_CHANNEL_5, 1, ADC_SAMPLETIME_56CYCLES);
 	  HAL_ADC_Start(&hadc1);
 	  raw_1 = HAL_ADC_GetValue(&hadc1);
-//	  HAL_ADC_Stop(&hadc1);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
 
 	  ADC_SetConfigChannel(&hadc1, ADC_CHANNEL_9, 2, ADC_SAMPLETIME_84CYCLES);
 	  HAL_ADC_Start(&hadc1);
 	  raw_2 = HAL_ADC_GetValue(&hadc1);
-//	  HAL_ADC_Stop(&hadc1);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
 
 	  ADC_SetConfigChannel(&hadc1, ADC_CHANNEL_11, 3, ADC_SAMPLETIME_112CYCLES);
 	  HAL_ADC_Start(&hadc1);
 	  raw_3 = HAL_ADC_GetValue(&hadc1);
-//	  HAL_ADC_Stop(&hadc1);
 	  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
-
-//	  HAL_ADC_PollForConversion(&hadc3, 1 * deciseconds);
-//	  raw_3 = HAL_ADC_GetValue(&hadc3);
-
-//	  vTaskDelayUntil(&TaskDelayTimer, 1 * centiseconds);
   }
   /* USER CODE END 5 */
 }
@@ -1663,29 +1645,29 @@ void StartStateTask(void *argument)
 
 	  if(PSA.Mode.Enable)
 	  {
-		  PSA.State_Update = 0;
-		  if((PSA.Mode.Run) && (PSA.State < 1))
+		  PSA.State.Update = 0;
+		  if((PSA.Mode.Run) && (PSA.State.Value < 1))
 		  {
-			  PSA.State = 1;
+			  PSA.State.Value = 1;
 			  PSA_State_UpdateValveMessage();
 		  }
 
-		  if((!PSA.Mode.Run) && (PSA.State > 0))
+		  if((!PSA.Mode.Run) && (PSA.State.Value > 0))
 		  {
-			  PSA.State = -2;
+			  PSA.State.Value = -2;
 			  PSA_State_UpdateValveMessage();
 		  }
 
-		  if(!PSA.State_Timer)
+		  if(!PSA.State.Timer)
 		  {
-			  if(PSA.State)
+			  if(PSA.State.Value)
 			  {
-				  PSA.State++;
+				  PSA.State.Value++;
 			  }
 
-			  if(PSA.State > 16)
+			  if(PSA.State.Value > 16)
 			  {
-				  PSA.State = 1;
+				  PSA.State.Value = 1;
 			  }
 
 			  PSA_State_UpdateValveMessage();
@@ -1835,12 +1817,12 @@ void StartModeTask(void *argument)
 	  }
 
 	  /* Ready condition -----------------------------------------------------*/
-	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State) && (PSA.Out1.Ready)) && (!PSA.Alarm.AL19_HighOut1Pressure.Trigger))
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State.Value) && (PSA.Out1.Ready)) && (!PSA.Alarm.AL19_HighOut1Pressure.Trigger))
 	  {
 		  PSA.Mode.Run = 0x01;
 	  }
 
-	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State) && (PSA.Out2.Ready)) && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger))
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State.Value) && (PSA.Out2.Ready)) && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger))
 	  {
 		  PSA.Mode.Run = 0x01;
 	  }
@@ -1857,13 +1839,13 @@ void StartModeTask(void *argument)
 	  }
 
 	  /* Run condition -------------------------------------------------------*/
-	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State) && (PSA.Out1.Ready))
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State.Value) && (PSA.Out1.Ready))
 			  && (!PSA.Alarm.AL19_HighOut1Pressure.Trigger) && (!PSA.Alarm.BlockingAlarmsTriggered))
 	  {
 		  PSA.Mode.Run = 0x01;
 	  }
 
-	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State) && (PSA.Out2.Ready))
+	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State.Value) && (PSA.Out2.Ready))
 			  && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger) && (!PSA.Alarm.BlockingAlarmsTriggered))
 	  {
 		  PSA.Mode.Run = 0x01;
@@ -1929,7 +1911,7 @@ void StartTimeTask(void *argument)
 		  TimeCounter_AddDecisecond(&MaintenanceWorking);
 	  TimeCounter_AddDecisecond(&TotalWorking);
 	  /* Timer ---------------------------------------------------------------*/
-	  MyTimer_SubtractDeciSecond(&PSA.State_Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.State.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Time.SendStateMessageToValve_Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Time.SendAliveMessageToValve_Timer);
 	  /* Alarm Timer ---------------------------------------------------------*/
@@ -2303,62 +2285,62 @@ void StartAlarmTask(void *argument)
   /* USER CODE BEGIN StartAlarmTask */
 
 
-	Alarm_Init(&PSA.Alarm.AL01_CANbusError, 5, 2);
-	Alarm_Init(&PSA.Alarm.AL02_LowInputAirPressure, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL11_External, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL17_HighDewpoint, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL18_HighDewpoint, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL19_HighOut1Pressure, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL20_PCComunicationFault, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL31_B1ProbeFault, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL32_B2ProbeFault, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL33_B3ProbeFault, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL34_B4ProbeFault, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL35_IFWProbeFault, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL36_DEWProbeFault, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL37_KE25ProbeFault, 5, 5);
-	Alarm_Init(&PSA.Alarm.AL40_PsaDischanging, 5, 5);
-	Alarm_Init(&PSA.Alarm.MissingSDCard, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL01_CANbusError, 5, 2);
+	ALARM_Init(&PSA.Alarm.AL02_LowInputAirPressure, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL05_LowProcessTankPressure, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL11_External, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL16_HighOut2Pressure, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL17_HighDewpoint, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL18_HighDewpoint, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL19_HighOut1Pressure, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL20_PCComunicationFault, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL31_B1ProbeFault, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL32_B2ProbeFault, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL33_B3ProbeFault, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL34_B4ProbeFault, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL35_IFWProbeFault, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL36_DEWProbeFault, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL37_KE25ProbeFault, 5, 5);
+	ALARM_Init(&PSA.Alarm.AL40_PsaDischanging, 5, 5);
+	ALARM_Init(&PSA.Alarm.MissingSDCard, 5, 5);
 
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
   for(;;)
   {
 
-	  Alarm_CheckCondition(&PSA.Alarm.AL01_CANbusError, !(PSA.CAN_2.AliveMessageReceived));
+	  ALARM_CheckCondition(&PSA.Alarm.AL01_CANbusError, !(PSA.CAN_2.AliveMessageReceived));
 	  PSA.CAN_2.AliveMessageReceived = 0;
 
 	  if(!PSA.Alarm.AL02_LowInputAirPressure.Trigger)
-		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowInputAirPressure,
+		  ALARM_CheckCondition(&PSA.Alarm.AL02_LowInputAirPressure,
 			  	  	  	  	  (PSA.B1_InputAirPressure.Value < PSA.B1_InputAirPressure.LowerThreshold));
 	  else
-		  Alarm_CheckCondition(&PSA.Alarm.AL02_LowInputAirPressure,
+		  ALARM_CheckCondition(&PSA.Alarm.AL02_LowInputAirPressure,
 		 			  	  	  (PSA.B1_InputAirPressure.Value < PSA.B1_InputAirPressure.UpperThreshold));
 
 	  if(!PSA.Alarm.AL05_LowProcessTankPressure.Trigger)
-		  Alarm_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
+		  ALARM_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
 			  	  	  	  	  (PSA.B3_ProcessTankAirPressure.Value < PSA.B3_ProcessTankAirPressure.LowerThreshold));
 	  else
-		  Alarm_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
+		  ALARM_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
 		  			  	  	  (PSA.B3_ProcessTankAirPressure.Value < PSA.B3_ProcessTankAirPressure.UpperThreshold));
 
 	  if(!PSA.Alarm.AL16_HighOut2Pressure.Trigger)
-		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
+		  ALARM_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
 			  	  	  	  	  (PSA.B4_OutputAirPressure_2.Value > PSA.B4_OutputAirPressure_2.UpperThreshold));
 	  else
-		  Alarm_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
+		  ALARM_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
 		  			  	  	  (PSA.B4_OutputAirPressure_2.Value > PSA.B4_OutputAirPressure_2.LowerThreshold));
 
 	  if(!PSA.Alarm.AL19_HighOut1Pressure.Trigger)
-		  Alarm_CheckCondition(&PSA.Alarm.AL19_HighOut1Pressure,
+		  ALARM_CheckCondition(&PSA.Alarm.AL19_HighOut1Pressure,
 			  	  	  	  	  (PSA.B2_OutputAirPressure_1.Value > PSA.B2_OutputAirPressure_1.UpperThreshold));
 	  else
-		  Alarm_CheckCondition(&PSA.Alarm.AL19_HighOut1Pressure,
+		  ALARM_CheckCondition(&PSA.Alarm.AL19_HighOut1Pressure,
 		  			  	  	  (PSA.B2_OutputAirPressure_1.Value > PSA.B2_OutputAirPressure_1.LowerThreshold));
 
-	  Alarm_CheckCondition(&PSA.Alarm.MissingSDCard, (hsd.ErrorCode));
+	  ALARM_CheckCondition(&PSA.Alarm.MissingSDCard, (hsd.ErrorCode));
 
 	  /* PSA.Alarm Status Update */
 	  PSA.Alarm.AlarmsTriggered = PSA_Alarm_NumberOfAlarmsTriggered();

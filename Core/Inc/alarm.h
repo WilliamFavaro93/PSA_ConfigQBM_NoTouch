@@ -19,6 +19,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stdint.h"
+
 /* Defines -------------------------------------------------------------------*/
 /* Typedef struct definition -------------------------------------------------*/
 /**
@@ -36,13 +37,14 @@ typedef struct
 } Alarm;
 
 /* Public Function definition ------------------------------------------------*/
-void Alarm_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF);
-void Alarm_CheckCondition(Alarm * Alarm, uint8_t condition);
-void Alarm_Disable(Alarm * Alarm);
-void Alarm_Enable(Alarm * Alarm);
+void ALARM_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF);
+void ALARM_CheckCondition(Alarm * Alarm, uint8_t condition);
+void ALARM_Disable(Alarm * Alarm);
+void ALARM_Enable(Alarm * Alarm);
+
 /* Public Automated Testing Function -----------------------------------------*/
 #ifdef DEBUG
-void Alarm_test_all();
+void ALARM_test_all();
 #endif /* DEBUG */
 
 #endif /* INC_ALARM_H_ */

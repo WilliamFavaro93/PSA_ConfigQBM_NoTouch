@@ -26,7 +26,7 @@ void Alarm_test_DisabledAlarm_AlarmMustNotTrigger();
 void Alarm_test_ConditionKeepsChanging();
 
 /* Public Function -----------------------------------------------------------*/
-void Alarm_test_all()
+void ALARM_test_all()
 {
 	Alarm_test_Triggered();
 	Alarm_test_FromTriggeredToNoTriggered();
@@ -41,13 +41,13 @@ void Alarm_test_all()
  */
 void Alarm_test_Triggered()
 {
-	Alarm_Init(&alatest, 5, 5);
+	ALARM_Init(&alatest, 5, 5);
 
 	uint8_t condition = 1;
 
 	for(uint8_t i = 0; i<5; i++)
 	{
-		Alarm_CheckCondition(&alatest, condition);
+		ALARM_CheckCondition(&alatest, condition);
 		alatest.Timer--;
 		while(!(alatest.Trigger == 0))
 		{
@@ -55,7 +55,7 @@ void Alarm_test_Triggered()
 		}
 	}
 
-	Alarm_CheckCondition(&alatest, condition);
+	ALARM_CheckCondition(&alatest, condition);
 	while(!(alatest.Trigger == 1))
 	{
 
@@ -73,7 +73,7 @@ void Alarm_test_FromTriggeredToNoTriggered()
 
 	for(uint8_t i = 0; i < 5; i++)
 	{
-		Alarm_CheckCondition(&alatest, condition);
+		ALARM_CheckCondition(&alatest, condition);
 		alatest.Timer--;
 		while(!(alatest.Trigger == 1))
 		{
@@ -81,7 +81,7 @@ void Alarm_test_FromTriggeredToNoTriggered()
 		}
 	}
 
-	Alarm_CheckCondition(&alatest, condition);
+	ALARM_CheckCondition(&alatest, condition);
 	while(!(alatest.Trigger == 0))
 	{
 
@@ -97,11 +97,11 @@ void Alarm_test_DisabledAlarm_AlarmMustNotTrigger()
 {
 	uint8_t condition = 0;
 
-	Alarm_Disable(&alatest);
+	ALARM_Disable(&alatest);
 
 	for(uint8_t i = 0; i<5; i++)
 	{
-		Alarm_CheckCondition(&alatest, condition);
+		ALARM_CheckCondition(&alatest, condition);
 		alatest.Timer--;
 		while(!(alatest.Trigger == 0))
 		{
@@ -109,15 +109,15 @@ void Alarm_test_DisabledAlarm_AlarmMustNotTrigger()
 		}
 	}
 
-	Alarm_CheckCondition(&alatest, condition);
+	ALARM_CheckCondition(&alatest, condition);
 	while(!(alatest.Trigger == 0))
 	{
 		/* test failed */
 	}
 
-	Alarm_Enable(&alatest);
+	ALARM_Enable(&alatest);
 
-	Alarm_CheckCondition(&alatest, condition);
+	ALARM_CheckCondition(&alatest, condition);
 	while(!(alatest.Trigger == 0))
 	{
 		/* test failed */
@@ -137,7 +137,7 @@ void Alarm_test_ConditionKeepsChanging()
 	{
 		condition = !(condition);
 
-		Alarm_CheckCondition(&alatest, condition);
+		ALARM_CheckCondition(&alatest, condition);
 		alatest.Timer--;
 		while(!(alatest.Trigger == 0))
 		{

@@ -76,7 +76,7 @@ typedef struct
 	 int8_t Value;
 	uint8_t Timer;
 	uint8_t Update;
-} int_State;
+} int8_State;
 
 /* Digital Input structure ---------------------------------------------------*/
 typedef struct
@@ -251,13 +251,11 @@ typedef struct
 /* Pressure Swing Adsorption structure ---------------------------------------*/
 typedef struct{
 	/* Time ------------------------------------------------------------------*/
-	uint16_Time Time;
+	uint16_Time Time;		/**< the time structure managed by TimeTask */
 	/* Mode ------------------------------------------------------------------*/
 	uint8_Mode Mode;		/**< the mode structure managed by ModeTask */
 	/* State -----------------------------------------------------------------*/
-	int State; 		/**< the number that identified thestate, StateTask */
-	uint8_t State_Update;
-	uint16_t State_Timer;
+	int8_State State;		/**< the state structure managed by StateTask */
 	/* Out -------------------------------------------------------------------*/
 	uint8_Out Out1;
 	uint8_Out Out2;
@@ -287,7 +285,6 @@ typedef struct{
 	SetOfRelays Relay;
 	/* Alarm */
 	SetOfAlarms Alarm;
-
 	/* Task Management */
 	ManageCANSPI CANSPI;
 	ManageCAN2 CAN_2;

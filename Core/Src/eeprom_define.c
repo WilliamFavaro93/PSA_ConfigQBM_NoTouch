@@ -364,15 +364,15 @@ void EEPROM_DEFINE_AlarmInit()
 	EEPROM_Read(E2_2__ALARM_AL20_REFRESH_TIME_ON, &alarm_AL20_refreshtime_on, 2);
 	EEPROM_Read(E2_2__ALARM_AL20_REFRESH_TIME_OFF, &alarm_AL20_refreshtime_off, 2);
 
-	Alarm_Init(&PSA.Alarm.AL01_CANbusError, alarm_AL01_refreshtime_on, alarm_AL01_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL02_LowInputAirPressure, alarm_AL02_refreshtime_on, alarm_AL02_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL05_LowProcessTankPressure, alarm_AL05_refreshtime_on, alarm_AL05_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL11_External, alarm_AL11_refreshtime_on, alarm_AL11_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL16_HighOut2Pressure, alarm_AL16_refreshtime_on, alarm_AL16_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL17_HighDewpoint, alarm_AL17_refreshtime_on, alarm_AL17_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL18_HighDewpoint, alarm_AL18_refreshtime_on, alarm_AL18_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL19_HighOut1Pressure, alarm_AL19_refreshtime_on, alarm_AL19_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL20_PCComunicationFault, alarm_AL20_refreshtime_on, alarm_AL20_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL01_CANbusError, alarm_AL01_refreshtime_on, alarm_AL01_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL02_LowInputAirPressure, alarm_AL02_refreshtime_on, alarm_AL02_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL05_LowProcessTankPressure, alarm_AL05_refreshtime_on, alarm_AL05_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL11_External, alarm_AL11_refreshtime_on, alarm_AL11_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL16_HighOut2Pressure, alarm_AL16_refreshtime_on, alarm_AL16_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL17_HighDewpoint, alarm_AL17_refreshtime_on, alarm_AL17_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL18_HighDewpoint, alarm_AL18_refreshtime_on, alarm_AL18_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL19_HighOut1Pressure, alarm_AL19_refreshtime_on, alarm_AL19_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL20_PCComunicationFault, alarm_AL20_refreshtime_on, alarm_AL20_refreshtime_off);
 }
 
 void EEPROM_DEFINE_FaultInit()
@@ -423,15 +423,15 @@ void EEPROM_DEFINE_FaultInit()
 	EEPROM_Read(E2_3__ALARM_MSDC_REFRESH_TIME_ON, &alarm_MSDC_refreshtime_on, 2);
 	EEPROM_Read(E2_3__ALARM_MSDC_REFRESH_TIME_OFF, &alarm_MSDC_refreshtime_off, 2);
 
-	Alarm_Init(&PSA.Alarm.AL31_B1ProbeFault, alarm_AL31_refreshtime_on, alarm_AL31_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL32_B2ProbeFault, alarm_AL32_refreshtime_on, alarm_AL32_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL33_B3ProbeFault, alarm_AL33_refreshtime_on, alarm_AL33_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL34_B4ProbeFault, alarm_AL34_refreshtime_on, alarm_AL34_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL35_IFWProbeFault, alarm_AL35_refreshtime_on, alarm_AL35_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL36_DEWProbeFault, alarm_AL36_refreshtime_on, alarm_AL36_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL37_KE25ProbeFault, alarm_AL37_refreshtime_on, alarm_AL37_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.AL40_PsaDischanging, alarm_AL40_refreshtime_on, alarm_AL40_refreshtime_off);
-	Alarm_Init(&PSA.Alarm.MissingSDCard, alarm_MSDC_refreshtime_on, alarm_MSDC_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL31_B1ProbeFault, alarm_AL31_refreshtime_on, alarm_AL31_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL32_B2ProbeFault, alarm_AL32_refreshtime_on, alarm_AL32_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL33_B3ProbeFault, alarm_AL33_refreshtime_on, alarm_AL33_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL34_B4ProbeFault, alarm_AL34_refreshtime_on, alarm_AL34_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL35_IFWProbeFault, alarm_AL35_refreshtime_on, alarm_AL35_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL36_DEWProbeFault, alarm_AL36_refreshtime_on, alarm_AL36_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL37_KE25ProbeFault, alarm_AL37_refreshtime_on, alarm_AL37_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.AL40_PsaDischanging, alarm_AL40_refreshtime_on, alarm_AL40_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.MissingSDCard, alarm_MSDC_refreshtime_on, alarm_MSDC_refreshtime_off);
 }
 
 /*
