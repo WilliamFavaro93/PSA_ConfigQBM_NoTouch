@@ -1640,7 +1640,7 @@ void StartStateTask(void *argument)
   for(;;)
   {
 
-	  PSA.Time.TotalCompensation = PSA.Time.Compensation_0 +
+	  PSA.Time._TotalCompensation = PSA.Time.Compensation_0 +
 			  PSA.Time.Compensation_1 + PSA.Time.Compensation_2;
 
 	  if(PSA.Mode.Enable)

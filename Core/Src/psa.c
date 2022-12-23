@@ -176,7 +176,7 @@ void PSA_State_UpdateValveMessage()
 	{
 		PSA_Adsorption1(0);
 		PSA_Adsorption1(1);
-		PSA.State.Timer = (PSA.Time.Adsorption - PSA.Time.TotalCompensation) / 2;
+		PSA.State.Timer = (PSA.Time.Adsorption - PSA.Time._TotalCompensation) / 2;
 	}
 	if(PSA.State.Value == 2)
 	{
@@ -200,7 +200,7 @@ void PSA_State_UpdateValveMessage()
 	{
 		PSA_Adsorption1(0);
 		PSA_Adsorption2(1);
-		PSA.State.Timer = (PSA.Time.Adsorption + 1 - PSA.Time.TotalCompensation) / 2;
+		PSA.State.Timer = (PSA.Time.Adsorption + 1 - PSA.Time._TotalCompensation) / 2;
 	}
 	if(PSA.State.Value == 6)
 	{
@@ -224,7 +224,7 @@ void PSA_State_UpdateValveMessage()
 	{
 		PSA_Adsorption2(0);
 		PSA_Adsorption2(1);
-		PSA.State.Timer = (PSA.Time.Adsorption + 1 - PSA.Time.TotalCompensation) / 2;
+		PSA.State.Timer = (PSA.Time.Adsorption + 1 - PSA.Time._TotalCompensation) / 2;
 	}
 	if(PSA.State.Value == 10)
 	{
@@ -248,7 +248,7 @@ void PSA_State_UpdateValveMessage()
 	{
 		PSA_Adsorption2(0);
 		PSA_Adsorption1(1);
-		PSA.State.Timer = (PSA.Time.Adsorption - PSA.Time.TotalCompensation) / 2;
+		PSA.State.Timer = (PSA.Time.Adsorption - PSA.Time._TotalCompensation) / 2;
 	}
 	if(PSA.State.Value == 14)
 	{
@@ -277,48 +277,48 @@ void PSA_State_UpdateValveMessage()
 /* Public Function definition: Set -------------------------------------------*/
 void PSA_MODE_SetEnable()
 {
-	MODE_SetEnable(&PSA.Mode);
+	PSA_MODE__SetEnable(&PSA.Mode);
 }
 
 void PSA_MODE_SetDisable()
 {
-	MODE_SetDisable(&PSA.Mode);
+	PSA_MODE__SetDisable(&PSA.Mode);
 }
 
 void PSA_MODE_SetReady()
 {
-	MODE_SetReady(&PSA.Mode);
+	PSA_MODE__SetReady(&PSA.Mode);
 }
 
 void PSA_MODE_SetNotReady()
 {
-	MODE_SetNotReady(&PSA.Mode);
+	PSA_MODE__SetNotReady(&PSA.Mode);
 }
 
 void PSA_MODE_SetRun()
 {
-	MODE_SetRun(&PSA.Mode);
+	PSA_MODE__SetRun(&PSA.Mode);
 }
 
 void PSA_MODE_SetStandby()
 {
-	MODE_SetStandby(&PSA.Mode);
+	PSA_MODE__SetStandby(&PSA.Mode);
 }
 
 /* Public Function definition: Get -------------------------------------------*/
 uint8_t PSA_MODE_GetEnable()
 {
-	return MODE_GetEnable(PSA.Mode);
+	return PSA_MODE__GetEnable(PSA.Mode);
 }
 
 uint8_t PSA_MODE_GetReady()
 {
-	return PSA_MODE_GetReady(PSA.Mode);
+	return PSA_MODE__GetReady(PSA.Mode);
 }
 
 uint8_t PSA_MODE_GetRun()
 {
-	return PSA_MODE_GetRun(PSA.Mode);
+	return PSA_MODE__GetRun(PSA.Mode);
 }
 
 void PSA_AnalogInput_Acquisition(uint16_AnalogInput *AnalogInput, uint16_t AnalogInputValue)

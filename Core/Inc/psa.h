@@ -25,24 +25,25 @@
 #include "canspi.h"
 
 #include "psa_mode.h"
+#include "psa_time.h"
 
 /* Time structure ------------------------------------------------------------*/
-typedef struct
-{
-	uint16_t Adsorption;
-	uint16_t TotalCompensation;
-	uint16_t Compensation_0;
-	uint16_t Compensation_1;
-	uint16_t Compensation_2;
-	uint16_t PreStandby_1;
-	uint16_t PreStandby_2;
-
-	uint16_t SendAliveMessageToValve_Timer;
-	uint16_t SendAliveMessageToValve_Refresh;
-
-	uint16_t SendStateMessageToValve_Timer;
-	uint16_t SendStateMessageToValve_Refresh;
-} uint16_Time;
+//typedef struct
+//{
+//	uint16_t Adsorption;
+//	uint16_t TotalCompensation;
+//	uint16_t Compensation_0;
+//	uint16_t Compensation_1;
+//	uint16_t Compensation_2;
+//	uint16_t PreStandby_1;
+//	uint16_t PreStandby_2;
+//
+//	uint16_t SendAliveMessageToValve_Timer;
+//	uint16_t SendAliveMessageToValve_Refresh;
+//
+//	uint16_t SendStateMessageToValve_Timer;
+//	uint16_t SendStateMessageToValve_Refresh;
+//} uint16_Time;
 
 /* Mode structure ------------------------------------------------------------*/
 //typedef struct
@@ -293,8 +294,27 @@ typedef struct{
 } PSAStruct;
 
 /* Public Function -----------------------------------------------------------*/
+/* Public Function: PSA.Time -------------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_TIME_SetAdsorption(uint16_Time* Time, uint16_t TimeToSet);
+void PSA_TIME_SetCompensation_0(uint16_Time* Time, uint16_t TimeToSet);
+void PSA_TIME_SetCompensation_1(uint16_Time* Time, uint16_t TimeToSet);
+void PSA_TIME_SetCompensation_2(uint16_Time* Time, uint16_t TimeToSet);
+void PSA_TIME_SetPreStandby_1(uint16_Time* Time, uint16_t TimeToSet);
+void PSA_TIME_SetPreStandby_2(uint16_Time* Time, uint16_t TimeToSet);
+void PSA_TIME_Set_Standby(uint16_Time* Time);
 
-/* Public Function definition: PSA.Mode --------------------------------------*/
+/* Public Function definition: Get -------------------------------------------*/
+void PSA_TIME_GetAdsorption(uint16_Time Time);
+void PSA_TIME_Get_Adsorption(uint16_Time Time);
+void PSA_TIME_GetCompensation_0(uint16_Time Time);
+void PSA_TIME_GetCompensation_1(uint16_Time Time);
+void PSA_TIME_GetCompensation_2(uint16_Time Time);
+void PSA_TIME_GetPreStandby_1(uint16_Time Time);
+void PSA_TIME_GetPreStandby_2(uint16_Time Time);
+void PSA_TIME_Get_Standby(uint16_Time Time);
+
+/* Public Function: PSA.Mode --------------------------------------*/
 /* Public Function definition: Set -------------------------------------------*/
 void PSA_MODE_SetEnable();
 void PSA_MODE_SetDisable();
