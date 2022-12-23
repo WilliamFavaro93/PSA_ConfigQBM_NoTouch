@@ -1646,19 +1646,25 @@ void StartStateTask(void *argument)
 	  if(PSA.Mode.Enable)
 	  {
 		  PSA.State.Update = 0;
+
+		  /* Aggiorna PSA.State.Value quando passa in PSA.Mode -> Run */
 		  if((PSA.Mode.Run) && (PSA.State.Value < 1))
 		  {
 			  PSA.State.Value = 1;
 			  PSA_State_UpdateValveMessage();
 		  }
 
+		  /* Aggiorna PSA.State.Value quando passa in PSA.Mode -> Standby */
 		  if((!PSA.Mode.Run) && (PSA.State.Value > 0))
 		  {
 			  PSA.State.Value = -2;
 			  PSA_State_UpdateValveMessage();
 		  }
 
-		  if(!PSA.State.Timer)
+		  /* PSA.State ogni volta che PSA.State.Timer va in Timeout */
+		  /* @NOTE while(timeout) permette nel caso di una compensazione abbia tempo = 0 di rifare e saltarla */
+		  /* @NOTE PSA.State = 0, non deve mai avere tempo = 0, ma 1, altrimenti si blocca */
+		  while(!PSA.State.Timer)
 		  {
 			  if(PSA.State.Value)
 			  {

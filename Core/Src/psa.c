@@ -273,14 +273,52 @@ void PSA_State_UpdateValveMessage()
 	PSA.State.Update = 1;
 }
 
-void PSA_Mode_Run()
+/* Public Function definition: PSA.Mode --------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_MODE_SetEnable()
 {
-	PSA.Mode.Run = 0x01;
+	MODE_SetEnable(&PSA.Mode);
 }
 
-void PSA_Mode_Standby()
+void PSA_MODE_SetDisable()
 {
-	PSA.Mode.Run = 0x00;
+	MODE_SetDisable(&PSA.Mode);
+}
+
+void PSA_MODE_SetReady()
+{
+	MODE_SetReady(&PSA.Mode);
+}
+
+void PSA_MODE_SetNotReady()
+{
+	MODE_SetNotReady(&PSA.Mode);
+}
+
+void PSA_MODE_SetRun()
+{
+	MODE_SetRun(&PSA.Mode);
+}
+
+void PSA_MODE_SetStandby()
+{
+	MODE_SetStandby(&PSA.Mode);
+}
+
+/* Public Function definition: Get -------------------------------------------*/
+uint8_t PSA_MODE_GetEnable()
+{
+	return MODE_GetEnable(PSA.Mode);
+}
+
+uint8_t PSA_MODE_GetReady()
+{
+	return PSA_MODE_GetReady(PSA.Mode);
+}
+
+uint8_t PSA_MODE_GetRun()
+{
+	return PSA_MODE_GetRun(PSA.Mode);
 }
 
 void PSA_AnalogInput_Acquisition(uint16_AnalogInput *AnalogInput, uint16_t AnalogInputValue)

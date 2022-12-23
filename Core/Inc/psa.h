@@ -24,6 +24,8 @@
 #include "alarm.h"
 #include "canspi.h"
 
+#include "psa_mode.h"
+
 /* Time structure ------------------------------------------------------------*/
 typedef struct
 {
@@ -43,18 +45,18 @@ typedef struct
 } uint16_Time;
 
 /* Mode structure ------------------------------------------------------------*/
-typedef struct
-{
-	uint8_t Enable;		/**< define if psa start to work:
-	 	 	 	 	 	 0: psa is not in standby-mode
-	 	 	 	 	 	 1:	psa is in standy-mode			*/
-	uint8_t Ready; 		/**< define if psa is in ready-mode:
-	 	 	 	 	 	 0: psa is not in ready-mode
-	 	 	 	 	 	 1: psa is in ready-mode			*/
-	uint8_t Run;		/**< define if psa is run-mode:
-	 	 	 	 	 	 0: psa is not run-mode
-	 	 	 	 	 	 1:	psa is run-mode					*/
-} uint8_Mode;
+//typedef struct
+//{
+//	uint8_t Enable;		/**< define if psa start to work:
+//	 	 	 	 	 	 0: psa is not in standby-mode
+//	 	 	 	 	 	 1:	psa is in standy-mode			*/
+//	uint8_t Ready; 		/**< define if psa is in ready-mode:
+//	 	 	 	 	 	 0: psa is not in ready-mode
+//	 	 	 	 	 	 1: psa is in ready-mode			*/
+//	uint8_t Run;		/**< define if psa is run-mode:
+//	 	 	 	 	 	 0: psa is not run-mode
+//	 	 	 	 	 	 1:	psa is run-mode					*/
+//} uint8_Mode;
 
 /* Out structure -------------------------------------------------------------*/
 typedef struct
@@ -290,8 +292,22 @@ typedef struct{
 	ManageCAN2 CAN_2;
 } PSAStruct;
 
-void PSA_Mode_Run();
-void PSA_Mode_Standby();
+/* Public Function -----------------------------------------------------------*/
+
+/* Public Function definition: PSA.Mode --------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_MODE_SetEnable();
+void PSA_MODE_SetDisable();
+void PSA_MODE_SetReady();
+void PSA_MODE_SetNotReady();
+void PSA_MODE_SetRun();
+void PSA_MODE_SetStandby();
+
+/* Public Function definition: Get -------------------------------------------*/
+uint8_t PSA_MODE_GetEnable();
+uint8_t PSA_MODE_GetReady();
+uint8_t PSA_MODE_GetRun();
+
 
 void PSA_State_UpdateValveMessage();
 
