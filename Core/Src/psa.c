@@ -33,11 +33,11 @@ void PSA_OutValve()
 {
 	if(PSA.Out1.Run)
 	{
-		PSA.Valve[0] += 1;
+		PSA.State.Valve[0] += 1;
 	}
 	else if(PSA.Out2.Run)
 	{
-		PSA.Valve[1] += 1;
+		PSA.State.Valve[1] += 1;
 	}
 }
 
@@ -48,8 +48,8 @@ void PSA_OutValve()
  */
 void PSA_Adsorption1(uint8_t Module)
 {
-	if(PSA.Module > Module)
-		PSA.Valve[Module] = 0xC6;
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0xC6;
 }
 
 /*
@@ -59,8 +59,8 @@ void PSA_Adsorption1(uint8_t Module)
  */
 void PSA_Compensation0(uint8_t Module)
 {
-	if(PSA.Module > Module)
-		PSA.Valve[Module] = 0x00;
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x00;
 }
 
 /*
@@ -70,8 +70,8 @@ void PSA_Compensation0(uint8_t Module)
  */
 void PSA_Compensation1_1(uint8_t Module)
 {
-	if(PSA.Module > Module)
-		PSA.Valve[Module] = 0x20;
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x20;
 }
 
 /*
@@ -81,8 +81,8 @@ void PSA_Compensation1_1(uint8_t Module)
  */
 void PSA_Compensation1_2(uint8_t Module)
 {
-	if(PSA.Module > Module)
-		PSA.Valve[Module] = 0x04;
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x04;
 }
 
 /*
@@ -92,8 +92,8 @@ void PSA_Compensation1_2(uint8_t Module)
  */
 void PSA_Compensation2(uint8_t Module)
 {
-	if(PSA.Module > Module)
-		PSA.Valve[Module] = 0x24;
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x24;
 }
 
 /*
@@ -103,8 +103,8 @@ void PSA_Compensation2(uint8_t Module)
  */
 void PSA_Adsorption2(uint8_t Module)
 {
-	if(PSA.Module > Module)
-		PSA.Valve[Module] = 0xB8;
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0xB8;
 }
 
 /*
@@ -114,8 +114,8 @@ void PSA_Adsorption2(uint8_t Module)
  */
 void PSA_PreStandby1(uint8_t Module)
 {
-	if(PSA.Module > Module)
-		PSA.Valve[Module] = 0x08;
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x08;
 }
 
 /*
@@ -125,8 +125,8 @@ void PSA_PreStandby1(uint8_t Module)
  */
 void PSA_PreStandby2(uint8_t Module)
 {
-	if(PSA.Module > Module)
-		PSA.Valve[Module] = 0x48;
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x48;
 }
 
 /*
@@ -136,8 +136,8 @@ void PSA_PreStandby2(uint8_t Module)
  */
 void PSA_Standby(uint8_t Module)
 {
-	if(PSA.Module > Module)
-		PSA.Valve[Module] = 0x00;
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x00;
 }
 
 /*
@@ -148,8 +148,8 @@ void PSA_Standby(uint8_t Module)
 void PSA_State_UpdateValveMessage()
 {
 	/* Reset -----------------------------------------------------------------*/
-	PSA.Valve[0] = 0x00;
-	PSA.Valve[1] = 0x00;
+	PSA.State.Valve[0] = 0x00;
+	PSA.State.Valve[1] = 0x00;
 
 	/* Standby ---------------------------------------------------------------*/
 	if(PSA.State.Value == -2)
@@ -273,6 +273,84 @@ void PSA_State_UpdateValveMessage()
 	PSA.State.Update = 1;
 }
 
+/* Public Function: PSA.Time -------------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_TIME_SetAdsorption(uint16_t TimeToSet)
+{
+	PSA_TIME__SetAdsorption(&PSA.Time, TimeToSet);
+}
+
+void PSA_TIME_SetCompensation_0(uint16_t TimeToSet)
+{
+	PSA_TIME__SetCompensation_0(&PSA.Time, TimeToSet);
+}
+
+void PSA_TIME_SetCompensation_1(uint16_t TimeToSet)
+{
+	PSA_TIME__SetCompensation_1(&PSA.Time, TimeToSet);
+}
+
+void PSA_TIME_SetCompensation_2(uint16_t TimeToSet)
+{
+	PSA_TIME__SetCompensation_2(&PSA.Time, TimeToSet);
+}
+
+void PSA_TIME_SetPreStandby_1(uint16_t TimeToSet)
+{
+	PSA_TIME__SetPreStandby_1(&PSA.Time, TimeToSet);
+}
+
+void PSA_TIME_SetPreStandby_2(uint16_t TimeToSet)
+{
+	PSA_TIME__SetPreStandby_2(&PSA.Time, TimeToSet);
+}
+
+void PSA_TIME_Set_Standby()
+{
+	PSA_TIME__Set_Standby(&PSA.Time);
+}
+
+/* Public Function definition: Get -------------------------------------------*/
+uint16_t PSA_TIME_GetAdsorption()
+{
+	return PSA_TIME__GetAdsorption(PSA.Time);
+}
+
+uint16_t PSA_TIME_Get_Adsorption()
+{
+	return PSA_TIME__Get_Adsorption(PSA.Time);
+}
+
+uint16_t PSA_TIME_GetCompensation_0()
+{
+	return PSA_TIME__GetCompensation_0(PSA.Time);
+}
+
+uint16_t PSA_TIME_GetCompensation_1()
+{
+	return PSA_TIME__GetCompensation_1(PSA.Time);
+}
+
+uint16_t PSA_TIME_GetCompensation_2()
+{
+	return PSA_TIME__GetCompensation_2(PSA.Time);
+}
+
+uint16_t PSA_TIME_GetPreStandby_1()
+{
+	return PSA_TIME__GetPreStandby_1(PSA.Time);
+}
+
+uint16_t PSA_TIME_GetPreStandby_2()
+{
+	return PSA_TIME__GetPreStandby_2(PSA.Time);
+}
+
+uint16_t PSA_TIME_Get_Standby()
+{
+	return PSA_TIME__Get_Standby(PSA.Time);
+}
+
 /* Public Function definition: PSA.Mode --------------------------------------*/
 /* Public Function definition: Set -------------------------------------------*/
 void PSA_MODE_SetEnable()
@@ -319,6 +397,100 @@ uint8_t PSA_MODE_GetReady()
 uint8_t PSA_MODE_GetRun()
 {
 	return PSA_MODE__GetRun(PSA.Mode);
+}
+
+/* Public Function: PSA.Out1 -------------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_OUT1_Enable()
+{
+	PSA_OUT__Enable(&PSA.Out1);
+}
+
+void PSA_OUT1_Disable()
+{
+	PSA_OUT__Disable(&PSA.Out1);
+}
+
+void PSA_OUT1_Ready()
+{
+	PSA_OUT__Ready(&PSA.Out1);
+}
+
+void PSA_OUT1_NotReady()
+{
+	PSA_OUT__NotReady(&PSA.Out1);
+}
+
+void PSA_OUT1_Run()
+{
+	PSA_OUT__Run(&PSA.Out1);
+}
+
+void PSA_OUT1_Standby()
+{
+	PSA_OUT__Standby(&PSA.Out1);
+}
+/* Public Function definition: Get -------------------------------------------*/
+uint8_t PSA_OUT1_GetEnable()
+{
+	return PSA_OUT__GetEnable(PSA.Out1);
+}
+
+uint8_t PSA_OUT1_GetReady()
+{
+	return PSA_OUT__GetReady(PSA.Out1);
+}
+
+uint8_t PSA_OUT1_GetRun()
+{
+	return PSA_OUT__GetRun(PSA.Out1);
+}
+
+/* Public Function: PSA.Out2 -------------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_OUT2_Enable()
+{
+	PSA_OUT__Enable(&PSA.Out2);
+}
+
+void PSA_OUT2_Disable()
+{
+	PSA_OUT__Disable(&PSA.Out2);
+}
+
+void PSA_OUT2_Ready()
+{
+	PSA_OUT__Ready(&PSA.Out2);
+}
+
+void PSA_OUT2_NotReady()
+{
+	PSA_OUT__NotReady(&PSA.Out2);
+}
+
+void PSA_OUT2_Run()
+{
+	PSA_OUT__Run(&PSA.Out2);
+}
+
+void PSA_OUT2_Standby()
+{
+	PSA_OUT__Standby(&PSA.Out2);
+}
+/* Public Function definition: Get -------------------------------------------*/
+uint8_t PSA_OUT2_GetEnable()
+{
+	return PSA_OUT__GetEnable(PSA.Out2);
+}
+
+uint8_t PSA_OUT2_GetReady()
+{
+	return PSA_OUT__GetReady(PSA.Out2);
+}
+
+uint8_t PSA_OUT2_GetRun()
+{
+	return PSA_OUT__GetRun(PSA.Out2);
 }
 
 void PSA_AnalogInput_Acquisition(uint16_AnalogInput *AnalogInput, uint16_t AnalogInputValue)

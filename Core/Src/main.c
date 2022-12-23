@@ -1383,7 +1383,7 @@ void EEPROM_DEFINE_Init()
 	EEPROM_DEFINE_DateTimeInit();
 
 	/* Initialize Values from EEPROM: Module */
-	EEPROM_Read(E2_0__NUMBER_MODULE, &PSA.Module, 2);
+	EEPROM_Read(E2_0__NUMBER_MODULE, &PSA.State.Module, 2);
 
 	/* Initialize Values from EEPROM: CAN 1 */
 	PSA.Time.SendAliveMessageToValve_Refresh = 1;
@@ -1419,7 +1419,7 @@ void AssignDefaultValue()
 	/* DateTime */
 	DATETIME_Init(2022, 10, 5, 23, 59, 0);
 
-	PSA.Module = 2;
+	PSA.State.Module = 2;
 
 	PSA.Time.SendAliveMessageToValve_Refresh = 1;
 	PSA.Time.SendStateMessageToValve_Refresh = 1;
@@ -2003,7 +2003,7 @@ void StartCAN2TxTask(void *argument)
 	  {
 		  if(!PSA.Time.SendStateMessageToValve_Timer)
 		  {
-			  PSA.CAN_2.State = HAL_CAN_AddTxMessage(&hcan2, &TxValveMxHeader, PSA.Valve, &TxMailbox);
+			  PSA.CAN_2.State = HAL_CAN_AddTxMessage(&hcan2, &TxValveMxHeader, PSA.State.Valve, &TxMailbox);
 			  PSA.Time.SendStateMessageToValve_Timer = PSA.Time.SendStateMessageToValve_Refresh;
 		  }
 

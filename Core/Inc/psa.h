@@ -26,6 +26,7 @@
 
 #include "psa_mode.h"
 #include "psa_time.h"
+#include "psa_out.h"
 
 /* Time structure ------------------------------------------------------------*/
 //typedef struct
@@ -60,18 +61,18 @@
 //} uint8_Mode;
 
 /* Out structure -------------------------------------------------------------*/
-typedef struct
-{
-	uint8_t Enable;		/**< define if the out is enabled:
-	 	 	 	 	 	 0: the out is not enabled
-	 	 	 	 	 	 1: the out is enabled				*/
-	uint8_t Ready;		/**< define if the out is ready:
-	 	 	 	 	 	 0: the out is not ready
-	 	 	 	 	 	 1: the out is ready				*/
-	uint8_t Run;	/**< define if the out is working:
-	 	 	 	 	 	 0: the out is not working
-	 	 	 	 	 	 1: the out is working				*/
-} uint8_Out;
+//typedef struct
+//{
+//	uint8_t Enable;		/**< define if the out is enabled:
+//	 	 	 	 	 	 0: the out is not enabled
+//	 	 	 	 	 	 1: the out is enabled				*/
+//	uint8_t Ready;		/**< define if the out is ready:
+//	 	 	 	 	 	 0: the out is not ready
+//	 	 	 	 	 	 1: the out is ready				*/
+//	uint8_t Run;	/**< define if the out is working:
+//	 	 	 	 	 	 0: the out is not working
+//	 	 	 	 	 	 1: the out is working				*/
+//} uint8_Out;
 
 /* State structure -------------------------------------------------------------*/
 typedef struct
@@ -79,6 +80,8 @@ typedef struct
 	 int8_t Value;
 	uint8_t Timer;
 	uint8_t Update;
+	uint8_t Module;	/**< the number of modules */
+	uint8_t Valve[8];
 } int8_State;
 
 /* Digital Input structure ---------------------------------------------------*/
@@ -264,8 +267,8 @@ typedef struct{
 	uint8_Out Out2;
 	uint8_t OutPriority;
 	/* Valve -----------------------------------------------------------------*/
-	uint8_t Module;	/**< the number of modules */
-	uint8_t Valve[8];
+//	uint8_t Module;	/**< the number of modules */
+//	uint8_t Valve[8];
 
 	/* Command */
 	SetOfRequests Request;
@@ -296,25 +299,25 @@ typedef struct{
 /* Public Function -----------------------------------------------------------*/
 /* Public Function: PSA.Time -------------------------------------------------*/
 /* Public Function definition: Set -------------------------------------------*/
-void PSA_TIME_SetAdsorption(uint16_Time* Time, uint16_t TimeToSet);
-void PSA_TIME_SetCompensation_0(uint16_Time* Time, uint16_t TimeToSet);
-void PSA_TIME_SetCompensation_1(uint16_Time* Time, uint16_t TimeToSet);
-void PSA_TIME_SetCompensation_2(uint16_Time* Time, uint16_t TimeToSet);
-void PSA_TIME_SetPreStandby_1(uint16_Time* Time, uint16_t TimeToSet);
-void PSA_TIME_SetPreStandby_2(uint16_Time* Time, uint16_t TimeToSet);
-void PSA_TIME_Set_Standby(uint16_Time* Time);
+void PSA_TIME_SetAdsorption(uint16_t TimeToSet);
+void PSA_TIME_SetCompensation_0(uint16_t TimeToSet);
+void PSA_TIME_SetCompensation_1(uint16_t TimeToSet);
+void PSA_TIME_SetCompensation_2(uint16_t TimeToSet);
+void PSA_TIME_SetPreStandby_1(uint16_t TimeToSet);
+void PSA_TIME_SetPreStandby_2(uint16_t TimeToSet);
+void PSA_TIME_Set_Standby();
 
 /* Public Function definition: Get -------------------------------------------*/
-void PSA_TIME_GetAdsorption(uint16_Time Time);
-void PSA_TIME_Get_Adsorption(uint16_Time Time);
-void PSA_TIME_GetCompensation_0(uint16_Time Time);
-void PSA_TIME_GetCompensation_1(uint16_Time Time);
-void PSA_TIME_GetCompensation_2(uint16_Time Time);
-void PSA_TIME_GetPreStandby_1(uint16_Time Time);
-void PSA_TIME_GetPreStandby_2(uint16_Time Time);
-void PSA_TIME_Get_Standby(uint16_Time Time);
+uint16_t PSA_TIME_GetAdsorption();
+uint16_t PSA_TIME_Get_Adsorption();
+uint16_t PSA_TIME_GetCompensation_0();
+uint16_t PSA_TIME_GetCompensation_1();
+uint16_t PSA_TIME_GetCompensation_2();
+uint16_t PSA_TIME_GetPreStandby_1();
+uint16_t PSA_TIME_GetPreStandby_2();
+uint16_t PSA_TIME_Get_Standby();
 
-/* Public Function: PSA.Mode --------------------------------------*/
+/* Public Function: PSA.Mode -------------------------------------------------*/
 /* Public Function definition: Set -------------------------------------------*/
 void PSA_MODE_SetEnable();
 void PSA_MODE_SetDisable();
@@ -328,6 +331,31 @@ uint8_t PSA_MODE_GetEnable();
 uint8_t PSA_MODE_GetReady();
 uint8_t PSA_MODE_GetRun();
 
+/* Public Function: PSA.Out1 -------------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_OUT1_Enable();
+void PSA_OUT1_Disable();
+void PSA_OUT1_Ready();
+void PSA_OUT1_NotReady();
+void PSA_OUT1_Run();
+void PSA_OUT1_Standby();
+/* Public Function definition: Get -------------------------------------------*/
+uint8_t PSA_OUT1_GetEnable();
+uint8_t PSA_OUT1_GetReady();
+uint8_t PSA_OUT1_GetRun();
+
+/* Public Function: PSA.Out2 -------------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_OUT2_Enable();
+void PSA_OUT2_Disable();
+void PSA_OUT2_Ready();
+void PSA_OUT2_NotReady();
+void PSA_OUT2_Run();
+void PSA_OUT2_Standby();
+/* Public Function definition: Get -------------------------------------------*/
+uint8_t PSA_OUT2_GetEnable();
+uint8_t PSA_OUT2_GetReady();
+uint8_t PSA_OUT2_GetRun();
 
 void PSA_State_UpdateValveMessage();
 
