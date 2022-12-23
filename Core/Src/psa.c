@@ -23,256 +23,6 @@
 PSAStruct PSA;
 
 /* Private Function definition -----------------------------------------------*/
-
-/*
- * @brief This method add the value of out1 or out2, if active, to the CAN message
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_OutValve()
-{
-	if(PSA.Out1.Run)
-	{
-		PSA.State.Valve[0] += 1;
-	}
-	else if(PSA.Out2.Run)
-	{
-		PSA.State.Valve[1] += 1;
-	}
-}
-
-/*
- * @brief This method update the value of psa structure when it reachs Adsorption1 state
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_Adsorption1(uint8_t Module)
-{
-	if(PSA.State.Module > Module)
-		PSA.State.Valve[Module] = 0xC6;
-}
-
-/*
- * @brief This method update the value of psa structure when it reachs Compensation0 state
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_Compensation0(uint8_t Module)
-{
-	if(PSA.State.Module > Module)
-		PSA.State.Valve[Module] = 0x00;
-}
-
-/*
- * @brief This method update the value of psa structure when it reachs Compensation1 state
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_Compensation1_1(uint8_t Module)
-{
-	if(PSA.State.Module > Module)
-		PSA.State.Valve[Module] = 0x20;
-}
-
-/*
- * @brief This method update the value of psa structure when it reachs Compensation1 state
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_Compensation1_2(uint8_t Module)
-{
-	if(PSA.State.Module > Module)
-		PSA.State.Valve[Module] = 0x04;
-}
-
-/*
- * @brief This method update the value of psa structure when it reachs Compensation2 state
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_Compensation2(uint8_t Module)
-{
-	if(PSA.State.Module > Module)
-		PSA.State.Valve[Module] = 0x24;
-}
-
-/*
- * @brief This method update the value of psa structure when it reachs Adsorption2 state
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_Adsorption2(uint8_t Module)
-{
-	if(PSA.State.Module > Module)
-		PSA.State.Valve[Module] = 0xB8;
-}
-
-/*
- * @brief This method update the value of psa structure when it reachs PreStandby1 state
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_PreStandby1(uint8_t Module)
-{
-	if(PSA.State.Module > Module)
-		PSA.State.Valve[Module] = 0x08;
-}
-
-/*
- * @brief This method update the value of psa structure when it reachs PreStandby2 state
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_PreStandby2(uint8_t Module)
-{
-	if(PSA.State.Module > Module)
-		PSA.State.Valve[Module] = 0x48;
-}
-
-/*
- * @brief This method update the value of psa structure when it reachs Standby state
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_Standby(uint8_t Module)
-{
-	if(PSA.State.Module > Module)
-		PSA.State.Valve[Module] = 0x00;
-}
-
-/*
- * @brief This method select the method to update psa structure
- * @author William Favaro
- * @date 21/09/2022
- */
-void PSA_State_UpdateValveMessage()
-{
-	/* Reset -----------------------------------------------------------------*/
-	PSA.State.Valve[0] = 0x00;
-	PSA.State.Valve[1] = 0x00;
-
-	/* Standby ---------------------------------------------------------------*/
-	if(PSA.State.Value == -2)
-	{
-		PSA_PreStandby1(0);
-		PSA_PreStandby1(1);
-		PSA.State.Timer = PSA.Time.PreStandby_1;
-	}
-	if(PSA.State.Value == -1)
-	{
-		PSA_PreStandby2(0);
-		PSA_PreStandby2(1);
-		PSA.State.Timer = PSA.Time.PreStandby_2;
-	}
-	if(PSA.State.Value == 0)
-	{
-		PSA_Standby(0);
-		PSA_Standby(1);
-		PSA.State.Timer = 1;
-	}
-
-	/* Run -------------------------------------------------------------------*/
-	if(PSA.State.Value == 1)
-	{
-		PSA_Adsorption1(0);
-		PSA_Adsorption1(1);
-		PSA.State.Timer = (PSA.Time.Adsorption - PSA.Time._TotalCompensation) / 2;
-	}
-	if(PSA.State.Value == 2)
-	{
-		PSA_Adsorption1(0);
-		PSA_Compensation0(1);
-		PSA.State.Timer = PSA.Time.Compensation_0;
-	}
-	if(PSA.State.Value == 3)
-	{
-		PSA_Adsorption1(0);
-		PSA_Compensation1_1(1);
-		PSA.State.Timer = PSA.Time.Compensation_1;
-	}
-	if(PSA.State.Value == 4)
-	{
-		PSA_Adsorption1(0);
-		PSA_Compensation2(1);
-		PSA.State.Timer = PSA.Time.Compensation_2;
-	}
-	if(PSA.State.Value == 5)
-	{
-		PSA_Adsorption1(0);
-		PSA_Adsorption2(1);
-		PSA.State.Timer = (PSA.Time.Adsorption + 1 - PSA.Time._TotalCompensation) / 2;
-	}
-	if(PSA.State.Value == 6)
-	{
-		PSA_Compensation0(0);
-		PSA_Adsorption2(1);
-		PSA.State.Timer = PSA.Time.Compensation_0;
-	}
-	if(PSA.State.Value == 7)
-	{
-		PSA_Compensation1_1(0);
-		PSA_Adsorption2(1);
-		PSA.State.Timer = PSA.Time.Compensation_1;
-	}
-	if(PSA.State.Value == 8)
-	{
-		PSA_Compensation2(0);
-		PSA_Adsorption2(1);
-		PSA.State.Timer = PSA.Time.Compensation_2;
-	}
-	if(PSA.State.Value == 9)
-	{
-		PSA_Adsorption2(0);
-		PSA_Adsorption2(1);
-		PSA.State.Timer = (PSA.Time.Adsorption + 1 - PSA.Time._TotalCompensation) / 2;
-	}
-	if(PSA.State.Value == 10)
-	{
-		PSA_Adsorption2(0);
-		PSA_Compensation0(1);
-		PSA.State.Timer = PSA.Time.Compensation_0;
-	}
-	if(PSA.State.Value == 11)
-	{
-		PSA_Adsorption2(0);
-		PSA_Compensation1_2(1);
-		PSA.State.Timer = PSA.Time.Compensation_1;
-	}
-	if(PSA.State.Value == 12)
-	{
-		PSA_Adsorption2(0);
-		PSA_Compensation2(1);
-		PSA.State.Timer = PSA.Time.Compensation_2;
-	}
-	if(PSA.State.Value == 13)
-	{
-		PSA_Adsorption2(0);
-		PSA_Adsorption1(1);
-		PSA.State.Timer = (PSA.Time.Adsorption - PSA.Time._TotalCompensation) / 2;
-	}
-	if(PSA.State.Value == 14)
-	{
-		PSA_Compensation0(0);
-		PSA_Adsorption1(1);
-		PSA.State.Timer = PSA.Time.Compensation_0;
-	}
-	if(PSA.State.Value == 15)
-	{
-		PSA_Compensation1_2(0);
-		PSA_Adsorption1(1);
-		PSA.State.Timer = PSA.Time.Compensation_1;
-	}
-	if(PSA.State.Value == 16)
-	{
-		PSA_Compensation2(0);
-		PSA_Adsorption1(1);
-		PSA.State.Timer = PSA.Time.Compensation_2;
-	}
-
-	PSA_OutValve();
-	PSA.State.Update = 1;
-}
-
 /* Public Function: PSA.Time -------------------------------------------------*/
 /* Public Function definition: Set -------------------------------------------*/
 void PSA_TIME_SetAdsorption(uint16_t TimeToSet)
@@ -403,33 +153,34 @@ uint8_t PSA_MODE_GetRun()
 /* Public Function definition: Set -------------------------------------------*/
 void PSA_OUT1_Enable()
 {
-	PSA_OUT__Enable(&PSA.Out1);
+	PSA_OUT__SetEnable(&PSA.Out1);
 }
 
 void PSA_OUT1_Disable()
 {
-	PSA_OUT__Disable(&PSA.Out1);
+	PSA_OUT__ResetEnable(&PSA.Out1);
 }
 
 void PSA_OUT1_Ready()
 {
-	PSA_OUT__Ready(&PSA.Out1);
+	PSA_OUT__SetReady(&PSA.Out1);
 }
 
 void PSA_OUT1_NotReady()
 {
-	PSA_OUT__NotReady(&PSA.Out1);
+	PSA_OUT__ResetReady(&PSA.Out1);
 }
 
 void PSA_OUT1_Run()
 {
-	PSA_OUT__Run(&PSA.Out1);
+	PSA_OUT__SetRun(&PSA.Out1);
 }
 
 void PSA_OUT1_Standby()
 {
-	PSA_OUT__Standby(&PSA.Out1);
+	PSA_OUT__ResetRun(&PSA.Out1);
 }
+
 /* Public Function definition: Get -------------------------------------------*/
 uint8_t PSA_OUT1_GetEnable()
 {
@@ -450,33 +201,34 @@ uint8_t PSA_OUT1_GetRun()
 /* Public Function definition: Set -------------------------------------------*/
 void PSA_OUT2_Enable()
 {
-	PSA_OUT__Enable(&PSA.Out2);
+	PSA_OUT__SetEnable(&PSA.Out2);
 }
 
 void PSA_OUT2_Disable()
 {
-	PSA_OUT__Disable(&PSA.Out2);
+	PSA_OUT__ResetEnable(&PSA.Out2);
 }
 
 void PSA_OUT2_Ready()
 {
-	PSA_OUT__Ready(&PSA.Out2);
+	PSA_OUT__SetReady(&PSA.Out2);
 }
 
 void PSA_OUT2_NotReady()
 {
-	PSA_OUT__NotReady(&PSA.Out2);
+	PSA_OUT__ResetReady(&PSA.Out2);
 }
 
 void PSA_OUT2_Run()
 {
-	PSA_OUT__Run(&PSA.Out2);
+	PSA_OUT__SetRun(&PSA.Out2);
 }
 
 void PSA_OUT2_Standby()
 {
-	PSA_OUT__Standby(&PSA.Out2);
+	PSA_OUT__ResetRun(&PSA.Out2);
 }
+
 /* Public Function definition: Get -------------------------------------------*/
 uint8_t PSA_OUT2_GetEnable()
 {
@@ -491,6 +243,292 @@ uint8_t PSA_OUT2_GetReady()
 uint8_t PSA_OUT2_GetRun()
 {
 	return PSA_OUT__GetRun(PSA.Out2);
+}
+
+/* Public Function: PSA.OutPriority ------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_SetOutPriority(uint8_t NumberOfOutToSetPriority)
+{
+	PSA.OutPriority = NumberOfOutToSetPriority;
+}
+/* Public Function definition: Get -------------------------------------------*/
+uint8_t PSA_GetOutPriority()
+{
+	return PSA.OutPriority;
+}
+
+/* Public Function: PSA.State ------------------------------------------------*/
+/* Private Function definition -----------------------------------------------*/
+void PSA_STATE_ValveOut();
+void PSA_STATE_Adsorption1(uint8_t Module);
+void PSA_STATE_Compensation0(uint8_t Module);
+void PSA_STATE_Compensation1_1(uint8_t Module);
+void PSA_STATE_Compensation1_2(uint8_t Module);
+void PSA_STATE_Compensation2(uint8_t Module);
+void PSA_STATE_Adsorption2(uint8_t Module);
+void PSA_STATE_PreStandby1(uint8_t Module);
+void PSA_STATE_PreStandby2(uint8_t Module);
+void PSA_STATE_Standby(uint8_t Module);
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_STATE_SetValue(int8_t ValueToSet);
+void PSA_STATE_SetTimer(uint8_t ValueToSet);
+void PSA_STATE_SetUpdate(uint8_t ValueToSet);
+void PSA_STATE_SetModule(uint8_t ValueToSet);
+void PSA_STATE_MemSetValve(uint8_t* ArrayToSet, uint8_t ArrayToSet_length);
+/* Public Function definition: Get -------------------------------------------*/
+int8_t PSA_STATE_GetValue();
+uint8_t PSA_STATE_GetTimer();
+uint8_t PSA_STATE_GetUpdate();
+uint8_t PSA_STATE_GetModule();
+uint8_t PSA_STATE_MemGetValve();
+/* Private Function ----------------------------------------------------------*/
+/*
+ * @brief This method add the value of out1 or out2, if active, to the CAN message
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_ValveOut()
+{
+	if(PSA.Out1.Run)
+	{
+		PSA.State.Valve[0] += 1;
+	}
+	else if(PSA.Out2.Run)
+	{
+		PSA.State.Valve[1] += 1;
+	}
+}
+
+/*
+ * @brief This method update the value of psa structure when it reachs Adsorption1 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_Adsorption1(uint8_t Module)
+{
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0xC6;
+}
+
+/*
+ * @brief This method update the value of psa structure when it reachs Compensation0 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_Compensation0(uint8_t Module)
+{
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x00;
+}
+
+/*
+ * @brief This method update the value of psa structure when it reachs Compensation1 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_Compensation1_1(uint8_t Module)
+{
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x20;
+}
+
+/*
+ * @brief This method update the value of psa structure when it reachs Compensation1 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_Compensation1_2(uint8_t Module)
+{
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x04;
+}
+
+/*
+ * @brief This method update the value of psa structure when it reachs Compensation2 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_Compensation2(uint8_t Module)
+{
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x24;
+}
+
+/*
+ * @brief This method update the value of psa structure when it reachs Adsorption2 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_Adsorption2(uint8_t Module)
+{
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0xB8;
+}
+
+/*
+ * @brief This method update the value of psa structure when it reachs PreStandby1 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_PreStandby1(uint8_t Module)
+{
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x08;
+}
+
+/*
+ * @brief This method update the value of psa structure when it reachs PreStandby2 state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_PreStandby2(uint8_t Module)
+{
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x48;
+}
+
+/*
+ * @brief This method update the value of psa structure when it reachs Standby state
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_Standby(uint8_t Module)
+{
+	if(PSA.State.Module > Module)
+		PSA.State.Valve[Module] = 0x00;
+}
+
+/*
+ * @brief This method select the method to update psa structure
+ * @author William Favaro
+ * @date 21/09/2022
+ */
+void PSA_STATE_UpdateValve()
+{
+	/* Reset -----------------------------------------------------------------*/
+	PSA.State.Valve[0] = 0x00;
+	PSA.State.Valve[1] = 0x00;
+
+	/* Standby ---------------------------------------------------------------*/
+	if(PSA.State.Value == -2)
+	{
+		PSA_STATE_PreStandby1(0);
+		PSA_STATE_PreStandby1(1);
+		PSA.State.Timer = PSA.Time.PreStandby_1;
+	}
+	if(PSA.State.Value == -1)
+	{
+		PSA_STATE_PreStandby2(0);
+		PSA_STATE_PreStandby2(1);
+		PSA.State.Timer = PSA.Time.PreStandby_2;
+	}
+	if(PSA.State.Value == 0)
+	{
+		PSA_STATE_Standby(0);
+		PSA_STATE_Standby(1);
+		PSA.State.Timer = 1;
+	}
+
+	/* Run -------------------------------------------------------------------*/
+	if(PSA.State.Value == 1)
+	{
+		PSA_STATE_Adsorption1(0);
+		PSA_STATE_Adsorption1(1);
+		PSA.State.Timer = (PSA.Time.Adsorption - PSA.Time._TotalCompensation) / 2;
+	}
+	if(PSA.State.Value == 2)
+	{
+		PSA_STATE_Adsorption1(0);
+		PSA_STATE_Compensation0(1);
+		PSA.State.Timer = PSA.Time.Compensation_0;
+	}
+	if(PSA.State.Value == 3)
+	{
+		PSA_STATE_Adsorption1(0);
+		PSA_STATE_Compensation1_1(1);
+		PSA.State.Timer = PSA.Time.Compensation_1;
+	}
+	if(PSA.State.Value == 4)
+	{
+		PSA_STATE_Adsorption1(0);
+		PSA_STATE_Compensation2(1);
+		PSA.State.Timer = PSA.Time.Compensation_2;
+	}
+	if(PSA.State.Value == 5)
+	{
+		PSA_STATE_Adsorption1(0);
+		PSA_STATE_Adsorption2(1);
+		PSA.State.Timer = (PSA.Time.Adsorption + 1 - PSA.Time._TotalCompensation) / 2;
+	}
+	if(PSA.State.Value == 6)
+	{
+		PSA_STATE_Compensation0(0);
+		PSA_STATE_Adsorption2(1);
+		PSA.State.Timer = PSA.Time.Compensation_0;
+	}
+	if(PSA.State.Value == 7)
+	{
+		PSA_STATE_Compensation1_1(0);
+		PSA_STATE_Adsorption2(1);
+		PSA.State.Timer = PSA.Time.Compensation_1;
+	}
+	if(PSA.State.Value == 8)
+	{
+		PSA_STATE_Compensation2(0);
+		PSA_STATE_Adsorption2(1);
+		PSA.State.Timer = PSA.Time.Compensation_2;
+	}
+	if(PSA.State.Value == 9)
+	{
+		PSA_STATE_Adsorption2(0);
+		PSA_STATE_Adsorption2(1);
+		PSA.State.Timer = (PSA.Time.Adsorption + 1 - PSA.Time._TotalCompensation) / 2;
+	}
+	if(PSA.State.Value == 10)
+	{
+		PSA_STATE_Adsorption2(0);
+		PSA_STATE_Compensation0(1);
+		PSA.State.Timer = PSA.Time.Compensation_0;
+	}
+	if(PSA.State.Value == 11)
+	{
+		PSA_STATE_Adsorption2(0);
+		PSA_STATE_Compensation1_2(1);
+		PSA.State.Timer = PSA.Time.Compensation_1;
+	}
+	if(PSA.State.Value == 12)
+	{
+		PSA_STATE_Adsorption2(0);
+		PSA_STATE_Compensation2(1);
+		PSA.State.Timer = PSA.Time.Compensation_2;
+	}
+	if(PSA.State.Value == 13)
+	{
+		PSA_STATE_Adsorption2(0);
+		PSA_STATE_Adsorption1(1);
+		PSA.State.Timer = (PSA.Time.Adsorption - PSA.Time._TotalCompensation) / 2;
+	}
+	if(PSA.State.Value == 14)
+	{
+		PSA_STATE_Compensation0(0);
+		PSA_STATE_Adsorption1(1);
+		PSA.State.Timer = PSA.Time.Compensation_0;
+	}
+	if(PSA.State.Value == 15)
+	{
+		PSA_STATE_Compensation1_2(0);
+		PSA_STATE_Adsorption1(1);
+		PSA.State.Timer = PSA.Time.Compensation_1;
+	}
+	if(PSA.State.Value == 16)
+	{
+		PSA_STATE_Compensation2(0);
+		PSA_STATE_Adsorption1(1);
+		PSA.State.Timer = PSA.Time.Compensation_2;
+	}
+
+	PSA_STATE_ValveOut();
+	PSA.State.Update = 1;
 }
 
 void PSA_AnalogInput_Acquisition(uint16_AnalogInput *AnalogInput, uint16_t AnalogInputValue)

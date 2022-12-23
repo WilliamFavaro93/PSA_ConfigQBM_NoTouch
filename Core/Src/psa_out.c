@@ -22,19 +22,19 @@
 /* Private Function definition -----------------------------------------------*/
 /* Public Function -----------------------------------------------------------*/
 /* Public Function definition: Set -------------------------------------------*/
-void PSA_OUT__Enable(uint8_Out* Out)
+void PSA_OUT__SetEnable(uint8_Out* Out)
 {
 	Out->Enable = 1;
 }
 
-void PSA_OUT__Disable(uint8_Out* Out)
+void PSA_OUT__ResetEnable(uint8_Out* Out)
 {
 	Out->Run = 0;
 	Out->Ready = 0;
 	Out->Enable = 0;
 }
 
-void PSA_OUT__Ready(uint8_Out* Out)
+void PSA_OUT__SetReady(uint8_Out* Out)
 {
 	if(Out->Enable)
 	{
@@ -42,13 +42,13 @@ void PSA_OUT__Ready(uint8_Out* Out)
 	}
 }
 
-void PSA_OUT__NotReady(uint8_Out* Out)
+void PSA_OUT__ResetReady(uint8_Out* Out)
 {
 	Out->Ready = 0;
 	Out->Run = 0;
 }
 
-void PSA_OUT__Run(uint8_Out* Out)
+void PSA_OUT__SetRun(uint8_Out* Out)
 {
 	if((Out->Enable) && (Out->Ready))
 	{
@@ -56,7 +56,7 @@ void PSA_OUT__Run(uint8_Out* Out)
 	}
 }
 
-void PSA_OUT__Standby(uint8_Out* Out)
+void PSA_OUT__ResetRun(uint8_Out* Out)
 {
 	Out->Run = 0;
 }

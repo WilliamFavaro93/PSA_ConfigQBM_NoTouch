@@ -38,12 +38,13 @@ typedef struct
 
 /* Public Function definition ------------------------------------------------*/
 /* Public Function definition: Set -------------------------------------------*/
-void PSA_OUT__Enable(uint8_Out* Out);
-void PSA_OUT__Disable(uint8_Out* Out);
-void PSA_OUT__Ready(uint8_Out* Out);
-void PSA_OUT__NotReady(uint8_Out* Out);
-void PSA_OUT__Run(uint8_Out* Out);
-void PSA_OUT__Standby(uint8_Out* Out);
+void PSA_OUT__SetEnable(uint8_Out* Out);
+void PSA_OUT__ResetEnable(uint8_Out* Out);
+void PSA_OUT__SetReady(uint8_Out* Out);
+void PSA_OUT__ResetReady(uint8_Out* Out);
+void PSA_OUT__SetRun(uint8_Out* Out);
+void PSA_OUT__ResetRun(uint8_Out* Out);
+
 /* Public Function definition: Get -------------------------------------------*/
 uint8_t PSA_OUT__GetEnable(uint8_Out Out);
 uint8_t PSA_OUT__GetReady(uint8_Out Out);

@@ -1651,14 +1651,14 @@ void StartStateTask(void *argument)
 		  if((PSA.Mode.Run) && (PSA.State.Value < 1))
 		  {
 			  PSA.State.Value = 1;
-			  PSA_State_UpdateValveMessage();
+			  PSA_STATE_UpdateValve();
 		  }
 
 		  /* Aggiorna PSA.State.Value quando passa in PSA.Mode -> Standby */
 		  if((!PSA.Mode.Run) && (PSA.State.Value > 0))
 		  {
 			  PSA.State.Value = -2;
-			  PSA_State_UpdateValveMessage();
+			  PSA_STATE_UpdateValve();
 		  }
 
 		  /* PSA.State ogni volta che PSA.State.Timer va in Timeout */
@@ -1676,7 +1676,7 @@ void StartStateTask(void *argument)
 				  PSA.State.Value = 1;
 			  }
 
-			  PSA_State_UpdateValveMessage();
+			  PSA_STATE_UpdateValve();
 		  }
 	  }
 

@@ -357,7 +357,22 @@ uint8_t PSA_OUT2_GetEnable();
 uint8_t PSA_OUT2_GetReady();
 uint8_t PSA_OUT2_GetRun();
 
-void PSA_State_UpdateValveMessage();
+/* Public Function: PSA.State ------------------------------------------------*/
+/* Private Function definition -----------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_STATE_SetValue(int8_t ValueToSet);
+void PSA_STATE_SetTimer(uint8_t ValueToSet);
+void PSA_STATE_SetUpdate(uint8_t ValueToSet);
+void PSA_STATE_SetModule(uint8_t ValueToSet);
+void PSA_STATE_MemSetValve(uint8_t* ArrayToSet, uint8_t ArrayToSet_length);
+/* Public Function definition: Get -------------------------------------------*/
+int8_t PSA_STATE_GetValue();
+uint8_t PSA_STATE_GetTimer();
+uint8_t PSA_STATE_GetUpdate();
+uint8_t PSA_STATE_GetModule();
+uint8_t PSA_STATE_MemGetValve();
+
+void PSA_STATE_UpdateValve();
 
 uint8_t PSA_Alarm_NumberOfAlarmsTriggered();
 uint8_t PSA_Alarm_NumberOfBlockingAlarmsTriggered();
