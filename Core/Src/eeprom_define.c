@@ -431,7 +431,7 @@ void EEPROM_DEFINE_FaultInit()
 	ALARM_Init(&PSA.Alarm.AL36_DEWProbeFault, alarm_AL36_refreshtime_on, alarm_AL36_refreshtime_off);
 	ALARM_Init(&PSA.Alarm.AL37_KE25ProbeFault, alarm_AL37_refreshtime_on, alarm_AL37_refreshtime_off);
 	ALARM_Init(&PSA.Alarm.AL40_PsaDischanging, alarm_AL40_refreshtime_on, alarm_AL40_refreshtime_off);
-	ALARM_Init(&PSA.Alarm.MissingSDCard, alarm_MSDC_refreshtime_on, alarm_MSDC_refreshtime_off);
+	ALARM_Init(&PSA.Alarm.MSDC_MissingSDCard, alarm_MSDC_refreshtime_on, alarm_MSDC_refreshtime_off);
 }
 
 /*

@@ -1846,13 +1846,13 @@ void StartModeTask(void *argument)
 
 	  /* Run condition -------------------------------------------------------*/
 	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State.Value) && (PSA.Out1.Ready))
-			  && (!PSA.Alarm.AL19_HighOut1Pressure.Trigger) && (!PSA.Alarm.BlockingAlarmsTriggered))
+			  && (!PSA.Alarm.AL19_HighOut1Pressure.Trigger) && (!PSA.Alarm.NumberOfTriggeredBlockingAlarms))
 	  {
 		  PSA.Mode.Run = 0x01;
 	  }
 
 	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (!PSA.State.Value) && (PSA.Out2.Ready))
-			  && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger) && (!PSA.Alarm.BlockingAlarmsTriggered))
+			  && (!PSA.Alarm.AL16_HighOut2Pressure.Trigger) && (!PSA.Alarm.NumberOfTriggeredBlockingAlarms))
 	  {
 		  PSA.Mode.Run = 0x01;
 	  }
@@ -1872,13 +1872,13 @@ void StartModeTask(void *argument)
 
 	  /* Standby condition: Blocking Alarm -----------------------------------*/
 	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out2.Run))
-			  && (PSA.Alarm.BlockingAlarmsTriggered))
+			  && (PSA.Alarm.NumberOfTriggeredBlockingAlarms))
 	  {
 		  PSA.Mode.Run = 0x00;
 	  }
 
 	  if(((PSA.Mode.Enable) && (PSA.Mode.Ready) && (PSA.Mode.Run) && (PSA.Out2.Run))
-			  && (PSA.Alarm.BlockingAlarmsTriggered))
+			  && (PSA.Alarm.NumberOfTriggeredBlockingAlarms))
 	  {
 		  PSA.Mode.Run = 0x00;
 	  }
@@ -1937,7 +1937,7 @@ void StartTimeTask(void *argument)
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL35_IFWProbeFault.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL36_DEWProbeFault.Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Alarm.AL37_KE25ProbeFault.Timer);
-	  MyTimer_SubtractDeciSecond(&PSA.Alarm.MissingSDCard.Timer);
+	  MyTimer_SubtractDeciSecond(&PSA.Alarm.MSDC_MissingSDCard.Timer);
 	  /* Message Timer -------------------------------------------------------*/
 	  MyTimer_SubtractDeciSecond(&PSA.Time.SendAliveMessageToValve_Timer);
 	  MyTimer_SubtractDeciSecond(&PSA.Time.SendStateMessageToValve_Timer);
@@ -2112,7 +2112,7 @@ void StartSDTask(void *argument)
 	  CheckAlarmConditionToWriteSD(&PSA.Alarm.AL37_KE25ProbeFault,
 	  			  	  	  	  	  "AL37 Guasto Sonda KE25",
 								  sizeof("AL37 Guasto Sonda KE25"));
-	  CheckAlarmConditionToWriteSD(&PSA.Alarm.MissingSDCard,
+	  CheckAlarmConditionToWriteSD(&PSA.Alarm.MSDC_MissingSDCard,
 	  			  	  	  	  	  "MicroSD Assente",
 								  sizeof("MicroSD Assente"));
 
@@ -2308,7 +2308,7 @@ void StartAlarmTask(void *argument)
 	ALARM_Init(&PSA.Alarm.AL36_DEWProbeFault, 5, 5);
 	ALARM_Init(&PSA.Alarm.AL37_KE25ProbeFault, 5, 5);
 	ALARM_Init(&PSA.Alarm.AL40_PsaDischanging, 5, 5);
-	ALARM_Init(&PSA.Alarm.MissingSDCard, 5, 5);
+	ALARM_Init(&PSA.Alarm.MSDC_MissingSDCard, 5, 5);
 
 	TickType_t StateTaskDelayTimer = xTaskGetTickCount();
   /* Infinite loop */
@@ -2346,11 +2346,11 @@ void StartAlarmTask(void *argument)
 		  ALARM_CheckCondition(&PSA.Alarm.AL19_HighOut1Pressure,
 		  			  	  	  (PSA.B2_OutputAirPressure_1.Value > PSA.B2_OutputAirPressure_1.LowerThreshold));
 
-	  ALARM_CheckCondition(&PSA.Alarm.MissingSDCard, (hsd.ErrorCode));
+	  ALARM_CheckCondition(&PSA.Alarm.MSDC_MissingSDCard, (hsd.ErrorCode));
 
 	  /* PSA.Alarm Status Update */
-	  PSA.Alarm.AlarmsTriggered = PSA_Alarm_NumberOfAlarmsTriggered();
-	  PSA.Alarm.BlockingAlarmsTriggered = PSA_Alarm_NumberOfBlockingAlarmsTriggered();
+	  PSA.Alarm.NumberOfTriggeredAlarms = PSA_Alarm_NumberOfAlarmsTriggered();
+	  PSA.Alarm.NumberOfTriggeredBlockingAlarms = PSA_Alarm_NumberOfBlockingAlarmsTriggered();
 
 	  vTaskDelayUntil(&StateTaskDelayTimer, 1 * deciseconds);
   }

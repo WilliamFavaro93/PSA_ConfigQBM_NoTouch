@@ -110,8 +110,8 @@ typedef struct{
 /* Alarm and Fault structure -------------------------------------------------*/
 typedef struct
 {
-	uint8_t AlarmsTriggered;			/**< number of alarms triggered */
-	uint8_t BlockingAlarmsTriggered;	/**< number of blocking alarms triggered */
+	uint8_t NumberOfTriggeredAlarms;			/**< number of alarms triggered */
+	uint8_t NumberOfTriggeredBlockingAlarms;	/**< number of blocking alarms triggered */
 
 	Alarm AL01_CANbusError;				/**< define if AL01 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL01 is not triggered
@@ -156,7 +156,7 @@ typedef struct
 	Alarm AL40_PsaDischanging;			/**< define if AL40 is triggered:
 	 	 	 	 	 	 	 	 	 	 0: AL40 is not triggered
 	 	 	 	 	 	 	 	 	 	 1: AL40 is triggered				*/
-	Alarm MissingSDCard;				/**< define if MissingSDCard is triggered:
+	Alarm MSDC_MissingSDCard;				/**< define if MissingSDCard is triggered:
 	 	 	 	 	 	 	 	 	 	 0: MissingSDCard is not triggered
 	 	 	 	 	 	 	 	 	 	 1: MissingSDCard is triggered		*/
 } SetOfAlarms;
