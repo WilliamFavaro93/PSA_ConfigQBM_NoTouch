@@ -27,13 +27,13 @@ void Acquisition_AnalogInputIntoQueueWithAlarm(uint16_AnalogInput *AnalogInput, 
 			  && (AnalogInput->Value >= AnalogInput->LowerLimit)
 			  && (AnalogInput->Value <= AnalogInput->UpperLimit))
 	  {
-		  ALARM_CheckCondition(Alarm, 0);
+		  ALARM_Check(Alarm, 0);
 		  MyQueue_InsertElement(Queue, AnalogInput->Value);
 		  AnalogInput->Acquisition = 0;
 	  }
 	  else
 	  {
-		  ALARM_CheckCondition(Alarm, 1);
+		  ALARM_Check(Alarm, 1);
 	  }
 }
 

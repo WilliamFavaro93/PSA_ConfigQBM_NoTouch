@@ -54,7 +54,6 @@ typedef struct
 /* Public Function definition ------------------------------------------------*/
 /* Public Function definition: Get -------------------------------------------*/
 uint8_t PSA_COMMAND__GetEnableOutGoingNitrogen(SetOfCommands Command);
-uint8_t PSA_COMMAND__GetEnableOutGoingNitrogen(SetOfCommands Command);
 uint8_t PSA_COMMAND__GetDisableOutGoingNitrogen(SetOfCommands Command);
 uint8_t PSA_COMMAND__GetEnableOut1_DisableOut2(SetOfCommands Command);
 uint8_t PSA_COMMAND__GetEnableOut2_DisableOut1(SetOfCommands Command);
@@ -65,7 +64,6 @@ uint8_t PSA_COMMAND__GetPulldownOn(SetOfCommands Command);
 uint8_t PSA_COMMAND__GetPulldownOff(SetOfCommands Command);
 /* Public Function definition: Set -------------------------------------------*/
 void PSA_COMMAND__SetEnableOutGoingNitrogen(SetOfCommands* Command);
-void PSA_COMMAND__SetEnableOutGoingNitrogen(SetOfCommands* Command);
 void PSA_COMMAND__SetDisableOutGoingNitrogen(SetOfCommands* Command);
 void PSA_COMMAND__SetEnableOut1_DisableOut2(SetOfCommands* Command);
 void PSA_COMMAND__SetEnableOut2_DisableOut1(SetOfCommands* Command);
@@ -75,7 +73,6 @@ void PSA_COMMAND__SetSetPriorityOut2(SetOfCommands* Command);
 void PSA_COMMAND__SetPulldownOn(SetOfCommands* Command);
 void PSA_COMMAND__SetPulldownOff(SetOfCommands* Command);
 /* Public Function definition: Reset -----------------------------------------*/
-void PSA_COMMAND__ResetEnableOutGoingNitrogen(SetOfCommands* Command);
 void PSA_COMMAND__ResetEnableOutGoingNitrogen(SetOfCommands* Command);
 void PSA_COMMAND__ResetDisableOutGoingNitrogen(SetOfCommands* Command);
 void PSA_COMMAND__ResetEnableOut1_DisableOut2(SetOfCommands* Command);

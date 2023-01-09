@@ -42,7 +42,7 @@ void ALARM_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_O
  * @date 15/09/2022
  * @note This method also enable the alarm
  */
-void ALARM_CheckCondition(Alarm * Alarm, uint8_t condition)
+void ALARM_Check(Alarm * Alarm, uint8_t condition)
 {
 	/* Check if Alarm is Enable */
 	if(!(Alarm->Enable))

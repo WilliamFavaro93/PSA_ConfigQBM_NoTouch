@@ -47,7 +47,7 @@ void Alarm_test_Triggered()
 
 	for(uint8_t i = 0; i<5; i++)
 	{
-		ALARM_CheckCondition(&alatest, condition);
+		ALARM_Check(&alatest, condition);
 		alatest.Timer--;
 		while(!(alatest.Trigger == 0))
 		{
@@ -55,7 +55,7 @@ void Alarm_test_Triggered()
 		}
 	}
 
-	ALARM_CheckCondition(&alatest, condition);
+	ALARM_Check(&alatest, condition);
 	while(!(alatest.Trigger == 1))
 	{
 
@@ -73,7 +73,7 @@ void Alarm_test_FromTriggeredToNoTriggered()
 
 	for(uint8_t i = 0; i < 5; i++)
 	{
-		ALARM_CheckCondition(&alatest, condition);
+		ALARM_Check(&alatest, condition);
 		alatest.Timer--;
 		while(!(alatest.Trigger == 1))
 		{
@@ -81,7 +81,7 @@ void Alarm_test_FromTriggeredToNoTriggered()
 		}
 	}
 
-	ALARM_CheckCondition(&alatest, condition);
+	ALARM_Check(&alatest, condition);
 	while(!(alatest.Trigger == 0))
 	{
 
@@ -101,7 +101,7 @@ void Alarm_test_DisabledAlarm_AlarmMustNotTrigger()
 
 	for(uint8_t i = 0; i<5; i++)
 	{
-		ALARM_CheckCondition(&alatest, condition);
+		ALARM_Check(&alatest, condition);
 		alatest.Timer--;
 		while(!(alatest.Trigger == 0))
 		{
@@ -109,7 +109,7 @@ void Alarm_test_DisabledAlarm_AlarmMustNotTrigger()
 		}
 	}
 
-	ALARM_CheckCondition(&alatest, condition);
+	ALARM_Check(&alatest, condition);
 	while(!(alatest.Trigger == 0))
 	{
 		/* test failed */
@@ -117,7 +117,7 @@ void Alarm_test_DisabledAlarm_AlarmMustNotTrigger()
 
 	ALARM_Enable(&alatest);
 
-	ALARM_CheckCondition(&alatest, condition);
+	ALARM_Check(&alatest, condition);
 	while(!(alatest.Trigger == 0))
 	{
 		/* test failed */
@@ -137,7 +137,7 @@ void Alarm_test_ConditionKeepsChanging()
 	{
 		condition = !(condition);
 
-		ALARM_CheckCondition(&alatest, condition);
+		ALARM_Check(&alatest, condition);
 		alatest.Timer--;
 		while(!(alatest.Trigger == 0))
 		{

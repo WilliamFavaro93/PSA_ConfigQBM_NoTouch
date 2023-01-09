@@ -310,11 +310,11 @@ void PSA_STATE_Adsorption1(uint8_t Module)
 		PSA.State.Valve[Module] = 0xC6;
 }
 
-/*
- * @brief This method update the value of psa structure when it reachs Compensation0 state
- * @author William Favaro
- * @date 21/09/2022
- */
+///*
+// * @brief This method update the value of psa structure when it reachs Compensation0 state
+// * @author William Favaro
+// * @date 21/09/2022
+// */
 void PSA_STATE_Compensation0(uint8_t Module)
 {
 	if(PSA.State.Module > Module)
@@ -403,7 +403,7 @@ void PSA_STATE_Standby(uint8_t Module)
  * @author William Favaro
  * @date 21/09/2022
  */
-void PSA_STATE_UpdateValve()
+void PSA_State_UpdateState()
 {
 	/* Reset -----------------------------------------------------------------*/
 	PSA.State.Valve[0] = 0x00;
@@ -530,6 +530,464 @@ void PSA_STATE_UpdateValve()
 	PSA_STATE_ValveOut();
 	PSA.State.Update = 1;
 }
+
+/* Public Function: PSA.Command ----------------------------------------------*/
+/* Private Function definition -----------------------------------------------*/
+/* Public Function definition: Get -------------------------------------------*/
+uint8_t PSA_COMMAND_GetEnableOutGoingNitrogen()
+{
+	return PSA_COMMAND__GetEnableOutGoingNitrogen(PSA.Command);
+}
+
+uint8_t PSA_COMMAND_GetDisableOutGoingNitrogen()
+{
+	return PSA_COMMAND__GetDisableOutGoingNitrogen(PSA.Command);
+}
+
+uint8_t PSA_COMMAND_GetEnableOut1_DisableOut2()
+{
+	return PSA_COMMAND__GetEnableOut1_DisableOut2(PSA.Command);
+}
+uint8_t PSA_COMMAND_GetEnableOut2_DisableOut1()
+{
+	return PSA_COMMAND__GetEnableOut2_DisableOut1(PSA.Command);
+}
+uint8_t PSA_COMMAND_GetEnableOut1_EnableOut2()
+{
+	return PSA_COMMAND__GetEnableOut1_EnableOut2(PSA.Command);
+}
+uint8_t PSA_COMMAND_GetSetPriorityOut1()
+{
+	return PSA_COMMAND__GetSetPriorityOut1(PSA.Command);
+}
+uint8_t PSA_COMMAND_GetSetPriorityOut2()
+{
+	return PSA_COMMAND__GetSetPriorityOut2(PSA.Command);
+}
+uint8_t PSA_COMMAND_GetPulldownOn()
+{
+	return PSA_COMMAND__GetPulldownOn(PSA.Command);
+}
+uint8_t PSA_COMMAND_GetPulldownOff()
+{
+	return PSA_COMMAND__GetPulldownOff(PSA.Command);
+}
+/* Public Function definition: Set -------------------------------------------*/
+void PSA_COMMAND_SetEnableOutGoingNitrogen()
+{
+	PSA_COMMAND__SetEnableOutGoingNitrogen(&PSA.Command);
+}
+void PSA_COMMAND_SetDisableOutGoingNitrogen()
+{
+	PSA_COMMAND__SetDisableOutGoingNitrogen(&PSA.Command);
+}
+void PSA_COMMAND_SetEnableOut1_DisableOut2()
+{
+	PSA_COMMAND__SetEnableOut1_DisableOut2(&PSA.Command);
+}
+void PSA_COMMAND_SetEnableOut2_DisableOut1()
+{
+	PSA_COMMAND__SetEnableOut2_DisableOut1(&PSA.Command);
+}
+void PSA_COMMAND_SetEnableOut1_EnableOut2()
+{
+	PSA_COMMAND__SetEnableOut1_EnableOut2(&PSA.Command);
+}
+void PSA_COMMAND_SetSetPriorityOut1()
+{
+	PSA_COMMAND__SetSetPriorityOut1(&PSA.Command);
+}
+void PSA_COMMAND_SetSetPriorityOut2()
+{
+	PSA_COMMAND__SetSetPriorityOut2(&PSA.Command);
+}
+void PSA_COMMAND_SetPulldownOn()
+{
+	PSA_COMMAND__SetPulldownOn(&PSA.Command);
+}
+void PSA_COMMAND_SetPulldownOff()
+{
+	PSA_COMMAND__SetPulldownOff(&PSA.Command);
+}
+/* Public Function definition: Reset -----------------------------------------*/
+void PSA_COMMAND_ResetEnableOutGoingNitrogen()
+{
+	PSA_COMMAND__ResetEnableOutGoingNitrogen(&PSA.Command);
+}
+
+void PSA_COMMAND_ResetDisableOutGoingNitrogen()
+{
+	PSA_COMMAND__ResetDisableOutGoingNitrogen(&PSA.Command);
+}
+
+void PSA_COMMAND_ResetEnableOut1_DisableOut2()
+{
+	PSA_COMMAND__ResetEnableOut1_DisableOut2(&PSA.Command);
+}
+
+void PSA_COMMAND_ResetEnableOut2_DisableOut1()
+{
+	PSA_COMMAND__ResetEnableOut2_DisableOut1(&PSA.Command);
+}
+
+void PSA_COMMAND_ResetEnableOut1_EnableOut2()
+{
+	PSA_COMMAND__ResetEnableOut1_EnableOut2(&PSA.Command);
+}
+
+void PSA_COMMAND_ResetSetPriorityOut1()
+{
+	PSA_COMMAND__ResetSetPriorityOut1(&PSA.Command);
+}
+
+void PSA_COMMAND_ResetSetPriorityOut2()
+{
+	PSA_COMMAND__ResetSetPriorityOut2(&PSA.Command);
+}
+
+void PSA_COMMAND_ResetPulldownOn()
+{
+	PSA_COMMAND__ResetPulldownOn(&PSA.Command);
+}
+
+void PSA_COMMAND_ResetPulldownOff()
+{
+	PSA_COMMAND__ResetPulldownOff(&PSA.Command);
+}
+
+/* TODO ----------------------------------------------------------------------*/
+/* Public Function: PSA.Request ----------------------------------------------*/
+/* Private Function definition -----------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+/* Public Function definition: Get -------------------------------------------*/
+
+/* TODO ----------------------------------------------------------------------*/
+/* Public Function: PSA.Alarm ------------------------------------------------*/
+/* Public Function definition: Init ------------------------------------------*/
+void PSA_ALARM_AL01_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL01_CANbusError, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL02_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL02_LowInputAirPressure, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL05_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL05_LowProcessTankPressure, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL11_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL11_External, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL16_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL16_HighOut2Pressure, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL17_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL17_HighDewpoint, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL18_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL18_HighDewpoint, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL19_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL19_HighOut1Pressure, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL20_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL20_PCComunicationFault, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL31_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL31_B1ProbeFault, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL32_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL32_B2ProbeFault, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL33_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL33_B3ProbeFault, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL34_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL34_B4ProbeFault, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL35_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL35_IFWProbeFault, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL36_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL36_DEWProbeFault, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL37_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL37_KE25ProbeFault, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_AL40_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.AL40_PsaDischanging, RefreshTimer_ON, RefreshTimer_OFF);
+}
+
+void PSA_ALARM_MSDC_Init(uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF)
+{
+	ALARM_Init(&PSA.Alarm.MSDC_MissingSDCard, RefreshTimer_ON, RefreshTimer_OFF);
+}
+/* Public Function definition: Enable ----------------------------------------*/
+void PSA_ALARM_AL01_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL01_CANbusError);
+}
+
+void PSA_ALARM_AL02_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL02_LowInputAirPressure);
+}
+
+void PSA_ALARM_AL05_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL05_LowProcessTankPressure);
+}
+
+void PSA_ALARM_AL11_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL11_External);
+}
+
+void PSA_ALARM_AL16_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL16_HighOut2Pressure);
+}
+
+void PSA_ALARM_AL17_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL17_HighDewpoint);
+}
+
+void PSA_ALARM_AL18_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL18_HighDewpoint);
+}
+
+void PSA_ALARM_AL19_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL19_HighOut1Pressure);
+}
+
+void PSA_ALARM_AL20_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL20_PCComunicationFault);
+}
+
+void PSA_ALARM_AL31_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL31_B1ProbeFault);
+}
+
+void PSA_ALARM_AL32_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL32_B2ProbeFault);
+}
+
+void PSA_ALARM_AL33_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL33_B3ProbeFault);
+}
+
+void PSA_ALARM_AL34_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL34_B4ProbeFault);
+}
+
+void PSA_ALARM_AL35_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL35_IFWProbeFault);
+}
+
+void PSA_ALARM_AL36_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL36_DEWProbeFault);
+}
+
+void PSA_ALARM_AL37_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL37_KE25ProbeFault);
+}
+
+void PSA_ALARM_AL40_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.AL40_PsaDischanging);
+}
+
+void PSA_ALARM_MSDC_Enable()
+{
+	ALARM_Enable(&PSA.Alarm.MSDC_MissingSDCard);
+}
+/* Public Function definition: Disable ---------------------------------------*/
+void PSA_ALARM_AL01_Disable();
+void PSA_ALARM_AL02_Disable();
+void PSA_ALARM_AL05_Disable();
+void PSA_ALARM_AL11_Disable();
+void PSA_ALARM_AL16_Disable();
+void PSA_ALARM_AL17_Disable();
+void PSA_ALARM_AL18_Disable();
+void PSA_ALARM_AL19_Disable();
+void PSA_ALARM_AL20_Disable();
+void PSA_ALARM_AL31_Disable();
+void PSA_ALARM_AL32_Disable();
+void PSA_ALARM_AL33_Disable();
+void PSA_ALARM_AL34_Disable();
+void PSA_ALARM_AL35_Disable();
+void PSA_ALARM_AL36_Disable();
+void PSA_ALARM_AL37_Disable();
+void PSA_ALARM_AL40_Disable();
+void PSA_ALARM_MSDC_Disable();
+/* Public Function definition: GetEnable -------------------------------------*/
+uint8_t PSA_ALARM_AL01_GetEnable();
+uint8_t PSA_ALARM_AL02_GetEnable();
+uint8_t PSA_ALARM_AL05_GetEnable();
+uint8_t PSA_ALARM_AL11_GetEnable();
+uint8_t PSA_ALARM_AL16_GetEnable();
+uint8_t PSA_ALARM_AL17_GetEnable();
+uint8_t PSA_ALARM_AL18_GetEnable();
+uint8_t PSA_ALARM_AL19_GetEnable();
+uint8_t PSA_ALARM_AL20_GetEnable();
+uint8_t PSA_ALARM_AL31_GetEnable();
+uint8_t PSA_ALARM_AL32_GetEnable();
+uint8_t PSA_ALARM_AL33_GetEnable();
+uint8_t PSA_ALARM_AL34_GetEnable();
+uint8_t PSA_ALARM_AL35_GetEnable();
+uint8_t PSA_ALARM_AL36_GetEnable();
+uint8_t PSA_ALARM_AL37_GetEnable();
+uint8_t PSA_ALARM_AL40_GetEnable();
+uint8_t PSA_ALARM_MSDC_GetEnable();
+/* Public Function definition: GetTrigger ------------------------------------*/
+uint8_t PSA_ALARM_AL01_GetTrigger();
+uint8_t PSA_ALARM_AL02_GetTrigger();
+uint8_t PSA_ALARM_AL05_GetTrigger();
+uint8_t PSA_ALARM_AL11_GetTrigger();
+uint8_t PSA_ALARM_AL16_GetTrigger();
+uint8_t PSA_ALARM_AL17_GetTrigger();
+uint8_t PSA_ALARM_AL18_GetTrigger();
+uint8_t PSA_ALARM_AL19_GetTrigger();
+uint8_t PSA_ALARM_AL20_GetTrigger();
+uint8_t PSA_ALARM_AL31_GetTrigger();
+uint8_t PSA_ALARM_AL32_GetTrigger();
+uint8_t PSA_ALARM_AL33_GetTrigger();
+uint8_t PSA_ALARM_AL34_GetTrigger();
+uint8_t PSA_ALARM_AL35_GetTrigger();
+uint8_t PSA_ALARM_AL36_GetTrigger();
+uint8_t PSA_ALARM_AL37_GetTrigger();
+uint8_t PSA_ALARM_AL40_GetTrigger();
+uint8_t PSA_ALARM_MSDC_GetTrigger();
+/* Public Function definition: GetWriteToSD ----------------------------------*/
+uint8_t PSA_ALARM_AL01_GetWriteToSD();
+uint8_t PSA_ALARM_AL02_GetWriteToSD();
+uint8_t PSA_ALARM_AL05_GetWriteToSD();
+uint8_t PSA_ALARM_AL11_GetWriteToSD();
+uint8_t PSA_ALARM_AL16_GetWriteToSD();
+uint8_t PSA_ALARM_AL17_GetWriteToSD();
+uint8_t PSA_ALARM_AL18_GetWriteToSD();
+uint8_t PSA_ALARM_AL19_GetWriteToSD();
+uint8_t PSA_ALARM_AL20_GetWriteToSD();
+uint8_t PSA_ALARM_AL31_GetWriteToSD();
+uint8_t PSA_ALARM_AL32_GetWriteToSD();
+uint8_t PSA_ALARM_AL33_GetWriteToSD();
+uint8_t PSA_ALARM_AL34_GetWriteToSD();
+uint8_t PSA_ALARM_AL35_GetWriteToSD();
+uint8_t PSA_ALARM_AL36_GetWriteToSD();
+uint8_t PSA_ALARM_AL37_GetWriteToSD();
+uint8_t PSA_ALARM_AL40_GetWriteToSD();
+uint8_t PSA_ALARM_MSDC_GetWriteToSD();
+/* Public Function definition: Get -------------------------------------------*/
+uint8_t PSA_ALARM_GetNumberOfTriggeredAlarms();
+uint8_t PSA_ALARM_GetNumberOfTriggeredBlockingAlarms();
+/* Public Function definition: ResetWriteToSD --------------------------------*/
+void PSA_ALARM_AL01_ResetWriteToSD();
+void PSA_ALARM_AL02_ResetWriteToSD();
+void PSA_ALARM_AL05_ResetWriteToSD();
+void PSA_ALARM_AL11_ResetWriteToSD();
+void PSA_ALARM_AL16_ResetWriteToSD();
+void PSA_ALARM_AL17_ResetWriteToSD();
+void PSA_ALARM_AL18_ResetWriteToSD();
+void PSA_ALARM_AL19_ResetWriteToSD();
+void PSA_ALARM_AL20_ResetWriteToSD();
+void PSA_ALARM_AL31_ResetWriteToSD();
+void PSA_ALARM_AL32_ResetWriteToSD();
+void PSA_ALARM_AL33_ResetWriteToSD();
+void PSA_ALARM_AL34_ResetWriteToSD();
+void PSA_ALARM_AL35_ResetWriteToSD();
+void PSA_ALARM_AL36_ResetWriteToSD();
+void PSA_ALARM_AL37_ResetWriteToSD();
+void PSA_ALARM_AL40_ResetWriteToSD();
+void PSA_ALARM_MSDC_ResetWriteToSD();
+/* Public Function definition: Check -----------------------------------------*/
+void PSA_ALARM_AL01_Check(uint8_t Condition);
+void PSA_ALARM_AL02_Check(uint8_t Condition);
+void PSA_ALARM_AL05_Check(uint8_t Condition);
+void PSA_ALARM_AL11_Check(uint8_t Condition);
+void PSA_ALARM_AL16_Check(uint8_t Condition);
+void PSA_ALARM_AL17_Check(uint8_t Condition);
+void PSA_ALARM_AL18_Check(uint8_t Condition);
+void PSA_ALARM_AL19_Check(uint8_t Condition);
+void PSA_ALARM_AL20_Check(uint8_t Condition);
+void PSA_ALARM_AL31_Check(uint8_t Condition);
+void PSA_ALARM_AL32_Check(uint8_t Condition);
+void PSA_ALARM_AL33_Check(uint8_t Condition);
+void PSA_ALARM_AL34_Check(uint8_t Condition);
+void PSA_ALARM_AL35_Check(uint8_t Condition);
+void PSA_ALARM_AL36_Check(uint8_t Condition);
+void PSA_ALARM_AL37_Check(uint8_t Condition);
+void PSA_ALARM_AL40_Check(uint8_t Condition);
+void PSA_ALARM_MSDC_Check(uint8_t Condition);
+
+/* TODO ----------------------------------------------------------------------*/
+/* Public Function: PSA.DigitalInput -----------------------------------------*/
+/* Private Function definition -----------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+/* Public Function definition: Get -------------------------------------------*/
+
+/* TODO ----------------------------------------------------------------------*/
+/* Public Function: PSA.AnalogInput ------------------------------------------*/
+/* Private Function definition -----------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+/* Public Function definition: Get -------------------------------------------*/
+
+/* TODO ----------------------------------------------------------------------*/
+/* Public Function: PSA.Relay ------------------------------------------------*/
+/* Private Function definition -----------------------------------------------*/
+/* Public Function definition: Set -------------------------------------------*/
+/* Public Function definition: Get -------------------------------------------*/
+
+
+
+
+
+
+
+
+
+
 
 void PSA_AnalogInput_Acquisition(uint16_AnalogInput *AnalogInput, uint16_t AnalogInputValue)
 {

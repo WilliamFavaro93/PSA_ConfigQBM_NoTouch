@@ -1651,14 +1651,14 @@ void StartStateTask(void *argument)
 		  if((PSA.Mode.Run) && (PSA.State.Value < 1))
 		  {
 			  PSA.State.Value = 1;
-			  PSA_STATE_UpdateValve();
+			  PSA_State_UpdateState();
 		  }
 
 		  /* Aggiorna PSA.State.Value quando passa in PSA.Mode -> Standby */
 		  if((!PSA.Mode.Run) && (PSA.State.Value > 0))
 		  {
 			  PSA.State.Value = -2;
-			  PSA_STATE_UpdateValve();
+			  PSA_State_UpdateState();
 		  }
 
 		  /* PSA.State ogni volta che PSA.State.Timer va in Timeout */
@@ -1676,7 +1676,7 @@ void StartStateTask(void *argument)
 				  PSA.State.Value = 1;
 			  }
 
-			  PSA_STATE_UpdateValve();
+			  PSA_State_UpdateState();
 		  }
 	  }
 
@@ -2315,38 +2315,38 @@ void StartAlarmTask(void *argument)
   for(;;)
   {
 
-	  ALARM_CheckCondition(&PSA.Alarm.AL01_CANbusError, !(PSA.CAN_2.AliveMessageReceived));
+	  ALARM_Check(&PSA.Alarm.AL01_CANbusError, !(PSA.CAN_2.AliveMessageReceived));
 	  PSA.CAN_2.AliveMessageReceived = 0;
 
 	  if(!PSA.Alarm.AL02_LowInputAirPressure.Trigger)
-		  ALARM_CheckCondition(&PSA.Alarm.AL02_LowInputAirPressure,
+		  ALARM_Check(&PSA.Alarm.AL02_LowInputAirPressure,
 			  	  	  	  	  (PSA.B1_InputAirPressure.Value < PSA.B1_InputAirPressure.LowerThreshold));
 	  else
-		  ALARM_CheckCondition(&PSA.Alarm.AL02_LowInputAirPressure,
+		  ALARM_Check(&PSA.Alarm.AL02_LowInputAirPressure,
 		 			  	  	  (PSA.B1_InputAirPressure.Value < PSA.B1_InputAirPressure.UpperThreshold));
 
 	  if(!PSA.Alarm.AL05_LowProcessTankPressure.Trigger)
-		  ALARM_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
+		  ALARM_Check(&PSA.Alarm.AL05_LowProcessTankPressure,
 			  	  	  	  	  (PSA.B3_ProcessTankAirPressure.Value < PSA.B3_ProcessTankAirPressure.LowerThreshold));
 	  else
-		  ALARM_CheckCondition(&PSA.Alarm.AL05_LowProcessTankPressure,
+		  ALARM_Check(&PSA.Alarm.AL05_LowProcessTankPressure,
 		  			  	  	  (PSA.B3_ProcessTankAirPressure.Value < PSA.B3_ProcessTankAirPressure.UpperThreshold));
 
 	  if(!PSA.Alarm.AL16_HighOut2Pressure.Trigger)
-		  ALARM_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
+		  ALARM_Check(&PSA.Alarm.AL16_HighOut2Pressure,
 			  	  	  	  	  (PSA.B4_OutputAirPressure_2.Value > PSA.B4_OutputAirPressure_2.UpperThreshold));
 	  else
-		  ALARM_CheckCondition(&PSA.Alarm.AL16_HighOut2Pressure,
+		  ALARM_Check(&PSA.Alarm.AL16_HighOut2Pressure,
 		  			  	  	  (PSA.B4_OutputAirPressure_2.Value > PSA.B4_OutputAirPressure_2.LowerThreshold));
 
 	  if(!PSA.Alarm.AL19_HighOut1Pressure.Trigger)
-		  ALARM_CheckCondition(&PSA.Alarm.AL19_HighOut1Pressure,
+		  ALARM_Check(&PSA.Alarm.AL19_HighOut1Pressure,
 			  	  	  	  	  (PSA.B2_OutputAirPressure_1.Value > PSA.B2_OutputAirPressure_1.UpperThreshold));
 	  else
-		  ALARM_CheckCondition(&PSA.Alarm.AL19_HighOut1Pressure,
+		  ALARM_Check(&PSA.Alarm.AL19_HighOut1Pressure,
 		  			  	  	  (PSA.B2_OutputAirPressure_1.Value > PSA.B2_OutputAirPressure_1.LowerThreshold));
 
-	  ALARM_CheckCondition(&PSA.Alarm.MSDC_MissingSDCard, (hsd.ErrorCode));
+	  ALARM_Check(&PSA.Alarm.MSDC_MissingSDCard, (hsd.ErrorCode));
 
 	  /* PSA.Alarm Status Update */
 	  PSA.Alarm.NumberOfTriggeredAlarms = PSA_Alarm_NumberOfAlarmsTriggered();

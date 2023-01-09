@@ -39,13 +39,14 @@ void PSA_STATE__SetValue(int8_State* State, int8_t ValueToSet);
 void PSA_STATE__SetTimer(int8_State* State, uint8_t ValueToSet);
 void PSA_STATE__SetUpdate(int8_State* State, uint8_t ValueToSet);
 void PSA_STATE__SetModule(int8_State* State, uint8_t ValueToSet);
-void PSA_STATE__MemSetValve(int8_State* State, uint8_t* ArrayToSet, uint8_t ArrayToSet_length);
-
+void PSA_STATE__MemSetValve(int8_State* State, uint8_t* ArrayToCopy, uint8_t ArrayToCopy_length);
 /* Public Function definition: Get -------------------------------------------*/
 int8_t PSA_STATE__GetValue(int8_State* State);
 uint8_t PSA_STATE__GetTimer(int8_State* State);
 uint8_t PSA_STATE__GetUpdate(int8_State* State);
 uint8_t PSA_STATE__GetModule(int8_State* State);
-uint8_t PSA_STATE__MemGetValve(int8_State* State);
+void PSA_STATE__MemGetValve(int8_State* State, uint8_t* CopyArray, uint8_t CopyArray_length);
+/* Public Function definition: State -----------------------------------------*/
+
 
 #endif /* INC_PSA_STATE_H_ */

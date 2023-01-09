@@ -42,9 +42,9 @@ void PSA_STATE__SetModule(int8_State* State, uint8_t ValueToSet)
 	State->Module = ValueToSet;
 }
 
-void PSA_STATE__MemSetValve(int8_State* State, uint8_t* ArrayToSet, uint8_t ArrayToSet_length)
+void PSA_STATE__MemSetValve(int8_State* State, uint8_t* ArrayToCopy, uint8_t ArrayToCopy_length)
 {
-	memcpy(State->Valve, ArrayToSet, ArrayToSet_length);
+	memcpy(State->Valve, ArrayToCopy, ArrayToCopy_length);
 }
 
 /* Public Function definition: Get -------------------------------------------*/
@@ -68,9 +68,12 @@ uint8_t PSA_STATE__GetModule(int8_State* State)
 	return State->Module;
 }
 
-uint8_t PSA_STATE__MemGetValve(int8_State* State)
+void PSA_STATE__MemGetValve(int8_State* State, uint8_t* CopyArray, uint8_t CopyArray_length)
 {
-	return State->Value;
+	if(CopyArray_length < 8)
+		memcpy(CopyArray, State, CopyArray_length);
+	else
+		memcpy(CopyArray, State, 8);
 }
 /* Private Function ----------------------------------------------------------*/
 
