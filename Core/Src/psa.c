@@ -844,122 +844,560 @@ void PSA_ALARM_MSDC_Enable()
 	ALARM_Enable(&PSA.Alarm.MSDC_MissingSDCard);
 }
 /* Public Function definition: Disable ---------------------------------------*/
-void PSA_ALARM_AL01_Disable();
-void PSA_ALARM_AL02_Disable();
-void PSA_ALARM_AL05_Disable();
-void PSA_ALARM_AL11_Disable();
-void PSA_ALARM_AL16_Disable();
-void PSA_ALARM_AL17_Disable();
-void PSA_ALARM_AL18_Disable();
-void PSA_ALARM_AL19_Disable();
-void PSA_ALARM_AL20_Disable();
-void PSA_ALARM_AL31_Disable();
-void PSA_ALARM_AL32_Disable();
-void PSA_ALARM_AL33_Disable();
-void PSA_ALARM_AL34_Disable();
-void PSA_ALARM_AL35_Disable();
-void PSA_ALARM_AL36_Disable();
-void PSA_ALARM_AL37_Disable();
-void PSA_ALARM_AL40_Disable();
-void PSA_ALARM_MSDC_Disable();
+void PSA_ALARM_AL01_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL01_CANbusError);
+}
+
+void PSA_ALARM_AL02_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL02_LowInputAirPressure);
+}
+
+void PSA_ALARM_AL05_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL05_LowProcessTankPressure);
+}
+
+void PSA_ALARM_AL11_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL11_External);
+}
+
+void PSA_ALARM_AL16_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL16_HighOut2Pressure);
+}
+
+void PSA_ALARM_AL17_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL17_HighDewpoint);
+}
+
+void PSA_ALARM_AL18_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL18_HighDewpoint);
+}
+
+void PSA_ALARM_AL19_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL19_HighOut1Pressure);
+}
+
+void PSA_ALARM_AL20_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL20_PCComunicationFault);
+}
+
+void PSA_ALARM_AL31_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL31_B1ProbeFault);
+}
+
+void PSA_ALARM_AL32_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL32_B2ProbeFault);
+}
+
+void PSA_ALARM_AL33_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL33_B3ProbeFault);
+}
+
+void PSA_ALARM_AL34_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL34_B4ProbeFault);
+}
+
+void PSA_ALARM_AL35_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL35_IFWProbeFault);
+}
+
+void PSA_ALARM_AL36_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL36_DEWProbeFault);
+}
+
+void PSA_ALARM_AL37_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL37_KE25ProbeFault);
+}
+
+void PSA_ALARM_AL40_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.AL40_PsaDischanging);
+}
+
+void PSA_ALARM_MSDC_Disable()
+{
+	ALARM_Disable(&PSA.Alarm.MSDC_MissingSDCard);
+}
+
 /* Public Function definition: GetEnable -------------------------------------*/
-uint8_t PSA_ALARM_AL01_GetEnable();
-uint8_t PSA_ALARM_AL02_GetEnable();
-uint8_t PSA_ALARM_AL05_GetEnable();
-uint8_t PSA_ALARM_AL11_GetEnable();
-uint8_t PSA_ALARM_AL16_GetEnable();
-uint8_t PSA_ALARM_AL17_GetEnable();
-uint8_t PSA_ALARM_AL18_GetEnable();
-uint8_t PSA_ALARM_AL19_GetEnable();
-uint8_t PSA_ALARM_AL20_GetEnable();
-uint8_t PSA_ALARM_AL31_GetEnable();
-uint8_t PSA_ALARM_AL32_GetEnable();
-uint8_t PSA_ALARM_AL33_GetEnable();
-uint8_t PSA_ALARM_AL34_GetEnable();
-uint8_t PSA_ALARM_AL35_GetEnable();
-uint8_t PSA_ALARM_AL36_GetEnable();
-uint8_t PSA_ALARM_AL37_GetEnable();
-uint8_t PSA_ALARM_AL40_GetEnable();
-uint8_t PSA_ALARM_MSDC_GetEnable();
+uint8_t PSA_ALARM_AL01_GetEnable()
+{
+	return PSA.Alarm.AL01_CANbusError.Enable;
+}
+
+uint8_t PSA_ALARM_AL02_GetEnable()
+{
+	return PSA.Alarm.AL02_LowInputAirPressure.Enable;
+}
+
+uint8_t PSA_ALARM_AL05_GetEnable()
+{
+	return PSA.Alarm.AL05_LowProcessTankPressure.Enable;
+}
+
+uint8_t PSA_ALARM_AL11_GetEnable()
+{
+	return PSA.Alarm.AL11_External.Enable;
+}
+
+uint8_t PSA_ALARM_AL16_GetEnable()
+{
+	return PSA.Alarm.AL16_HighOut2Pressure.Enable;
+}
+
+uint8_t PSA_ALARM_AL17_GetEnable()
+{
+	return PSA.Alarm.AL17_HighDewpoint.Enable;
+}
+
+uint8_t PSA_ALARM_AL18_GetEnable()
+{
+	return PSA.Alarm.AL18_HighDewpoint.Enable;
+}
+
+uint8_t PSA_ALARM_AL19_GetEnable()
+{
+	return PSA.Alarm.AL19_HighOut1Pressure.Enable;
+}
+
+uint8_t PSA_ALARM_AL20_GetEnable()
+{
+	return PSA.Alarm.AL20_PCComunicationFault.Enable;
+}
+
+uint8_t PSA_ALARM_AL31_GetEnable()
+{
+	return PSA.Alarm.AL31_B1ProbeFault.Enable;
+}
+
+uint8_t PSA_ALARM_AL32_GetEnable()
+{
+	return PSA.Alarm.AL32_B2ProbeFault.Enable;
+}
+
+uint8_t PSA_ALARM_AL33_GetEnable()
+{
+	return PSA.Alarm.AL33_B3ProbeFault.Enable;
+}
+
+uint8_t PSA_ALARM_AL34_GetEnable()
+{
+	return PSA.Alarm.AL34_B4ProbeFault.Enable;
+}
+
+uint8_t PSA_ALARM_AL35_GetEnable()
+{
+	return PSA.Alarm.AL35_IFWProbeFault.Enable;
+}
+
+uint8_t PSA_ALARM_AL36_GetEnable()
+{
+	return PSA.Alarm.AL36_DEWProbeFault.Enable;
+}
+
+uint8_t PSA_ALARM_AL37_GetEnable()
+{
+	return PSA.Alarm.AL37_KE25ProbeFault.Enable;
+}
+
+uint8_t PSA_ALARM_AL40_GetEnable()
+{
+	return PSA.Alarm.AL40_PsaDischanging.Enable;
+}
+
+uint8_t PSA_ALARM_MSDC_GetEnable()
+{
+	return PSA.Alarm.MSDC_MissingSDCard.Enable;
+}
+
 /* Public Function definition: GetTrigger ------------------------------------*/
-uint8_t PSA_ALARM_AL01_GetTrigger();
-uint8_t PSA_ALARM_AL02_GetTrigger();
-uint8_t PSA_ALARM_AL05_GetTrigger();
-uint8_t PSA_ALARM_AL11_GetTrigger();
-uint8_t PSA_ALARM_AL16_GetTrigger();
-uint8_t PSA_ALARM_AL17_GetTrigger();
-uint8_t PSA_ALARM_AL18_GetTrigger();
-uint8_t PSA_ALARM_AL19_GetTrigger();
-uint8_t PSA_ALARM_AL20_GetTrigger();
-uint8_t PSA_ALARM_AL31_GetTrigger();
-uint8_t PSA_ALARM_AL32_GetTrigger();
-uint8_t PSA_ALARM_AL33_GetTrigger();
-uint8_t PSA_ALARM_AL34_GetTrigger();
-uint8_t PSA_ALARM_AL35_GetTrigger();
-uint8_t PSA_ALARM_AL36_GetTrigger();
-uint8_t PSA_ALARM_AL37_GetTrigger();
-uint8_t PSA_ALARM_AL40_GetTrigger();
-uint8_t PSA_ALARM_MSDC_GetTrigger();
+uint8_t PSA_ALARM_AL01_GetTrigger()
+{
+	return PSA.Alarm.AL01_CANbusError.Trigger;
+}
+
+uint8_t PSA_ALARM_AL02_GetTrigger()
+{
+	return PSA.Alarm.AL02_LowInputAirPressure.Trigger;
+}
+
+uint8_t PSA_ALARM_AL05_GetTrigger()
+{
+	return PSA.Alarm.AL05_LowProcessTankPressure.Trigger;
+}
+
+uint8_t PSA_ALARM_AL11_GetTrigger()
+{
+	return PSA.Alarm.AL11_External.Trigger;
+}
+
+uint8_t PSA_ALARM_AL16_GetTrigger()
+{
+	return PSA.Alarm.AL16_HighOut2Pressure.Trigger;
+}
+
+uint8_t PSA_ALARM_AL17_GetTrigger()
+{
+	return PSA.Alarm.AL17_HighDewpoint.Trigger;
+}
+
+uint8_t PSA_ALARM_AL18_GetTrigger()
+{
+	return PSA.Alarm.AL18_HighDewpoint.Trigger;
+}
+
+uint8_t PSA_ALARM_AL19_GetTrigger()
+{
+	return PSA.Alarm.AL19_HighOut1Pressure.Trigger;
+}
+
+uint8_t PSA_ALARM_AL20_GetTrigger()
+{
+	return PSA.Alarm.AL20_PCComunicationFault.Trigger;
+}
+
+uint8_t PSA_ALARM_AL31_GetTrigger()
+{
+	return PSA.Alarm.AL31_B1ProbeFault.Trigger;
+}
+
+uint8_t PSA_ALARM_AL32_GetTrigger()
+{
+	return PSA.Alarm.AL32_B2ProbeFault.Trigger;
+}
+
+uint8_t PSA_ALARM_AL33_GetTrigger()
+{
+	return PSA.Alarm.AL33_B3ProbeFault.Trigger;
+}
+
+uint8_t PSA_ALARM_AL34_GetTrigger()
+{
+	return PSA.Alarm.AL34_B4ProbeFault.Trigger;
+}
+
+uint8_t PSA_ALARM_AL35_GetTrigger()
+{
+	return PSA.Alarm.AL35_IFWProbeFault.Trigger;
+}
+
+uint8_t PSA_ALARM_AL36_GetTrigger()
+{
+	return PSA.Alarm.AL36_DEWProbeFault.Trigger;
+}
+
+uint8_t PSA_ALARM_AL37_GetTrigger()
+{
+	return PSA.Alarm.AL37_KE25ProbeFault.Trigger;
+}
+
+uint8_t PSA_ALARM_AL40_GetTrigger()
+{
+	return PSA.Alarm.AL40_PsaDischanging.Trigger;
+}
+
+uint8_t PSA_ALARM_MSDC_GetTrigger()
+{
+	return PSA.Alarm.MSDC_MissingSDCard.Trigger;
+}
+
 /* Public Function definition: GetWriteToSD ----------------------------------*/
-uint8_t PSA_ALARM_AL01_GetWriteToSD();
-uint8_t PSA_ALARM_AL02_GetWriteToSD();
-uint8_t PSA_ALARM_AL05_GetWriteToSD();
-uint8_t PSA_ALARM_AL11_GetWriteToSD();
-uint8_t PSA_ALARM_AL16_GetWriteToSD();
-uint8_t PSA_ALARM_AL17_GetWriteToSD();
-uint8_t PSA_ALARM_AL18_GetWriteToSD();
-uint8_t PSA_ALARM_AL19_GetWriteToSD();
-uint8_t PSA_ALARM_AL20_GetWriteToSD();
-uint8_t PSA_ALARM_AL31_GetWriteToSD();
-uint8_t PSA_ALARM_AL32_GetWriteToSD();
-uint8_t PSA_ALARM_AL33_GetWriteToSD();
-uint8_t PSA_ALARM_AL34_GetWriteToSD();
-uint8_t PSA_ALARM_AL35_GetWriteToSD();
-uint8_t PSA_ALARM_AL36_GetWriteToSD();
-uint8_t PSA_ALARM_AL37_GetWriteToSD();
-uint8_t PSA_ALARM_AL40_GetWriteToSD();
-uint8_t PSA_ALARM_MSDC_GetWriteToSD();
+uint8_t PSA_ALARM_AL01_GetWriteToSD()
+{
+	return PSA.Alarm.AL01_CANbusError.WriteToSD;
+}
+uint8_t PSA_ALARM_AL02_GetWriteToSD()
+{
+	return PSA.Alarm.AL02_LowInputAirPressure.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL05_GetWriteToSD()
+{
+	return PSA.Alarm.AL05_LowProcessTankPressure.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL11_GetWriteToSD()
+{
+	return PSA.Alarm.AL11_External.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL16_GetWriteToSD()
+{
+	return PSA.Alarm.AL16_HighOut2Pressure.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL17_GetWriteToSD()
+{
+	return PSA.Alarm.AL17_HighDewpoint.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL18_GetWriteToSD()
+{
+	return PSA.Alarm.AL18_HighDewpoint.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL19_GetWriteToSD()
+{
+	return PSA.Alarm.AL19_HighOut1Pressure.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL20_GetWriteToSD()
+{
+	return PSA.Alarm.AL20_PCComunicationFault.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL31_GetWriteToSD()
+{
+	return PSA.Alarm.AL31_B1ProbeFault.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL32_GetWriteToSD()
+{
+	return PSA.Alarm.AL32_B2ProbeFault.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL33_GetWriteToSD()
+{
+	return PSA.Alarm.AL33_B3ProbeFault.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL34_GetWriteToSD()
+{
+	return PSA.Alarm.AL34_B4ProbeFault.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL35_GetWriteToSD()
+{
+	return PSA.Alarm.AL35_IFWProbeFault.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL36_GetWriteToSD()
+{
+	return PSA.Alarm.AL36_DEWProbeFault.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL37_GetWriteToSD()
+{
+	return PSA.Alarm.AL37_KE25ProbeFault.WriteToSD;
+}
+
+uint8_t PSA_ALARM_AL40_GetWriteToSD()
+{
+	return PSA.Alarm.AL40_PsaDischanging.WriteToSD;
+}
+
+uint8_t PSA_ALARM_MSDC_GetWriteToSD()
+{
+	return PSA.Alarm.MSDC_MissingSDCard.WriteToSD;
+}
+
 /* Public Function definition: Get -------------------------------------------*/
-uint8_t PSA_ALARM_GetNumberOfTriggeredAlarms();
-uint8_t PSA_ALARM_GetNumberOfTriggeredBlockingAlarms();
+uint8_t PSA_ALARM_GetNumberOfTriggeredAlarms()
+{
+	return PSA.Alarm.NumberOfTriggeredAlarms;
+}
+
+uint8_t PSA_ALARM_GetNumberOfTriggeredBlockingAlarms()
+{
+	return PSA.Alarm.NumberOfTriggeredBlockingAlarms;
+}
+
 /* Public Function definition: ResetWriteToSD --------------------------------*/
-void PSA_ALARM_AL01_ResetWriteToSD();
-void PSA_ALARM_AL02_ResetWriteToSD();
-void PSA_ALARM_AL05_ResetWriteToSD();
-void PSA_ALARM_AL11_ResetWriteToSD();
-void PSA_ALARM_AL16_ResetWriteToSD();
-void PSA_ALARM_AL17_ResetWriteToSD();
-void PSA_ALARM_AL18_ResetWriteToSD();
-void PSA_ALARM_AL19_ResetWriteToSD();
-void PSA_ALARM_AL20_ResetWriteToSD();
-void PSA_ALARM_AL31_ResetWriteToSD();
-void PSA_ALARM_AL32_ResetWriteToSD();
-void PSA_ALARM_AL33_ResetWriteToSD();
-void PSA_ALARM_AL34_ResetWriteToSD();
-void PSA_ALARM_AL35_ResetWriteToSD();
-void PSA_ALARM_AL36_ResetWriteToSD();
-void PSA_ALARM_AL37_ResetWriteToSD();
-void PSA_ALARM_AL40_ResetWriteToSD();
-void PSA_ALARM_MSDC_ResetWriteToSD();
+void PSA_ALARM_AL01_ResetWriteToSD()
+{
+	PSA.Alarm.AL01_CANbusError.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL02_ResetWriteToSD()
+{
+	PSA.Alarm.AL02_LowInputAirPressure.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL05_ResetWriteToSD()
+{
+	PSA.Alarm.AL05_LowProcessTankPressure.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL11_ResetWriteToSD()
+{
+	PSA.Alarm.AL11_External.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL16_ResetWriteToSD()
+{
+	PSA.Alarm.AL16_HighOut2Pressure.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL17_ResetWriteToSD()
+{
+	PSA.Alarm.AL17_HighDewpoint.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL18_ResetWriteToSD()
+{
+	PSA.Alarm.AL18_HighDewpoint.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL19_ResetWriteToSD()
+{
+	PSA.Alarm.AL19_HighOut1Pressure.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL20_ResetWriteToSD()
+{
+	PSA.Alarm.AL20_PCComunicationFault.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL31_ResetWriteToSD()
+{
+	PSA.Alarm.AL31_B1ProbeFault.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL32_ResetWriteToSD()
+{
+	PSA.Alarm.AL32_B2ProbeFault.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL33_ResetWriteToSD()
+{
+	PSA.Alarm.AL33_B3ProbeFault.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL34_ResetWriteToSD()
+{
+	PSA.Alarm.AL34_B4ProbeFault.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL35_ResetWriteToSD()
+{
+	PSA.Alarm.AL35_IFWProbeFault.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL36_ResetWriteToSD()
+{
+	PSA.Alarm.AL36_DEWProbeFault.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL37_ResetWriteToSD()
+{
+	PSA.Alarm.AL37_KE25ProbeFault.WriteToSD = 0;
+}
+
+void PSA_ALARM_AL40_ResetWriteToSD()
+{
+	PSA.Alarm.AL40_PsaDischanging.WriteToSD = 0;
+}
+
+void PSA_ALARM_MSDC_ResetWriteToSD()
+{
+	PSA.Alarm.MSDC_MissingSDCard.WriteToSD = 0;
+}
+
 /* Public Function definition: Check -----------------------------------------*/
-void PSA_ALARM_AL01_Check(uint8_t Condition);
-void PSA_ALARM_AL02_Check(uint8_t Condition);
-void PSA_ALARM_AL05_Check(uint8_t Condition);
-void PSA_ALARM_AL11_Check(uint8_t Condition);
-void PSA_ALARM_AL16_Check(uint8_t Condition);
-void PSA_ALARM_AL17_Check(uint8_t Condition);
-void PSA_ALARM_AL18_Check(uint8_t Condition);
-void PSA_ALARM_AL19_Check(uint8_t Condition);
-void PSA_ALARM_AL20_Check(uint8_t Condition);
-void PSA_ALARM_AL31_Check(uint8_t Condition);
-void PSA_ALARM_AL32_Check(uint8_t Condition);
-void PSA_ALARM_AL33_Check(uint8_t Condition);
-void PSA_ALARM_AL34_Check(uint8_t Condition);
-void PSA_ALARM_AL35_Check(uint8_t Condition);
-void PSA_ALARM_AL36_Check(uint8_t Condition);
-void PSA_ALARM_AL37_Check(uint8_t Condition);
-void PSA_ALARM_AL40_Check(uint8_t Condition);
-void PSA_ALARM_MSDC_Check(uint8_t Condition);
+void PSA_ALARM_AL01_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL01_CANbusError, Condition);
+}
+
+void PSA_ALARM_AL02_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL02_LowInputAirPressure, Condition);
+}
+
+void PSA_ALARM_AL05_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL05_LowProcessTankPressure, Condition);
+}
+
+void PSA_ALARM_AL11_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL11_External, Condition);
+}
+
+void PSA_ALARM_AL16_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL16_HighOut2Pressure, Condition);
+}
+
+void PSA_ALARM_AL17_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL17_HighDewpoint, Condition);
+}
+
+void PSA_ALARM_AL18_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL18_HighDewpoint, Condition);
+}
+
+void PSA_ALARM_AL19_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL19_HighOut1Pressure, Condition);
+}
+
+void PSA_ALARM_AL20_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL20_PCComunicationFault, Condition);
+}
+
+void PSA_ALARM_AL31_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL31_B1ProbeFault, Condition);
+}
+
+void PSA_ALARM_AL32_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL32_B2ProbeFault, Condition);
+}
+
+void PSA_ALARM_AL33_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL33_B3ProbeFault, Condition);
+}
+
+void PSA_ALARM_AL34_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL34_B4ProbeFault, Condition);
+}
+
+void PSA_ALARM_AL35_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL35_IFWProbeFault, Condition);
+}
+
+void PSA_ALARM_AL36_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL36_DEWProbeFault, Condition);
+}
+
+void PSA_ALARM_AL37_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL37_KE25ProbeFault, Condition);
+}
+
+void PSA_ALARM_AL40_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.AL40_PsaDischanging, Condition);
+}
+
+void PSA_ALARM_MSDC_Check(uint8_t Condition)
+{
+	ALARM_Check(&PSA.Alarm.MSDC_MissingSDCard, Condition);
+}
 
 /* TODO ----------------------------------------------------------------------*/
 /* Public Function: PSA.DigitalInput -----------------------------------------*/

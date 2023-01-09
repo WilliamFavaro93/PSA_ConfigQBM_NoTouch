@@ -38,7 +38,7 @@ typedef struct
 
 /* Public Function definition ------------------------------------------------*/
 void ALARM_Init(Alarm * Alarm, uint16_t RefreshTimer_ON, uint16_t RefreshTimer_OFF);
-void ALARM_Check(Alarm * Alarm, uint8_t condition);
+void ALARM_Check(Alarm * Alarm, uint8_t Condition);
 void ALARM_Disable(Alarm * Alarm);
 void ALARM_Enable(Alarm * Alarm);
 
